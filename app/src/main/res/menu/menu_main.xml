@@ -2,9 +2,56 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="io.github.pastthepixels.freepaint.MainActivity">
+
+    <!-- Overflow menu -->
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
         android:title="@string/action_settings"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_save"
+        android:orderInCategory="100"
+        android:title="@string/action_save"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_load"
+        android:orderInCategory="100"
+        android:title="@string/action_load"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_more"
+        android:orderInCategory="100"
+        android:title="@string/action_more"
+        app:showAsAction="never" />
+
+    <!-- Tools -->
+    <item
+        android:id="@+id/tool_paintbrush"
+        android:icon="@drawable/baseline_brush_24"
+        android:title="@string/tool_paintbrush"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/tool_eraser"
+        android:checkable="true"
+        android:icon="@drawable/baseline_brush_24"
+        android:title="@string/eraser"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/tool_pan"
+        android:icon="@drawable/baseline_pan_tool_24"
+        android:title="@string/tool_pan"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/tool_select"
+        android:icon="@drawable/baseline_select_all_24"
+        android:title="@string/tool_eraser"
+        app:showAsAction="always"/>
+
 </menu>

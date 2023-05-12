@@ -43,4 +43,11 @@
         libero vel nunc consequat, quis tincidunt nisl eleifend. Cras bibendum enim a justo luctus
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
+    <string name="action_save">Save file</string>
+    <string name="action_load">Load file</string>
+    <string name="action_more">More actions</string>
+    <string name="tool_paintbrush">Paintbrush</string>
+    <string name="eraser">tool_eraser\n</string>
+    <string name="tool_pan">Pan</string>
+    <string name="tool_eraser">Eraser</string>
 </resources>
