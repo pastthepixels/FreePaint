@@ -38,7 +38,7 @@
     <item
         android:id="@+id/tool_eraser"
         android:checkable="true"
-        android:icon="@drawable/baseline_brush_24"
+        android:icon="@drawable/baseline_eraser_24"
         android:title="@string/eraser"
         app:showAsAction="always" />
 
