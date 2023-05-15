@@ -47,13 +47,14 @@ public class MainActivity extends AppCompatActivity {
         binding.ExpandToolbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                float deg = binding.ExpandToolbar.getRotation() + 180F;
-                binding.ExpandToolbar.animate().rotation(deg).setInterpolator(new AccelerateDecelerateInterpolator());
+                float deg = 0;
                 if (getSupportActionBar().isShowing()) {
                     getSupportActionBar().hide();
+                    deg = 180F;
                 } else {
                     getSupportActionBar().show();
                 }
+                binding.ExpandToolbar.animate().rotation(deg).setInterpolator(new AccelerateDecelerateInterpolator());
             }
         });
     }
