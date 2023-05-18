@@ -1,0 +1,54 @@
+package io.github.pastthepixels.freepaint.Tools;
+
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.view.MotionEvent;
+
+import io.github.pastthepixels.freepaint.DrawAppearance;
+import io.github.pastthepixels.freepaint.DrawCanvas;
+import io.github.pastthepixels.freepaint.DrawPath;
+
+public class PaintTool implements Tool {
+    private final DrawAppearance appearance = new DrawAppearance(Color.BLACK, /*Color.RED*/-1);
+    private DrawPath currentPath;
+    DrawCanvas canvas;
+
+    public PaintTool(DrawCanvas canvas) {
+        this.canvas = canvas;
+    }
+
+    /*
+     * Initialises <code>paint</code> with a default configuration.
+     */
+    public void init() {
+        canvas.paint.setAntiAlias(true);
+        canvas.paint.setStrokeWidth(5);
+        canvas.paint.setStrokeJoin(Paint.Join.ROUND);
+        canvas.paint.setStrokeCap(Paint.Cap.ROUND);
+    }
+
+    public boolean onTouchEvent(MotionEvent event) {
+        // Checks for the event that occurs
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                // Starts a new line in the path
+                currentPath = new DrawPath();
+                currentPath.appearance = appearance.clone();
+                canvas.paths.add(currentPath);
+                break;
+
+            case MotionEvent.ACTION_MOVE:
+                // Draws line between last point and this point
+                currentPath.addPoint(event.getX(), event.getY());
+                break;
+
+            case MotionEvent.ACTION_UP:
+                currentPath.finalise();
+                break;
+
+            default:
+                return false;
+        }
+        return true;
+    }
+}

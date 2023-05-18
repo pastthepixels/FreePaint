@@ -50,4 +50,6 @@
     <string name="eraser">tool_eraser\n</string>
     <string name="tool_pan">Pan</string>
     <string name="tool_eraser">Eraser</string>
+    <string name="toggleToolbar">Toggle toolbar visibility</string>
+    <string name="tool_select">Select</string>
 </resources>

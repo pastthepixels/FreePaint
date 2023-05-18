@@ -7,12 +7,21 @@
     android:fitsSystemWindows="true"
     tools:context=".MainActivity">
 
+
+    <io.github.pastthepixels.freepaint.DrawCanvas
+        android:id="@+id/drawCanvas"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true" />
+
+
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:animateLayoutChanges="true"
-        android:fitsSystemWindows="true">
+        android:fitsSystemWindows="true"
+        android:theme="@style/Theme.AppCompat.Light">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
@@ -21,7 +30,7 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <include layout="@layout/content_main" />
+    <!-- <include layout="@layout/content_main" /> -->
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/ExpandToolbar"
@@ -30,6 +39,7 @@
         android:layout_gravity="bottom|start"
         android:layout_marginStart="@dimen/fab_margin"
         android:layout_marginBottom="16dp"
+        android:contentDescription="@string/toggleToolbar"
         android:src="@drawable/baseline_arrow_drop_up_24" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

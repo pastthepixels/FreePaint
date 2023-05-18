@@ -31,6 +31,7 @@
     <!-- Tools -->
     <item
         android:id="@+id/tool_paintbrush"
+        android:checkable="true"
         android:icon="@drawable/baseline_brush_24"
         android:title="@string/tool_paintbrush"
         app:showAsAction="always"/>
@@ -39,19 +40,21 @@
         android:id="@+id/tool_eraser"
         android:checkable="true"
         android:icon="@drawable/baseline_eraser_24"
-        android:title="@string/eraser"
+        android:title="@string/tool_eraser"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/tool_pan"
+        android:checkable="true"
         android:icon="@drawable/baseline_pan_tool_24"
         android:title="@string/tool_pan"
         app:showAsAction="always"/>
 
     <item
         android:id="@+id/tool_select"
+        android:checkable="true"
         android:icon="@drawable/baseline_select_all_24"
-        android:title="@string/tool_eraser"
+        android:title="@string/tool_select"
         app:showAsAction="always"/>
 
 </menu>
