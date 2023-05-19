@@ -109,6 +109,7 @@ public class MainActivity extends AppCompatActivity {
                 // Can't use a switch statement because we get an error about R.id.* not being constant
                 if (topMenu.getItem(i).getItemId() == R.id.tool_paintbrush) tool = DrawCanvas.TOOLS.paint;
                 if (topMenu.getItem(i).getItemId() == R.id.tool_eraser) tool = DrawCanvas.TOOLS.eraser;
+                if (topMenu.getItem(i).getItemId() == R.id.tool_pan) tool = DrawCanvas.TOOLS.pan;
             }
         }
         binding.drawCanvas.setTool(tool);

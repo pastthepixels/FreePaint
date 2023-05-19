@@ -4,7 +4,9 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PathMeasure;
 import android.graphics.Point;
+import android.graphics.Region;
 
 import java.util.LinkedList;
 
@@ -13,8 +15,17 @@ public class DrawPath {
     private LinkedList<Point> points = new LinkedList<Point>();
     private Path path;
 
+    public boolean isClosed = false;
+
     public void addPoint(float x, float y) {
         points.add(new Point(Math.round(x), Math.round(y)));
+    }
+
+    // Constructors
+    public DrawPath() { }
+
+    public DrawPath(Path path) {
+        this.path = path;
     }
 
     // Generates a basic path by connecting lines, ideal for previewing
@@ -26,6 +37,9 @@ public class DrawPath {
             } else {
                 path.lineTo(point.x, point.y);
             }
+        }
+        if (isClosed) {
+            path.close();
         }
         return path;
     }
@@ -51,6 +65,9 @@ public class DrawPath {
                 path.lineTo(point.x, point.y);
             }
         }
+        if (isClosed) {
+            path.close();
+        }
         this.path = path;
     }
 
@@ -72,6 +89,11 @@ public class DrawPath {
             paint.setStyle(Paint.Style.STROKE);
             canvas.drawPath(toDraw, paint);
         }
+    }
+
+    // Assumes `path` is closed.
+    public void erase(DrawPath path) {
+        getPath().op(path.getPath(), Path.Op.DIFFERENCE);
     }
 
 }

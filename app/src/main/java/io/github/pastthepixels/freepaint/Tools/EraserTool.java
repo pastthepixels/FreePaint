@@ -15,12 +15,18 @@ import io.github.pastthepixels.freepaint.DrawPath;
 // Like a pencil tool from Illustrator, but one that removes.
 // **Only works on finalized paths, and doesn't edit the list of points on a DrawPath!!**
 public class EraserTool implements Tool {
+    private LinkedList<DrawPath> toolPaths = new LinkedList<DrawPath>();
     private final DrawAppearance appearance = new DrawAppearance(-1, Color.RED);
     private DrawPath currentPath;
     DrawCanvas canvas;
 
     public EraserTool(DrawCanvas canvas) {
         this.canvas = canvas;
+    }
+
+    @Override
+    public LinkedList<DrawPath> getToolPaths() {
+        return toolPaths;
     }
 
     public void init() {}
@@ -30,9 +36,10 @@ public class EraserTool implements Tool {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 // Starts a new line in the path
+                updateToolPaths();
                 currentPath = new DrawPath();
                 currentPath.appearance = appearance.clone();
-                canvas.paths.add(currentPath);
+                toolPaths.add(currentPath);
                 break;
 
             case MotionEvent.ACTION_MOVE:
@@ -52,27 +59,29 @@ public class EraserTool implements Tool {
     }
 
     public void eraseCurrentPath() {
-        LinkedList<DrawPath> pathsToDelete = new LinkedList<DrawPath>();
+        Region clip = new Region(0, 0, canvas.getWidth(), canvas.getHeight());
         for(DrawPath path : canvas.paths) {
-            if (path == currentPath) {
-                path.appearance.stroke = Color.RED;
-            } else {
-                // TODO: Edit from https://stackoverflow.com/questions/11184397/path-intersection-in-android
-                Region clip = new Region(0, 0, canvas.getHeight(), canvas.getWidth());
-                Region region1 = new Region();
-                region1.setPath(path.getPath(), clip);
-                Region region2 = new Region();
-                region2.setPath(currentPath.getPath(), clip);
-                if (!region1.quickReject(region2) && region1.op(region2, Region.Op.INTERSECT)) {
-                    path.getPath().op(currentPath.getPath(), Path.Op.DIFFERENCE);
-                }
+            // TODO: Edit from https://stackoverflow.com/questions/11184397/path-intersection-in-android
+            Region region1 = new Region();
+            region1.setPath(path.getPath(), clip);
+            Region region2 = new Region();
+            region2.setPath(currentPath.getPath(), clip);
+            if (!region1.quickReject(region2) && region1.op(region2, Region.Op.INTERSECT)) {
+                path.erase(currentPath);
             }
         }
-        // Remove all lines flagged for removal (so as to not interfere with
-        // canvas.paths while we are looping through it)
-        for(DrawPath path : pathsToDelete) {
-            canvas.paths.remove(path);
+        toolPaths.clear();
+    }
+
+    public void updateToolPaths() {
+        toolPaths.clear();
+        Region clip = new Region(0, 0, canvas.getWidth(), canvas.getHeight());
+        for(DrawPath path : canvas.paths) {
+            Region region = new Region();
+            region.setPath(path.getPath(), clip);
+            DrawPath drawPath = new DrawPath(region.getBoundaryPath());
+            drawPath.appearance = new DrawAppearance(Color.BLACK, Color.GREEN);
+            toolPaths.add(drawPath);
         }
-        canvas.paths.remove(currentPath);
     }
 }

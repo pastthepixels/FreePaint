@@ -4,17 +4,25 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.view.MotionEvent;
 
+import java.util.LinkedList;
+
 import io.github.pastthepixels.freepaint.DrawAppearance;
 import io.github.pastthepixels.freepaint.DrawCanvas;
 import io.github.pastthepixels.freepaint.DrawPath;
 
 public class PaintTool implements Tool {
+    private LinkedList<DrawPath> toolPaths = new LinkedList<DrawPath>();
     private final DrawAppearance appearance = new DrawAppearance(Color.BLACK, /*Color.RED*/-1);
     private DrawPath currentPath;
     DrawCanvas canvas;
 
     public PaintTool(DrawCanvas canvas) {
         this.canvas = canvas;
+    }
+
+    @Override
+    public LinkedList<DrawPath> getToolPaths() {
+        return toolPaths;
     }
 
     /*

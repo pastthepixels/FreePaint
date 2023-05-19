@@ -18,10 +18,11 @@ import java.util.LinkedList;
 
 import io.github.pastthepixels.freepaint.Tools.EraserTool;
 import io.github.pastthepixels.freepaint.Tools.PaintTool;
+import io.github.pastthepixels.freepaint.Tools.PanTool;
 import io.github.pastthepixels.freepaint.Tools.Tool;
 
 public final class DrawCanvas extends View {
-    public enum TOOLS { none, paint, eraser };
+    public enum TOOLS { none, paint, eraser, pan };
 
     private TOOLS tool = TOOLS.none;
 
@@ -31,6 +32,7 @@ public final class DrawCanvas extends View {
     private PaintTool paintTool = new PaintTool(this);
 
     private EraserTool eraserTool = new EraserTool(this);
+    private PanTool panTool = new PanTool(this);
 
 
     /*
@@ -56,6 +58,7 @@ public final class DrawCanvas extends View {
      */
     public void setTool(TOOLS tool) {
         this.tool = tool;
+        postInvalidate(); // Indicate view should be redrawn
     }
 
     /*
@@ -73,26 +76,28 @@ public final class DrawCanvas extends View {
      */
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        // Gets the chosen tool to a variable (null is no tool is selected)
-        Tool chosenTool = null;
-        switch(tool) {
-            case none:
-                chosenTool = null;
-                break;
-            case paint:
-                chosenTool = paintTool;
-                break;
-            case eraser:
-                chosenTool = eraserTool;
-                break;
-        }
         // Runs chosenTool.onTouchEvent if it exists, otherwise don't update the screen.
-        if (chosenTool == null || chosenTool.onTouchEvent(event) == false) {
+        if (tool == TOOLS.none || getTool().onTouchEvent(event) == false) {
             return false;
         } else {
             postInvalidate(); // Indicate view should be redrawn
             return true; // Indicate we've consumed the touch
         }
+    }
+
+    /*
+     * Gets the chosen tool
+     */
+    public Tool getTool() {
+        switch(tool) {
+            case none:
+                return null;
+            case paint:
+                return paintTool;
+            case eraser:
+                return eraserTool;
+        }
+        return null;
     }
 
     /*
@@ -102,8 +107,15 @@ public final class DrawCanvas extends View {
         // Allows us to do things like setting a custom background
         super.onDraw(canvas);
         // Draws things on the screen
+        canvas.scale(panTool.scaleFactor, panTool.scaleFactor);
+
         for(DrawPath path : paths) {
             path.draw(canvas, paint);
+        }
+        if (getTool() != null) {
+            for (DrawPath path : getTool().getToolPaths()) {
+                path.draw(canvas, paint);
+            }
         }
     }
 }
