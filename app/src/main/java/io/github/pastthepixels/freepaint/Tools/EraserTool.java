@@ -2,6 +2,7 @@ package io.github.pastthepixels.freepaint.Tools;
 
 import android.graphics.Color;
 import android.graphics.Path;
+import android.graphics.PointF;
 import android.graphics.Region;
 import android.view.MotionEvent;
 
@@ -44,7 +45,7 @@ public class EraserTool implements Tool {
 
             case MotionEvent.ACTION_MOVE:
                 // Draws line between last point and this point
-                currentPath.addPoint(event.getX(), event.getY());
+                currentPath.addPoint(canvas.mapPoint(event.getX(), event.getY()));
                 break;
 
             case MotionEvent.ACTION_UP:
@@ -59,7 +60,9 @@ public class EraserTool implements Tool {
     }
 
     public void eraseCurrentPath() {
-        Region clip = new Region(0, 0, canvas.getWidth(), canvas.getHeight());
+        PointF startPoint = canvas.mapPoint(0, 0);
+        PointF endPoint = canvas.mapPoint(canvas.getWidth(), canvas.getHeight());
+        Region clip = new Region(Math.round(startPoint.x), Math.round(startPoint.y), Math.round(endPoint.x), Math.round(endPoint.y));
         for(DrawPath path : canvas.paths) {
             // TODO: Edit from https://stackoverflow.com/questions/11184397/path-intersection-in-android
             Region region1 = new Region();
@@ -75,7 +78,9 @@ public class EraserTool implements Tool {
 
     public void updateToolPaths() {
         toolPaths.clear();
-        Region clip = new Region(0, 0, canvas.getWidth(), canvas.getHeight());
+        PointF startPoint = canvas.mapPoint(0, 0);
+        PointF endPoint = canvas.mapPoint(canvas.getWidth(), canvas.getHeight());
+        Region clip = new Region(Math.round(startPoint.x), Math.round(startPoint.y), Math.round(endPoint.x), Math.round(endPoint.y));
         for(DrawPath path : canvas.paths) {
             Region region = new Region();
             region.setPath(path.getPath(), clip);

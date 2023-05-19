@@ -6,6 +6,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PathMeasure;
 import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.Region;
 
 import java.util.LinkedList;
@@ -19,6 +20,10 @@ public class DrawPath {
 
     public void addPoint(float x, float y) {
         points.add(new Point(Math.round(x), Math.round(y)));
+    }
+
+    public void addPoint(PointF point) {
+        points.add(new Point(Math.round(point.x), Math.round(point.y)));
     }
 
     // Constructors

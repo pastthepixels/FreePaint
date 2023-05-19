@@ -7,6 +7,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 //import android.graphics.Point;
 import android.graphics.Point;
+import android.graphics.PointF;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -96,8 +97,14 @@ public final class DrawCanvas extends View {
                 return paintTool;
             case eraser:
                 return eraserTool;
+            case pan:
+                return panTool;
         }
         return null;
+    }
+
+    public PointF mapPoint(float x, float y) {
+        return new PointF((x / panTool.scaleFactor) - panTool.offset.x, (y / panTool.scaleFactor) - panTool.offset.y);
     }
 
     /*
@@ -107,15 +114,19 @@ public final class DrawCanvas extends View {
         // Allows us to do things like setting a custom background
         super.onDraw(canvas);
         // Draws things on the screen
+        canvas.save();
         canvas.scale(panTool.scaleFactor, panTool.scaleFactor);
+        canvas.translate(panTool.offset.x, panTool.offset.y);
 
         for(DrawPath path : paths) {
             path.draw(canvas, paint);
         }
-        if (getTool() != null) {
+        if (getTool() != null && getTool().getToolPaths() != null) {
             for (DrawPath path : getTool().getToolPaths()) {
                 path.draw(canvas, paint);
             }
         }
+
+        canvas.restore();
     }
 }

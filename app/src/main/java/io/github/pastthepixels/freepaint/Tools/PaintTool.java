@@ -47,7 +47,7 @@ public class PaintTool implements Tool {
 
             case MotionEvent.ACTION_MOVE:
                 // Draws line between last point and this point
-                currentPath.addPoint(event.getX(), event.getY());
+                currentPath.addPoint(canvas.mapPoint(event.getX(), event.getY()));
                 break;
 
             case MotionEvent.ACTION_UP:
