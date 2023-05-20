@@ -69,9 +69,9 @@ public class EraserTool implements Tool {
             region1.setPath(path.getPath(), clip);
             Region region2 = new Region();
             region2.setPath(currentPath.getPath(), clip);
-            if (!region1.quickReject(region2) && region1.op(region2, Region.Op.INTERSECT)) {
-                path.erase(currentPath);
-            }
+            //if (!region1.quickReject(region2) && region1.op(region2, Region.Op.INTERSECT)) {
+                path.erase(currentPath, clip);
+            //}
         }
         toolPaths.clear();
     }
@@ -82,11 +82,14 @@ public class EraserTool implements Tool {
         PointF endPoint = canvas.mapPoint(canvas.getWidth(), canvas.getHeight());
         Region clip = new Region(Math.round(startPoint.x), Math.round(startPoint.y), Math.round(endPoint.x), Math.round(endPoint.y));
         for(DrawPath path : canvas.paths) {
-            Region region = new Region();
-            region.setPath(path.getPath(), clip);
-            DrawPath drawPath = new DrawPath(region.getBoundaryPath());
-            drawPath.appearance = new DrawAppearance(Color.BLACK, Color.GREEN);
-            toolPaths.add(drawPath);
+            DrawPath cloned = new DrawPath(path.getPath());
+            cloned.isClosed = path.isClosed;
+            if (cloned.isClosed) {
+                cloned.appearance = new DrawAppearance(-1, Color.GREEN);
+            } else {
+                cloned.appearance = new DrawAppearance(Color.GREEN, -1);
+            }
+            toolPaths.add(cloned);
         }
     }
 }
