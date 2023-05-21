@@ -129,7 +129,6 @@ public class MainActivity extends AppCompatActivity {
             DrawableCompat.setTint(drawable, ContextCompat.getColor(this, R.color.black));
         }
         item.setIcon(drawable);
-        System.out.println(item.isChecked());
     }
 
     @Override

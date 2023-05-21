@@ -25,15 +25,7 @@ public class PaintTool implements Tool {
         return toolPaths;
     }
 
-    /*
-     * Initialises <code>paint</code> with a default configuration.
-     */
-    public void init() {
-        canvas.paint.setAntiAlias(true);
-        canvas.paint.setStrokeWidth(5);
-        canvas.paint.setStrokeJoin(Paint.Join.ROUND);
-        canvas.paint.setStrokeCap(Paint.Cap.ROUND);
-    }
+    public void init() {}
 
     public boolean onTouchEvent(MotionEvent event) {
         // Checks for the event that occurs

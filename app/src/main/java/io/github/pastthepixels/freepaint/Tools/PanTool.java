@@ -43,7 +43,6 @@ public class PanTool implements Tool {
                 scaleFactor *= detector.getScaleFactor();
                 scaleFactor = Math.max(MIN_ZOOM, Math.min(scaleFactor, MAX_ZOOM));
                 canvas.invalidate();
-                System.out.println(String.format("onScale %.2f", scaleFactor));
                 return true;
             }
         });

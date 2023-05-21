@@ -4,18 +4,18 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.PathMeasure;
 import android.graphics.PointF;
-import android.graphics.Region;
 
 import java.util.LinkedList;
 
 public class DrawPath {
     public DrawAppearance appearance = new DrawAppearance(Color.BLACK, -1);
-    private LinkedList<Point> points = new LinkedList<Point>();
+    public LinkedList<Point> points = new LinkedList<Point>();
     private Path path;
 
     public boolean isClosed = false;
+
+    public boolean drawPoints = false;
 
     public void addPoint(float x, float y) {
         points.add(new Point(x, y));
@@ -27,6 +27,7 @@ public class DrawPath {
 
     // Constructors
     public DrawPath() { }
+
 
     public DrawPath(Path path) {
         this.path = path;
@@ -47,33 +48,14 @@ public class DrawPath {
         }
         return path;
     }
-
-    // Generates a "final" path by interpolating lines.
-    // From https://stackoverflow.com/questions/8287949/android-how-to-draw-a-smooth-line-following-your-finger/8289516#8289516
-    // need to refactor
+    /*
+     * Generates a "final" path by interpolating lines.
+     * Right now, we are just using generatePath(). In the future, look at
+     * something like https://www.stkent.com/2015/07/03/building-smooth-paths-using-bezier-curves.html
+     * We need to interpolate between points, but unlike the default way of doing so, *also* contact each point.
+     */
     public void finalise() {
         this.path = generatePath();
-        /*Path path = new Path();
-        boolean first = true;
-        for(int i = 0; i < points.size(); i += 2){
-            Point point = points.get(i);
-            if(first || point.command == Point.COMMANDS.move){
-                first = false;
-                path.moveTo(point.x, point.y);
-            }
-
-            else if(i < points.size() - 1){
-                Point next = points.get(i + 1);
-                path.quadTo(point.x, point.y, next.x, next.y);
-            }
-            else{
-                path.lineTo(point.x, point.y);
-            }
-        }
-        if (isClosed) {
-            path.close();
-        }
-        this.path = path;*/
     }
 
     /*
@@ -86,6 +68,10 @@ public class DrawPath {
 
     public void draw(Canvas canvas, Paint paint) {
         Path toDraw = path == null? generatePath() : path;
+        paint.setAntiAlias(true);
+        paint.setStrokeWidth(5);
+        paint.setStrokeJoin(Paint.Join.ROUND);
+        paint.setStrokeCap(Paint.Cap.ROUND);
         // Fills, then...
         if (appearance.fill != -1) {
             paint.setColor(appearance.fill);
@@ -98,62 +84,23 @@ public class DrawPath {
             paint.setStyle(Paint.Style.STROKE);
             canvas.drawPath(toDraw, paint);
         }
-
-
-
-
-        PathMeasure pm = new PathMeasure(getPath(), false);
-        //coordinates will be here
-
-        float num_pts = points.size() - 1;
-
-        float length = pm.getLength();
-        System.out.println(length);
-        float distance = 0f;
-        float speed = 10f;
-        float[] aCoordinates = new float[2];
-
-        /*while (distance <= (length + speed)) {
-            // get point from the path
-            pm.getPosTan(distance, aCoordinates, null);
-            //
-            Path path = new Path();
-            path.addCircle(aCoordinates[0], aCoordinates[1], 5, Path.Direction.CW);
-            canvas.drawPath(path, paint);
-            //
-            distance = distance + speed;
-
-        }*/
-
-        for(Point pt : points) {
-            //if (pt.color != Color.BLACK) {
+        // If enabled, draw points on top of everything else
+        if (drawPoints == true) {
+            paint.setAlpha(100);
+            for(Point pt : points) {
                 paint.setColor(pt.color);
                 Path path = new Path();
                 path.addCircle(pt.x, pt.y, 5, Path.Direction.CW);
                 canvas.drawPath(path, paint);
-            //}
+            }
         }
     }
 
     // Assumes `path` is closed.
-    public void erase(DrawPath path, Region clip) {
+    public void erase(DrawPath path) {
         if (isClosed) {
             getPath().op(path.getPath(), Path.Op.DIFFERENCE);
         } else {
-            Region region = new Region();
-            region.setPath(path.getPath(), clip);
-/*
-            LinkedList<Point> toDelete = new LinkedList<Point>();
-            for(Point point : points) {
-                if (region.contains((int)point.x, (int)point.y)) {
-                    toDelete.add(point);
-                }
-            }
-            for(Point point : toDelete) {
-                points.remove(point);
-            }
-*/
-            //getIntersectingPoints(path);
             eraseFromStroke(path);
             finalise();
         }
@@ -164,7 +111,6 @@ public class DrawPath {
         int index = 0;
         int intersectingPointsIndex = 0;
         boolean state = false; // All the points we are looking at (to our knowledge) don't collide with erasePath
-        //LinkedList<Point> intersectingPoints = getIntersectingPoints(erasePath);
         while(index < points.size()) {
             boolean oldState = state;
             Point point = points.get(index);
@@ -176,60 +122,15 @@ public class DrawPath {
                 index ++;
             }
             // If there's a STATE CHANGE
-            if (oldState != state /*&& intersectingPointsIndex < intersectingPoints.size()*/) {
+            if (oldState != state) {
                 if (state == false) {
                     point.command = Point.COMMANDS.move;
                     point.color = Color.GREEN;
                 } else if (index > 0) {
                     points.get(index - 1).color = Color.RED;
                 }
-                //points.add(intersectingPoints.get(intersectingPointsIndex));
-                //intersectingPointsIndex ++;
             }
         }
-    }
-
-    public LinkedList<Point> getIntersectingPoints(DrawPath path) {
-        LinkedList<Point> intersectingPoints = new LinkedList<Point>();
-        PathMeasure pm = new PathMeasure(getPath(), false);
-        //coordinates will be here
-
-        float length = pm.getLength();
-        float distance = 0f;
-        float speed = 10f;
-        float[] aCoordinates = new float[2];
-
-
-        Point lastGoodPoint = null;
-        boolean isContains = false;
-
-    //    points.clear();
-        while (distance <= (length + speed)) {
-            // get point from the path
-            pm.getPosTan(distance, aCoordinates, null);
-            //
-            //if(region.contains((int)aCoordinates[0], (int)aCoordinates[1]) == isContains) {
-            if (path.contains(new PointF(aCoordinates[0], aCoordinates[1])) == isContains) {
-                lastGoodPoint = new Point(aCoordinates[0], aCoordinates[1]);
-                //if (path.contains(new PointF(aCoordinates[0], aCoordinates[1]))) lastGoodPoint.color = Color.GREEN;
-    //            /*if (isContains == false)*/ points.add(lastGoodPoint);
-            } else /* if (lastGoodPoint != null)*/ {
-                //if (isContains == false) points.removeLast();
-                if (lastGoodPoint != null) {
-                    lastGoodPoint.color = Color.GREEN;
-                    intersectingPoints.add(lastGoodPoint);
-                }
-                //lastGoodPoint.command = isContains == false? Point.COMMANDS.line : Point.COMMANDS.move;
-                //points.add(lastGoodPoint);//intersectingPoints.add(lastGoodPoint);
-                isContains = !isContains;
-            }
-            //
-            distance = distance + speed;
-        }
-
-        System.out.println(intersectingPoints.size());
-
-        return intersectingPoints;
     }
 
     /**

@@ -119,10 +119,12 @@ public final class DrawCanvas extends View {
         canvas.translate(panTool.offset.x, panTool.offset.y);
 
         for(DrawPath path : paths) {
+            paint.reset();
             path.draw(canvas, paint);
         }
         if (getTool() != null && getTool().getToolPaths() != null) {
             for (DrawPath path : getTool().getToolPaths()) {
+                paint.reset();
                 path.draw(canvas, paint);
             }
         }
