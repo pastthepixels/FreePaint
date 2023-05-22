@@ -25,7 +25,9 @@ public class PaintTool implements Tool {
         return toolPaths;
     }
 
-    public void init() {}
+    public void init() {
+
+    }
 
     public boolean onTouchEvent(MotionEvent event) {
         // Checks for the event that occurs

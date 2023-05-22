@@ -110,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
                 if (topMenu.getItem(i).getItemId() == R.id.tool_paintbrush) tool = DrawCanvas.TOOLS.paint;
                 if (topMenu.getItem(i).getItemId() == R.id.tool_eraser) tool = DrawCanvas.TOOLS.eraser;
                 if (topMenu.getItem(i).getItemId() == R.id.tool_pan) tool = DrawCanvas.TOOLS.pan;
+                if (topMenu.getItem(i).getItemId() == R.id.tool_select) tool = DrawCanvas.TOOLS.select;
             }
         }
         binding.drawCanvas.setTool(tool);

@@ -8,6 +8,7 @@ import android.graphics.PointF;
 
 import java.util.LinkedList;
 
+
 public class DrawPath {
     public DrawAppearance appearance = new DrawAppearance(Color.BLACK, -1);
     public LinkedList<Point> points = new LinkedList<Point>();
@@ -21,8 +22,8 @@ public class DrawPath {
         points.add(new Point(x, y));
     }
 
-    public void addPoint(PointF point) {
-        points.add(new Point(point.x, point.y));
+    public void addPoint(Point point) {
+        points.add(point);
     }
 
     // Constructors
@@ -48,6 +49,12 @@ public class DrawPath {
         }
         return path;
     }
+
+    // Clears all points
+    public void clear() {
+        points.clear();
+    }
+
     /*
      * Generates a "final" path by interpolating lines.
      * Right now, we are just using generatePath(). In the future, look at
@@ -66,7 +73,7 @@ public class DrawPath {
         return path;
     }
 
-    public void draw(Canvas canvas, Paint paint) {
+    public void draw(Canvas canvas, Paint paint, float scaleFactor) {
         Path toDraw = path == null? generatePath() : path;
         paint.setAntiAlias(true);
         paint.setStrokeWidth(5);
@@ -88,9 +95,11 @@ public class DrawPath {
         if (drawPoints == true) {
             paint.setAlpha(100);
             for(Point pt : points) {
+                paint.setStyle(Paint.Style.STROKE);
+                paint.setStrokeWidth(5.0f / scaleFactor);
                 paint.setColor(pt.color);
                 Path path = new Path();
-                path.addCircle(pt.x, pt.y, 5, Path.Direction.CW);
+                path.addCircle(pt.x, pt.y, 5.0f / scaleFactor, Path.Direction.CW);
                 canvas.drawPath(path, paint);
             }
         }
@@ -99,6 +108,7 @@ public class DrawPath {
     // Assumes `path` is closed.
     public void erase(DrawPath path) {
         if (isClosed) {
+            // TODO: regenerate list of points after this operation
             getPath().op(path.getPath(), Path.Op.DIFFERENCE);
         } else {
             eraseFromStroke(path);
@@ -155,14 +165,11 @@ public class DrawPath {
     }
 
 
-}
-class Point extends PointF {
-    public int color = Color.BLACK;
-
-    public enum COMMANDS {none, move, line};
-    public COMMANDS command = COMMANDS.none;
-
-    public Point(float x, float y) {
-        super(x, y);
+    public void translate(Point by) {
+        for(Point point : points) {
+            point.add(by);
+        }
     }
+
+
 }

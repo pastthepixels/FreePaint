@@ -5,8 +5,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-//import android.graphics.Point;
-import android.graphics.Point;
 import android.graphics.PointF;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -20,10 +18,11 @@ import java.util.LinkedList;
 import io.github.pastthepixels.freepaint.Tools.EraserTool;
 import io.github.pastthepixels.freepaint.Tools.PaintTool;
 import io.github.pastthepixels.freepaint.Tools.PanTool;
+import io.github.pastthepixels.freepaint.Tools.SelectionTool;
 import io.github.pastthepixels.freepaint.Tools.Tool;
 
 public final class DrawCanvas extends View {
-    public enum TOOLS { none, paint, eraser, pan };
+    public enum TOOLS { none, paint, eraser, pan, select };
 
     private TOOLS tool = TOOLS.none;
 
@@ -33,7 +32,10 @@ public final class DrawCanvas extends View {
     private PaintTool paintTool = new PaintTool(this);
 
     private EraserTool eraserTool = new EraserTool(this);
+
     private PanTool panTool = new PanTool(this);
+
+    private SelectionTool selectionTool = new SelectionTool(this);
 
 
     /*
@@ -59,6 +61,7 @@ public final class DrawCanvas extends View {
      */
     public void setTool(TOOLS tool) {
         this.tool = tool;
+        if (tool != TOOLS.none) getTool().init();
         postInvalidate(); // Indicate view should be redrawn
     }
 
@@ -99,12 +102,18 @@ public final class DrawCanvas extends View {
                 return eraserTool;
             case pan:
                 return panTool;
+            case select:
+                return selectionTool;
         }
         return null;
     }
 
-    public PointF mapPoint(float x, float y) {
-        return new PointF((x / panTool.scaleFactor) - panTool.offset.x, (y / panTool.scaleFactor) - panTool.offset.y);
+    public Point mapPoint(float x, float y) {
+        return new Point((x / panTool.scaleFactor) - panTool.offset.x, (y / panTool.scaleFactor) - panTool.offset.y);
+    }
+
+    public float getScaleFactor() {
+        return panTool.scaleFactor;
     }
 
     /*
@@ -120,12 +129,12 @@ public final class DrawCanvas extends View {
 
         for(DrawPath path : paths) {
             paint.reset();
-            path.draw(canvas, paint);
+            path.draw(canvas, paint, getScaleFactor());
         }
         if (getTool() != null && getTool().getToolPaths() != null) {
             for (DrawPath path : getTool().getToolPaths()) {
                 paint.reset();
-                path.draw(canvas, paint);
+                path.draw(canvas, paint, getScaleFactor());
             }
         }
 
