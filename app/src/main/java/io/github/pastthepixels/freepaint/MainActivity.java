@@ -1,10 +1,14 @@
 package io.github.pastthepixels.freepaint;
 
+import android.content.Context;
+import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.util.TypedValue;
 import android.view.View;
 
 import androidx.core.content.ContextCompat;
@@ -20,6 +24,8 @@ import io.github.pastthepixels.freepaint.databinding.ActivityMainBinding;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.animation.AccelerateDecelerateInterpolator;
+
+import com.google.android.material.color.DynamicColors;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -125,7 +131,9 @@ public class MainActivity extends AppCompatActivity {
         Drawable drawable = item.getIcon();
         drawable = DrawableCompat.wrap(drawable);
         if(item.isChecked() == true) {
-            DrawableCompat.setTint(drawable, ContextCompat.getColor(this, com.google.android.material.R.color.design_default_color_primary));
+            TypedValue typedValue = new TypedValue();
+            getTheme().resolveAttribute(androidx.appcompat.R.attr.colorAccent, typedValue, true);
+            DrawableCompat.setTint(drawable, typedValue.data);
         } else {
             DrawableCompat.setTint(drawable, ContextCompat.getColor(this, R.color.black));
         }

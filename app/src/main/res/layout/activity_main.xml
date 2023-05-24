@@ -12,7 +12,8 @@
         android:id="@+id/drawCanvas"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_centerInParent="true" />
+        android:layout_centerInParent="true"
+        android:background="@color/white" />
 
 
     <com.google.android.material.appbar.AppBarLayout
