@@ -1,7 +1,6 @@
 package io.github.pastthepixels.freepaint.Tools;
 
 import android.graphics.Color;
-import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.view.MotionEvent;
@@ -18,12 +17,15 @@ public class SelectionTool implements Tool {
     private final DrawAppearance SELECTION_APPEARANCE = new DrawAppearance(Color.RED, Color.argb(100, 255, 0, 0));
     private final DrawAppearance TRANSFORMATION_APPEARANCE = new DrawAppearance(Color.GREEN, Color.argb(100, 0, 255, 0));
 
-    private LinkedList<DrawPath> toolPaths = new LinkedList<DrawPath>();
+    private final LinkedList<DrawPath> toolPaths = new LinkedList<>();
 
-    private DrawPath currentPath = new DrawPath();
+    private final DrawPath currentPath = new DrawPath();
 
     DrawCanvas canvas;
 
+    /*
+     * Creates a SelectionTool instance, saying that the selection path has to be closed (it's a rectangle)
+     */
     public SelectionTool(DrawCanvas canvas) {
         this.canvas = canvas;
         currentPath.isClosed = true;
@@ -34,6 +36,11 @@ public class SelectionTool implements Tool {
         return toolPaths;
     }
 
+    /*
+     * Every time we select the selection tool (heh), it clears the previous selection.
+     * One of the reasons for doing this is that if we selected a path and its shape changed/it's no longer there,
+     * we can be lazy and don't have to recompute a bounding box or check if it's still there.
+     */
     public void init() {
         currentPath.clear();
         toolPaths.clear();
@@ -43,6 +50,8 @@ public class SelectionTool implements Tool {
 
     public Point previousPoint = null;
 
+    // You can either define a new selection or move a selection. Each touch mode is set from
+    // different conditions and reset once you lift your finger off the screen.
     private enum TOUCH_MODES {none, define, move}
 
     private TOUCH_MODES mode;
@@ -54,7 +63,7 @@ public class SelectionTool implements Tool {
                 // If the touch action is outside the currently selected rectangle, we're not trying to manipulate it
                 // -- we're trying to make a new one
                 originalPoint = canvas.mapPoint(event.getX(), event.getY());
-                if (currentPath.contains(originalPoint) == false) {
+                if (!currentPath.contains(originalPoint)) {
                     currentPath.appearance = SELECTION_APPEARANCE;
                     mode = TOUCH_MODES.define;
                     toolPaths.clear();
@@ -70,6 +79,7 @@ public class SelectionTool implements Tool {
             case MotionEvent.ACTION_MOVE:
                 Point touchPoint = canvas.mapPoint(event.getX(), event.getY());
                 if (mode == TOUCH_MODES.define) {
+                    // If we're trying to define a new selection, redraw the current path with the bounds
                     currentPath.clear();
                     currentPath.addPoint(originalPoint);
                     currentPath.addPoint(new Point(touchPoint.x, originalPoint.y));
@@ -77,16 +87,20 @@ public class SelectionTool implements Tool {
                     currentPath.addPoint(new Point(originalPoint.x, touchPoint.y));
                 }
                 if (mode == TOUCH_MODES.move && previousPoint != null) {
+                    // If we're trying to move all the paths we selected... well, move them!
                     for(DrawPath path : toolPaths) {
                         path.translate(touchPoint.clone().subtract(previousPoint));
                         if (path != currentPath) path.finalise();
                     }
                 }
+                // Important for second if statement
                 previousPoint = touchPoint.clone();
                 break;
 
             case MotionEvent.ACTION_UP:
                 if (mode == TOUCH_MODES.define) {
+                    // If we're releasing our finger from selecting a bunch of paths, we need to
+                    // do math to actually select those paths.
                     selectPaths();
                 }
                 mode = TOUCH_MODES.none;
@@ -102,22 +116,24 @@ public class SelectionTool implements Tool {
         Point endPoint = canvas.mapPoint(canvas.getWidth(), canvas.getHeight());
         Region clip = new Region(Math.round(startPoint.x), Math.round(startPoint.y), Math.round(endPoint.x), Math.round(endPoint.y));
 
-        // Top left
+        // Top left of a bounding box for all selections ('cause we're rebuilding currentPath after this!)
         Point boundsTop = null;
         // Bottom right
         Point boundsBottom = null;
 
-        Region region2 = new Region();
-        region2.setPath(currentPath.generatePath(), clip);
+        // Creates a Region from the current path to do bounding box math
+        Region currentPathRegion = new Region();
+        currentPathRegion.setPath(currentPath.generatePath(), clip);
 
+        // Bounding box math! (If a path collides with the current path, add it to the selection.)
         for(DrawPath path : canvas.paths) {
-            // TODO: Edit from https://stackoverflow.com/questions/11184397/path-intersection-in-android
-            Region region1 = new Region();
-            region1.setPath(path.getPath(), clip);
-            Rect bounds = region1.getBounds();
-
-            if (!region1.quickReject(region2) && region1.op(region2, Region.Op.INTERSECT)) {
+            Region region = new Region();
+            region.setPath(path.getPath(), clip);
+            Rect bounds = region.getBounds();
+            if (!region.quickReject(currentPathRegion) && region.op(currentPathRegion, Region.Op.INTERSECT)) {
                 toolPaths.add(path);
+                // Checks to see if the bounding box for all selections can be expanded.
+                // Speaking of expanding things, you should click the minimise button the left for each if statement.
                 if (boundsTop == null) {
                     boundsTop = new Point(bounds.left, bounds.top);
                 }
@@ -139,32 +155,14 @@ public class SelectionTool implements Tool {
             }
         }
 
+        // Yep, we are rebuilding the current path to reflect not the bounds the user selected,
+        // but the bounds of the *paths* the user selected.
         currentPath.clear();
-        if (boundsTop != null && boundsBottom != null) {
+        if (boundsTop != null) {
             currentPath.addPoint(boundsTop);
             currentPath.addPoint(new Point(boundsBottom.x, boundsTop.y));
             currentPath.addPoint(boundsBottom);
             currentPath.addPoint(new Point(boundsTop.x, boundsBottom.y));
         }
-    }
-
-    public void updateToolPaths() {
-        /*
-        toolPaths.clear();
-        PointF startPoint = canvas.mapPoint(0, 0);
-        PointF endPoint = canvas.mapPoint(canvas.getWidth(), canvas.getHeight());
-        Region clip = new Region(Math.round(startPoint.x), Math.round(startPoint.y), Math.round(endPoint.x), Math.round(endPoint.y));
-        for(DrawPath path : canvas.paths) {
-            DrawPath cloned = new DrawPath(path.getPath());
-            cloned.points = path.points;
-            cloned.isClosed = path.isClosed;
-            if (cloned.isClosed) {
-                cloned.appearance = new DrawAppearance(-1, Color.GREEN);
-            } else {
-                cloned.appearance = new DrawAppearance(Color.GREEN, -1);
-                cloned.drawPoints = true;
-            }
-            toolPaths.add(cloned);
-        }*/
     }
 }

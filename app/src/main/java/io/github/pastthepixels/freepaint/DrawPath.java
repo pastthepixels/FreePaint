@@ -11,16 +11,12 @@ import java.util.LinkedList;
 
 public class DrawPath {
     public DrawAppearance appearance = new DrawAppearance(Color.BLACK, -1);
-    public LinkedList<Point> points = new LinkedList<Point>();
+    public LinkedList<Point> points = new LinkedList<>();
     private Path path;
 
     public boolean isClosed = false;
 
     public boolean drawPoints = false;
-
-    public void addPoint(float x, float y) {
-        points.add(new Point(x, y));
-    }
 
     public void addPoint(Point point) {
         points.add(point);
@@ -53,6 +49,7 @@ public class DrawPath {
     // Clears all points
     public void clear() {
         points.clear();
+        this.path = null;
     }
 
     /*
@@ -73,10 +70,17 @@ public class DrawPath {
         return path;
     }
 
+    /*
+     * Draws the path.
+     * @param canvas The canvas to draw to.
+     * @param paint The Paint instance to use -- this code is built for reusing the same one so memory can be saved.
+     * @param scaleFactor Necessary so we can draw the dots for points to always be the same size
+     */
     public void draw(Canvas canvas, Paint paint, float scaleFactor) {
         Path toDraw = path == null? generatePath() : path;
+        // Sets a configuration for the Paint with DrawPath.appearance
         paint.setAntiAlias(true);
-        paint.setStrokeWidth(5);
+        paint.setStrokeWidth(appearance.strokeSize);
         paint.setStrokeJoin(Paint.Join.ROUND);
         paint.setStrokeCap(Paint.Cap.ROUND);
         // Fills, then...
@@ -92,20 +96,21 @@ public class DrawPath {
             canvas.drawPath(toDraw, paint);
         }
         // If enabled, draw points on top of everything else
-        if (drawPoints == true) {
+        if (drawPoints) {
             paint.setAlpha(100);
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setStrokeWidth(5.0f / scaleFactor);
             for(Point pt : points) {
-                paint.setStyle(Paint.Style.STROKE);
-                paint.setStrokeWidth(5.0f / scaleFactor);
                 paint.setColor(pt.color);
-                Path path = new Path();
-                path.addCircle(pt.x, pt.y, 5.0f / scaleFactor, Path.Direction.CW);
-                canvas.drawPath(path, paint);
+                canvas.drawCircle(pt.x, pt.y, 5.0f / scaleFactor, paint);
             }
         }
     }
 
-    // Assumes `path` is closed.
+    /*
+     * Erases a path from another path -- assumes `path` is closed.
+     * @param path The path to erase.
+     */
     public void erase(DrawPath path) {
         if (isClosed) {
             // TODO: regenerate list of points after this operation
@@ -116,10 +121,13 @@ public class DrawPath {
         }
     }
 
-    // Assumes erasePath is closed.
+    /*
+     * Erases a closed path from a stroke by removing points in the stroke that are in contact with the
+     * filled shape
+     * @param erasePath The path to erase.
+     */
     public void eraseFromStroke(DrawPath erasePath) {
         int index = 0;
-        int intersectingPointsIndex = 0;
         boolean state = false; // All the points we are looking at (to our knowledge) don't collide with erasePath
         while(index < points.size()) {
             boolean oldState = state;
@@ -133,7 +141,7 @@ public class DrawPath {
             }
             // If there's a STATE CHANGE
             if (oldState != state) {
-                if (state == false) {
+                if (!state) {
                     point.command = Point.COMMANDS.move;
                     point.color = Color.GREEN;
                 } else if (index > 0) {
@@ -143,10 +151,20 @@ public class DrawPath {
         }
     }
 
+    /*
+     * Translates all points in a path by an amount, in pixels.
+     * @param by The amount to translate all points in the DrawPath by
+     */
+    public void translate(Point by) {
+        for(Point point : points) {
+            point.add(by);
+        }
+    }
+
     /**
-     * TODO: Change from https://stackoverflow.com/questions/8721406/how-to-determine-if-a-point-is-inside-a-2d-convex-polygon
+     * TODO: Change from <a href="https://stackoverflow.com/questions/8721406/how-to-determine-if-a-point-is-inside-a-2d-convex-polygon">...</a>
      * Return true if the given point is contained inside the boundary.
-     * See: http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
+     * See: <a href="http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html">...</a>
      * @param test The point to check
      * @return true if the point is inside the boundary, false otherwise
      *
@@ -162,13 +180,6 @@ public class DrawPath {
             }
         }
         return result;
-    }
-
-
-    public void translate(Point by) {
-        for(Point point : points) {
-            point.add(by);
-        }
     }
 
 

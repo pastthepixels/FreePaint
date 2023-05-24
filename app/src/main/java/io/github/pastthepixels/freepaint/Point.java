@@ -25,6 +25,12 @@ public class Point extends PointF {
         return this;
     }
 
+    public Point divide(float number) {
+        this.x /= number;
+        this.y /= number;
+        return this;
+    }
+
     public Point clone() {
         return new Point(x, y);
     }

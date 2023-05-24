@@ -9,6 +9,8 @@ public class DrawAppearance {
     public int stroke = -1;
     public int fill = -1;
 
+    public int strokeSize = 5;
+
     public DrawAppearance(int stroke, int fill) {
         this.stroke = stroke;
         this.fill = fill;

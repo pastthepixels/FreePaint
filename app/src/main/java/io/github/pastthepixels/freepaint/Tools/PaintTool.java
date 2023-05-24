@@ -1,7 +1,6 @@
 package io.github.pastthepixels.freepaint.Tools;
 
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.view.MotionEvent;
 
 import java.util.LinkedList;
@@ -11,8 +10,10 @@ import io.github.pastthepixels.freepaint.DrawCanvas;
 import io.github.pastthepixels.freepaint.DrawPath;
 
 public class PaintTool implements Tool {
-    private LinkedList<DrawPath> toolPaths = new LinkedList<DrawPath>();
-    private final DrawAppearance appearance = new DrawAppearance(Color.BLACK, /*Color.RED*/-1);
+    private final LinkedList<DrawPath> toolPaths = new LinkedList<>();
+
+    // The default appearance. We're going to be able to change this!
+    private final DrawAppearance appearance = new DrawAppearance(Color.BLACK, -1);
     private DrawPath currentPath;
     DrawCanvas canvas;
 
@@ -25,10 +26,19 @@ public class PaintTool implements Tool {
         return toolPaths;
     }
 
+    /*
+     * Nothing to do when we select the paint tool
+     */
     public void init() {
 
     }
 
+    /*
+     * When the user puts a finger on the screen, we create a new DrawPath.
+     * Then, as they move it, we add each point Android is able to poll to the path.
+     * (This also means that path resolution == Android's native touch polling speed)
+     * Once the user lifts their finger off the screen, we finalise that path's points.
+     */
     public boolean onTouchEvent(MotionEvent event) {
         // Checks for the event that occurs
         switch (event.getAction()) {

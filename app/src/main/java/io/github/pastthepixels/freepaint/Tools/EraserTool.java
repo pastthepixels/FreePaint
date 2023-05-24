@@ -1,7 +1,6 @@
 package io.github.pastthepixels.freepaint.Tools;
 
 import android.graphics.Color;
-import android.graphics.Region;
 import android.view.MotionEvent;
 
 import java.util.LinkedList;
@@ -9,37 +8,43 @@ import java.util.LinkedList;
 import io.github.pastthepixels.freepaint.DrawAppearance;
 import io.github.pastthepixels.freepaint.DrawCanvas;
 import io.github.pastthepixels.freepaint.DrawPath;
-import io.github.pastthepixels.freepaint.Point;
 
 // Erases a filled path region from paths, turning them into filled paths if necessary.
 // Like a pencil tool from Illustrator, but one that removes.
 // **Only works on finalized paths, and doesn't edit the list of points on a DrawPath!!**
 public class EraserTool implements Tool {
-    private LinkedList<DrawPath> toolPaths = new LinkedList<DrawPath>();
-    private final DrawAppearance appearance = new DrawAppearance(-1, Color.RED);
-    private DrawPath currentPath;
+    // List of paths to redraw, where we highlight points.
+    private final LinkedList<DrawPath> toolPaths = new LinkedList<>();
+
+    // The eraser path
+    private final DrawPath currentPath = new DrawPath();
+
+    // The canvas
     DrawCanvas canvas;
 
+    /*
+     * Init function, binds the tool to a canvas and sets a default appearance for the eraser path
+     * @param canvas The canvas to bind the tool to (paths will be sampled from/drawn on here)
+     */
     public EraserTool(DrawCanvas canvas) {
         this.canvas = canvas;
+        this.currentPath.appearance = new DrawAppearance(-1, Color.RED);
     }
 
-    @Override
     public LinkedList<DrawPath> getToolPaths() {
         return toolPaths;
     }
 
-    public void init() {}
-
+    /*
+     * Draws an eraser path, and when done (ACTION_UP) erases that path from any overlapping paths
+     * See <code>EraserTool.eraseCurrentPath()</code>.
+     */
     public boolean onTouchEvent(MotionEvent event) {
         // Checks for the event that occurs
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 // Starts a new line in the path
-                updateToolPaths();
-                currentPath = new DrawPath();
-                currentPath.appearance = appearance.clone();
-                toolPaths.add(currentPath);
+                currentPath.clear();
                 break;
 
             case MotionEvent.ACTION_MOVE:
@@ -58,18 +63,24 @@ public class EraserTool implements Tool {
         return true;
     }
 
+    /*
+     * Loops through all paths, calling <code>path.erase</code>.
+     * See <code>DrawPath.erase</code> for how this handles erasing from strokes/filled shapes.
+     */
     public void eraseCurrentPath() {
         for(DrawPath path : canvas.paths) {
             path.erase(currentPath);
         }
-        toolPaths.clear();
+        currentPath.clear();
+        init();
     }
 
-    public void updateToolPaths() {
+    /*
+     * Initialises by building a list of DrawPaths which have their points highlighted
+     * and saves this to toolPaths.
+     */
+    public void init() {
         toolPaths.clear();
-        Point startPoint = canvas.mapPoint(0, 0);
-        Point endPoint = canvas.mapPoint(canvas.getWidth(), canvas.getHeight());
-        Region clip = new Region(Math.round(startPoint.x), Math.round(startPoint.y), Math.round(endPoint.x), Math.round(endPoint.y));
         for(DrawPath path : canvas.paths) {
             DrawPath cloned = new DrawPath(path.getPath());
             cloned.points = path.points;
@@ -82,5 +93,6 @@ public class EraserTool implements Tool {
             }
             toolPaths.add(cloned);
         }
+        toolPaths.add(currentPath);
     }
 }

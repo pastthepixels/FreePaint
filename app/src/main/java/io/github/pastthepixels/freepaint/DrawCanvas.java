@@ -109,7 +109,10 @@ public final class DrawCanvas extends View {
     }
 
     public Point mapPoint(float x, float y) {
-        return new Point((x / panTool.scaleFactor) - panTool.offset.x, (y / panTool.scaleFactor) - panTool.offset.y);
+        return new Point(
+                (x / panTool.scaleFactor) - panTool.offset.x - panTool.panOffset.x,
+                (y / panTool.scaleFactor) - panTool.offset.y - panTool.panOffset.y
+        );
     }
 
     public float getScaleFactor() {
@@ -124,8 +127,9 @@ public final class DrawCanvas extends View {
         super.onDraw(canvas);
         // Draws things on the screen
         canvas.save();
+        // SCALES, THEN TRANSLATES (translations are independent of scales)
         canvas.scale(panTool.scaleFactor, panTool.scaleFactor);
-        canvas.translate(panTool.offset.x, panTool.offset.y);
+        canvas.translate(panTool.offset.x + panTool.panOffset.x, panTool.offset.y + panTool.panOffset.y);
 
         for(DrawPath path : paths) {
             paint.reset();
