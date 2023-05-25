@@ -6,15 +6,21 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
+import android.graphics.Rect;
+import android.graphics.RectF;
+import android.net.Uri;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedList;
 
+import io.github.pastthepixels.freepaint.File.SVG;
 import io.github.pastthepixels.freepaint.Tools.EraserTool;
 import io.github.pastthepixels.freepaint.Tools.PaintTool;
 import io.github.pastthepixels.freepaint.Tools.PanTool;
@@ -37,6 +43,12 @@ public final class DrawCanvas extends View {
 
     private SelectionTool selectionTool = new SelectionTool(this);
 
+    private SVG svgHelper = new SVG(this);
+
+    // Letter, portrait, at 100 PPI
+    public Point documentSize = new Point(816, 1056);
+    public int documentColor = Color.WHITE;
+
 
     /*
      * Constructor
@@ -54,6 +66,21 @@ public final class DrawCanvas extends View {
 
     public DrawCanvas(Context context) {
         this(context, null, 0);
+    }
+
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        panTool.offset.set(
+                (w/2 - documentSize.x/2),
+                (h/2 - documentSize.y/2)
+        );
+    }
+
+    public void saveFile(Uri uri, AppCompatActivity activity) {
+        svgHelper.createSVG();
+        svgHelper.writeFile(uri, activity);
     }
 
     /*
@@ -130,7 +157,14 @@ public final class DrawCanvas extends View {
         // SCALES, THEN TRANSLATES (translations are independent of scales)
         canvas.scale(panTool.scaleFactor, panTool.scaleFactor);
         canvas.translate(panTool.offset.x + panTool.panOffset.x, panTool.offset.y + panTool.panOffset.y);
-
+        // Draws what the page will look like
+        paint.setColor(documentColor);
+        paint.setStyle(Paint.Style.FILL);
+        paint.setShadowLayer(12, 0, 0, Color.BLACK);
+        RectF page = new RectF(0, 0, documentSize.x, documentSize.y);
+        canvas.drawRect(page, paint);
+        paint.reset();
+        // Draws every path, then tool path
         for(DrawPath path : paths) {
             paint.reset();
             path.draw(canvas, paint, getScaleFactor());

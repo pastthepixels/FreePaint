@@ -14,7 +14,7 @@ import io.github.pastthepixels.freepaint.Point;
 
 public class PanTool implements Tool {
     // Minimum (x) and maximum (y) scale factor
-    private final static Point SCALE_RESTRICTIONS = new Point(1f, 5f);
+    private final static Point SCALE_RESTRICTIONS = new Point(1f, 10f);
 
     // Scale
     public float scaleFactor = 1f;
