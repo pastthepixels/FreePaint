@@ -14,7 +14,7 @@ import io.github.pastthepixels.freepaint.Point;
 
 public class PanTool implements Tool {
     // Minimum (x) and maximum (y) scale factor
-    private final static Point SCALE_RESTRICTIONS = new Point(1f, 10f);
+    private final static Point SCALE_RESTRICTIONS = new Point(0.01f, 10f);
 
     // Scale
     public float scaleFactor = 1f;
@@ -61,16 +61,24 @@ public class PanTool implements Tool {
             @Override
             public boolean onScale(@NonNull ScaleGestureDetector detector) {
                 scaleFactor *= detector.getScaleFactor();
-                scaleFactor = Math.max(SCALE_RESTRICTIONS.x, Math.min(scaleFactor, SCALE_RESTRICTIONS.y));
-                panOffset.set(
-                        -(float)canvas.getWidth() * scaleFactor / 2 + ((float)canvas.getWidth() / 2),
-                        -(float)canvas.getHeight() * scaleFactor / 2  + ((float)canvas.getHeight() / 2)
-                );
-                panOffset.divide(scaleFactor);
+                updateScaleFactor();
+                updatePanOffset();
                 canvas.invalidate();
                 return true;
             }
         });
+    }
+
+    public void updateScaleFactor() {
+        scaleFactor = Math.max(SCALE_RESTRICTIONS.x, Math.min(scaleFactor, SCALE_RESTRICTIONS.y));
+    }
+
+    public void updatePanOffset() {
+        panOffset.set(
+                -(float)canvas.getWidth() * scaleFactor / 2 + ((float)canvas.getWidth() / 2),
+                -(float)canvas.getHeight() * scaleFactor / 2  + ((float)canvas.getHeight() / 2)
+        );
+        panOffset.divide(scaleFactor);
     }
 
     /*

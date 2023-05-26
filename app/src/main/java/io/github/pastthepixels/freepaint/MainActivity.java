@@ -48,8 +48,9 @@ public class MainActivity extends AppCompatActivity {
 
     private Menu topMenu;
 
-    // Request code 1 == to save
-    private int requestCode = 1;
+    private enum FILE_ACTIONS {save, load};
+
+    private String intentAction;
 
     private MainActivity self = this;
     private ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(
@@ -59,7 +60,12 @@ public class MainActivity extends AppCompatActivity {
                     if(result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                         Uri uri = result.getData().getData();
                         System.out.println(uri.getPath());
-                        binding.drawCanvas.saveFile(uri, self);
+                        try {
+                            if (intentAction == Intent.ACTION_CREATE_DOCUMENT) binding.drawCanvas.saveFile(uri);
+                            if (intentAction == Intent.ACTION_OPEN_DOCUMENT) binding.drawCanvas.loadFile(uri);
+                        } catch(Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
@@ -134,27 +140,18 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
 
-        if (id == R.id.action_save) {
-            Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        if (id == R.id.action_save || id == R.id.action_load) {
+            intentAction = id == R.id.action_save? Intent.ACTION_CREATE_DOCUMENT : Intent.ACTION_OPEN_DOCUMENT;
+            Intent intent = new Intent(intentAction);
             intent.addCategory(Intent.CATEGORY_OPENABLE);
             intent.setType("image/svg+xml");
-            intent.putExtra(Intent.EXTRA_TITLE, "output.svg");
-            intent = Intent.createChooser(intent, "Save as");
+            intent.putExtra(Intent.EXTRA_TITLE, id == R.id.action_save? "output.svg" : "input.svg");
+            intent = Intent.createChooser(intent, "Save/load file");
             activityResultLauncher.launch(intent);
             return true;
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if(this.requestCode == requestCode && resultCode == Activity.RESULT_OK && data != null) {
-            Uri uri = data.getData();
-            System.out.println(uri.getPath());
-            binding.drawCanvas.saveFile(uri, this);
-        }
     }
 
     @SuppressLint("NonConstantResourceId")

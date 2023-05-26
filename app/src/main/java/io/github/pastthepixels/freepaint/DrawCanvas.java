@@ -18,6 +18,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.LinkedList;
 
 import io.github.pastthepixels.freepaint.File.SVG;
@@ -72,15 +74,25 @@ public final class DrawCanvas extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
+        // Scales the canvas so that the document width takes up 80% of the screen width
+        panTool.scaleFactor = (float) ((0.8) * (w / documentSize.x));
+        panTool.updatePanOffset();
+        panTool.updateScaleFactor();
         panTool.offset.set(
                 (w/2 - documentSize.x/2),
                 (h/2 - documentSize.y/2)
         );
     }
 
-    public void saveFile(Uri uri, AppCompatActivity activity) {
+    public void saveFile(Uri uri) throws IOException {
         svgHelper.createSVG();
-        svgHelper.writeFile(uri, activity);
+        svgHelper.writeFile(getContext().getContentResolver().openOutputStream(uri, "wt"));
+    }
+
+    public void loadFile(Uri uri) throws IOException {
+        svgHelper.createSVG();
+        svgHelper.loadFile(getContext().getContentResolver().openInputStream(uri));
+        if (getTool() != null) getTool().init();
     }
 
     /*
