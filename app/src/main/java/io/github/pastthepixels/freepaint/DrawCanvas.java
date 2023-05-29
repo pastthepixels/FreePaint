@@ -59,7 +59,6 @@ public final class DrawCanvas extends View {
         super(context, attrs, defStyleAttr);
         setFocusable(true);
         setFocusableInTouchMode(true);
-        initialisePaint();
     }
 
     public DrawCanvas(Context context, AttributeSet attrs) {
@@ -102,16 +101,6 @@ public final class DrawCanvas extends View {
         this.tool = tool;
         if (tool != TOOLS.none) getTool().init();
         postInvalidate(); // Indicate view should be redrawn
-    }
-
-    /*
-     * Initialises <code>paint</code> with a default configuration.
-     */
-    public void initialisePaint() {
-        paint.setAntiAlias(true);
-        paint.setStrokeWidth(5);
-        paint.setStrokeJoin(Paint.Join.ROUND);
-        paint.setStrokeCap(Paint.Cap.ROUND);
     }
 
     /*

@@ -79,10 +79,7 @@ public class DrawPath {
     public void draw(Canvas canvas, Paint paint, float scaleFactor) {
         Path toDraw = path == null? generatePath() : path;
         // Sets a configuration for the Paint with DrawPath.appearance
-        paint.setAntiAlias(true);
-        paint.setStrokeWidth(appearance.strokeSize);
-        paint.setStrokeJoin(Paint.Join.ROUND);
-        paint.setStrokeCap(Paint.Cap.ROUND);
+        appearance.initialisePaint(paint);
         // Fills, then...
         if (appearance.fill != -1) {
             paint.setColor(appearance.fill);

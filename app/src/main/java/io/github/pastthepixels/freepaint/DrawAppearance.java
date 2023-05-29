@@ -17,6 +17,16 @@ public class DrawAppearance {
         this.fill = fill;
     }
 
+    /*
+     * Initialises a <code>Paint</code> with a default configuration.
+     */
+    public void initialisePaint(Paint paint) {
+        paint.setAntiAlias(true);
+        paint.setStrokeWidth(strokeSize);
+        paint.setStrokeJoin(Paint.Join.ROUND);
+        paint.setStrokeCap(Paint.Cap.ROUND);
+    }
+
     @SuppressLint("DefaultLocale")
     public static String colorToRGBA(int color) {
         return String.format("rgba(%d, %d, %d, %d)", Color.red(color), Color.green(color), Color.blue(color), Color.alpha(color));
