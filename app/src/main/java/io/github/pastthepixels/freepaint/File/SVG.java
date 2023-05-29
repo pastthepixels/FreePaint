@@ -18,6 +18,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
+import java.text.DecimalFormat;
 import java.util.LinkedList;
 import java.util.stream.Collectors;
 
@@ -125,10 +126,12 @@ public class SVG {
             NodeList nodes = document.getElementsByTagName("path");
             for(int i = 0; i < nodes.getLength(); i ++) {
                 Node node = nodes.item(i);
-                if (node.getNodeType() == Node.ELEMENT_NODE) {
+                if (node.getNodeType() == Node.ELEMENT_NODE && ((Element) node).getTagName().equals("path")) {
                     Element element = (Element) node;
                     DrawPath path = new DrawPath();
+                    path.isClosed = element.getAttribute("d").toUpperCase().contains("Z");
                     // Points
+                    command = Point.COMMANDS.none;
                     path.points = svgToPointList(element.getAttribute("d"), path.points, 0);
                     // Fill/stroke
                     // TODO: account for opacity w/ fill-opacity and stroke-opacity
@@ -153,21 +156,59 @@ public class SVG {
             e.printStackTrace();
         }
     }
+
+    private Point.COMMANDS command = Point.COMMANDS.none;
+
+    private boolean isCommandRelative = false;
+    private Point previousPoint = new Point(0, 0);
+
     public LinkedList<Point> svgToPointList(String attribute, LinkedList<Point> currentPoints, int index) {
-        if (index + 1 > attribute.length()) {
+        System.out.println(attribute);
+        if (index + 1 >= attribute.length()) {
             return currentPoints;
         }
         // Pull the selected character to a variable
         String character = attribute.substring(index, index + 1);
-        // Two commands we support: M (move) and L (line).
-        if(character.equals("M") || character.equals("L")) {
-            index ++;
+        // Commands (can't use a switch statement because STRINGS!!!
+        if (character.equalsIgnoreCase("M")) {
+            command = Point.COMMANDS.move;
+            isCommandRelative = character.equals("m");
+        }
+        if (character.equalsIgnoreCase("L") || (previousPoint != null && previousPoint.command == Point.COMMANDS.move && command == Point.COMMANDS.none && character.equals(" "))) {
+            // Apparently a set of coords with no command with them *after* an M
+            // is interpreted as an L
+            command = Point.COMMANDS.line;
+            isCommandRelative = character.equals("l");
+        }
+        if (character.equalsIgnoreCase("H")) {
+            command = Point.COMMANDS.horizontal;
+            isCommandRelative = character.equals("h");
+        }
+        if (character.equalsIgnoreCase("V")) {
+            command = Point.COMMANDS.vertical;
+            isCommandRelative = character.equals("v");
+        }
+        if(character.equals("-") || isFloat(character)) {
             // Iterates through the rest of the string until we have two numbers
             String[] point = {"", ""};
             int pointIndex = 0;
-            while(!(!point[1].equals("") && character.equals(" "))) {
+            while(
+                    index  + 1 < attribute.length() &&
+                    !(!point[1].equals("") && (character.equals(" ") || character.equals(",")))
+            ) {
                 character = attribute.substring(index, index + 1);
-                if(character.equals(" ")) {
+                // If the character's not a dot (decimal), not a negative symbol, and not a float...
+                if(character.equals(" ") || character.equals(",")) {
+                    if (command == Point.COMMANDS.vertical || command == Point.COMMANDS.horizontal) {
+                        // Vertical line == Y value, no X value
+                        if (command == Point.COMMANDS.vertical) {
+                            point[1] = point[0];
+                            point[0] = "";
+                        }
+                        // If we have a command that's just supposed to take in one float, end this here
+                        command = Point.COMMANDS.line;
+                        break;
+                    }
                     pointIndex ++;
                     index ++;
                     continue;
@@ -178,15 +219,33 @@ public class SVG {
             index --;
             System.out.println(point[0] + " " + point[1]);
             // Then creates a point to add
-            Point toAdd = new Point(parseFloat(point[0]), parseFloat(point[1]));
-            toAdd.command = character.equals("M")? Point.COMMANDS.move : Point.COMMANDS.line;
+            Point toAdd = new Point(
+                    isFloat(point[0])? parseFloat(point[0]) : previousPoint.x,
+                    isFloat(point[1])? parseFloat(point[1]) : previousPoint.y
+            );
+            if (isCommandRelative) toAdd.add(previousPoint);
+            System.out.println(toAdd.x + " " + toAdd.y);
+            toAdd.command = command;
+            previousPoint = toAdd;
             currentPoints.add(toAdd);
+            command = Point.COMMANDS.none;
         }
         return svgToPointList(attribute, currentPoints, index + 1);
     }
 
     private float parseFloat(String input) {
-        return Float.parseFloat(input.replaceAll("[^\\d.]", ""));
+        DecimalFormat df = new DecimalFormat();
+        try {
+            return df.parse(input).floatValue();
+        } catch(Exception e) {
+            System.out.println("Warning: There was an issue parsing a float. It's been replaced with 0, but here's the error:");
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    private boolean isFloat(String input) {
+        return !input.matches("[^\\d.]") && !input.equals("");// && input.matches("-?\\d+");
     }
 
 }
