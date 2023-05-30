@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <FrameLayout
+        android:id="@+id/standard_bottom_sheet"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        style="?attr/bottomSheetStyle">
+        <!--android:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"-->
+
+        <!-- Bottom sheet contents. -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Title" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Supporting Text"/>
+
+        <Button
+            android:id="@+id/bottomsheet_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Action" />
+
+    </FrameLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

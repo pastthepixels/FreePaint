@@ -4,10 +4,13 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.activity.result.ActivityResult;
@@ -23,17 +26,24 @@ import android.util.TypedValue;
 import android.view.View;
 
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
 import androidx.core.graphics.drawable.DrawableCompat;
+import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import io.github.pastthepixels.freepaint.databinding.ActivityMainBinding;
+import kotlin.Suppress;
 
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
+import android.view.WindowInsetsController;
+import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Toast;
 
@@ -48,11 +58,8 @@ public class MainActivity extends AppCompatActivity {
 
     private Menu topMenu;
 
-    private enum FILE_ACTIONS {save, load};
-
     private String intentAction;
 
-    private MainActivity self = this;
     private ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
                 @Override
@@ -84,19 +91,34 @@ public class MainActivity extends AppCompatActivity {
 
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
+        // Adjusts the FAB to always be tappable (above navigation bars)
+        ViewGroup.MarginLayoutParams initialMarginLayoutParams = (ViewGroup.MarginLayoutParams) binding.ExpandToolbar.getLayoutParams();
+        int bottomMargin = initialMarginLayoutParams.bottomMargin;
+        ViewCompat.setOnApplyWindowInsetsListener(binding.ExpandToolbar, (v, windowInsets) -> {
+            Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            ViewGroup.MarginLayoutParams mlp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+            mlp.bottomMargin = bottomMargin + insets.bottom;
+            v.setLayoutParams(mlp);
+            return WindowInsetsCompat.CONSUMED;
+        });
+
+
         //NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         //appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
         //NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
 
         //
+        int initialSystemUiVisibility = getWindow().getDecorView().getSystemUiVisibility();
         binding.ExpandToolbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 float deg = 0;
                 if (getSupportActionBar().isShowing()) {
+                    getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
                     getSupportActionBar().hide();
                     deg = 180F;
                 } else {
+                    getWindow().getDecorView().setSystemUiVisibility(initialSystemUiVisibility);
                     getSupportActionBar().show();
                 }
                 binding.ExpandToolbar.animate().rotation(deg).setInterpolator(new AccelerateDecelerateInterpolator());
@@ -109,6 +131,11 @@ public class MainActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         topMenu = menu;
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        for (int i = 0; i < topMenu.size(); i++) {
+            if (topMenu.getItem(i).getIcon() != null) {
+                updateMenuItemColor(topMenu.getItem(i));
+            }
+        }
         return true;
     }
 
@@ -172,17 +199,21 @@ public class MainActivity extends AppCompatActivity {
     /*
      * https://developer.android.com/develop/ui/views/components/menus#checkable
      * says we can't make the top icons checkable through some clean, already existing means. :(
-     * TODO: Support dark mode
      */
     private void updateMenuItemColor(MenuItem item) {
         Drawable drawable = item.getIcon();
         drawable = DrawableCompat.wrap(drawable);
+
+        // See https://stackoverflow.com/questions/75943818/how-can-i-access-theme-color-attributes-via-r-attr-colorprimary
         if(item.isChecked() == true) {
             TypedValue typedValue = new TypedValue();
-            getTheme().resolveAttribute(androidx.appcompat.R.attr.colorAccent, typedValue, true);
+            this.getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true);
             DrawableCompat.setTint(drawable, typedValue.data);
         } else {
-            DrawableCompat.setTint(drawable, ContextCompat.getColor(this, R.color.black));
+            TypedValue typedValue = new TypedValue();
+            this.getTheme().resolveAttribute(com.google.android.material.R.attr.colorControlNormal, typedValue, true);
+            DrawableCompat.setTint(drawable, typedValue.data);
+            //DrawableCompat.setTint(drawable, ContextCompat.getColor(this, R.color.textColorPrimary));
         }
         item.setIcon(drawable);
     }
@@ -192,5 +223,19 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         return NavigationUI.navigateUp(navController, appBarConfiguration)
                 || super.onSupportNavigateUp();
+    }
+
+
+    // Updates top bar icons when the user switches to dark mode
+    @Override
+    protected void onApplyThemeResource(Resources.Theme theme, int resid, boolean first) {
+        super.onApplyThemeResource(theme, resid, first);
+        if(topMenu != null) {
+            for (int i = 0; i < topMenu.size(); i++) {
+                if (topMenu.getItem(i).getIcon() != null) {
+                    updateMenuItemColor(topMenu.getItem(i));
+                }
+            }
+        }
     }
 }

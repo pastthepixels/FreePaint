@@ -1,8 +1,25 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <!-- TODO: implement a proper dark theme? -->
-    <style name="Base.Theme.FreePaint" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="Base.Theme.FreePaint" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <!-- Primary brand color. -->
+        <!--
+        <item name="colorPrimary">@color/purple_200</item>
+        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorOnPrimary">@color/black</item>
+        -->
+        <!-- Secondary brand color. -->
+        <!--
+        <item name="colorSecondary">@color/teal_200</item>
+        <item name="colorSecondaryVariant">@color/teal_200</item>
+        <item name="colorOnSecondary">@color/black</item>
+        -->
+        <!-- Status bar color. -->
+        <!--
+        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        -->
+
+        <item name="colorControlNormal">@color/white</item>
     </style>
 </resources>
