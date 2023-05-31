@@ -42,6 +42,7 @@ import kotlin.Suppress;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -114,7 +115,8 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 float deg = 0;
                 if (getSupportActionBar().isShowing()) {
-                    getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+                    // See https://stackoverflow.com/questions/30075827/android-statusbar-icons-color
+                    getWindow().getDecorView().setSystemUiVisibility(initialSystemUiVisibility | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
                     getSupportActionBar().hide();
                     deg = 180F;
                 } else {
