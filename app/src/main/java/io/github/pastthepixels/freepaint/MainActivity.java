@@ -46,14 +46,18 @@ import android.view.Window;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.color.DynamicColors;
 
 public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration appBarConfiguration;
     private ActivityMainBinding binding;
+
+    private BottomSheetBehavior sheetBehavior;
 
     private boolean _isHidden = false;
 
@@ -92,14 +96,33 @@ public class MainActivity extends AppCompatActivity {
 
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
+
+
+        // The "more options" dialog
+        LinearLayout moreOptions = findViewById(R.id.more_options);
+        int initialOptionsPaddingTop = moreOptions.getPaddingTop();
+        int initialOptionsPaddingBottom = moreOptions.getPaddingBottom();
+        sheetBehavior = BottomSheetBehavior.from(moreOptions);
+        sheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        
+
         // Adjusts the FAB to always be tappable (above navigation bars)
         ViewGroup.MarginLayoutParams initialMarginLayoutParams = (ViewGroup.MarginLayoutParams) binding.ExpandToolbar.getLayoutParams();
         int bottomMargin = initialMarginLayoutParams.bottomMargin;
         ViewCompat.setOnApplyWindowInsetsListener(binding.ExpandToolbar, (v, windowInsets) -> {
             Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            // Adjusts the FAB's position
             ViewGroup.MarginLayoutParams mlp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
             mlp.bottomMargin = bottomMargin + insets.bottom;
             v.setLayoutParams(mlp);
+            // Adjusts margins for moreOptions
+            moreOptions.setPadding(
+                    moreOptions.getPaddingLeft(),
+                    initialOptionsPaddingTop + insets.top,
+                    moreOptions.getPaddingRight(),
+                    initialOptionsPaddingBottom + insets.bottom
+            );
+
             return WindowInsetsCompat.CONSUMED;
         });
 
@@ -178,6 +201,14 @@ public class MainActivity extends AppCompatActivity {
             intent = Intent.createChooser(intent, "Save/load file");
             activityResultLauncher.launch(intent);
             return true;
+        }
+
+        if (id == R.id.action_more) {
+            if (sheetBehavior.getState() == BottomSheetBehavior.STATE_HIDDEN) {
+                sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            } else {
+                sheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+            }
         }
 
         return super.onOptionsItemSelected(item);

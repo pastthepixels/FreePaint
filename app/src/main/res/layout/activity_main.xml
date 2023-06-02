@@ -45,4 +45,8 @@
         android:contentDescription="@string/toggleToolbar"
         android:src="@drawable/baseline_arrow_drop_up_24" />
 
+    <include layout="@layout/more_options" />
+
+    <!-- More options menu -->
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
