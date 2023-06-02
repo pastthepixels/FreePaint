@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- Permanent settings -->
+
+    <com.rarepebble.colorpicker.ColorPreference
+        android:defaultValue="#000000"
+        android:key="strokeColor"
+        android:title="Stroke color"
+        app:colorpicker_noneSelectedSummaryText="No color selected"
+        app:colorpicker_selectNoneButtonText="No color" />
+
+    <com.rarepebble.colorpicker.ColorPreference
+        android:key="fillColor"
+        android:title="Fill color"
+        app:colorpicker_noneSelectedSummaryText="No color selected"
+        app:colorpicker_selectNoneButtonText="No color" />
+
+    <EditTextPreference
+        android:digits="0123456789"
+        android:inputType="numberDecimal"
+        app:defaultValue="5"
+        app:key="strokeSize"
+        app:title="@string/stroke_size"
+        app:useSimpleSummaryProvider="true" />
+
+    <SwitchPreferenceCompat
+        app:defaultValue="false"
+        app:key="drawFilledShapes"
+        app:title="Draw filled shapes" />
+
+    <!-- Is set whenever you open a file, and by default is letter (according to Inkscape) -->
+    <EditTextPreference
+        android:digits="0123456789"
+        android:inputType="numberDecimal"
+        app:defaultValue="816"
+        app:key="documentWidth"
+        app:title="@string/document_width_setting"
+        app:useSimpleSummaryProvider="true" />
+
+    <EditTextPreference
+        android:digits="0123456789"
+        android:inputType="numberDecimal"
+        app:defaultValue="1056"
+        app:key="documentHeight"
+        app:title="@string/document_height_setting"
+        app:useSimpleSummaryProvider="true" />
+
+</PreferenceScreen>

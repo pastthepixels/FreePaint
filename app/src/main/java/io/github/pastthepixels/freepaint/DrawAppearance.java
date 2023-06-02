@@ -1,20 +1,37 @@
 package io.github.pastthepixels.freepaint;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Paint;
+
+import androidx.preference.PreferenceManager;
 
 import org.jetbrains.annotations.Nullable;
 
 public class DrawAppearance {
     public int stroke = -1;
     public int fill = -1;
-
     public int strokeSize = 5;
 
+    // Constructor with just stroke/fill
     public DrawAppearance(int stroke, int fill) {
         this.stroke = stroke;
         this.fill = fill;
+    }
+
+    // Constructor with every option
+    public DrawAppearance(int stroke, int fill, int strokeSize) {
+        this.strokeSize = strokeSize;
+        this.stroke = stroke;
+        this.fill = fill;
+    }
+
+    public void loadFromSettings(Context context) {
+        this.stroke = PreferenceManager.getDefaultSharedPreferences(context).getInt("strokeColor", -1);
+        this.fill = PreferenceManager.getDefaultSharedPreferences(context).getInt("fillColor", -1);
+        this.strokeSize = (int) Float.parseFloat(PreferenceManager.getDefaultSharedPreferences(context).getString("strokeSize", "5"));
     }
 
     /*
@@ -33,7 +50,7 @@ public class DrawAppearance {
     }
 
     public static String colorToHex(int color) {
-        return "#" + Integer.toHexString(color).substring(2, 8);
+        return "#" + Integer.toHexString(Color.rgb(Color.red(color), Color.green(color), Color.blue(color)));
     }
 
     public static float getColorAlpha(int color) {
@@ -41,6 +58,6 @@ public class DrawAppearance {
     }
 
     public DrawAppearance clone() {
-        return new DrawAppearance(stroke, fill);
+        return new DrawAppearance(stroke, fill, strokeSize);
     }
 }

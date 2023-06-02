@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -18,10 +19,13 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.preference.Preference;
 import android.provider.DocumentsContract;
+import android.text.InputType;
 import android.util.TypedValue;
 import android.view.View;
 
@@ -46,11 +50,17 @@ import android.view.Window;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.color.DynamicColors;
+
+import com.rarepebble.colorpicker.ColorPickerView;
+import com.rarepebble.colorpicker.ColorPreference;
+import com.takisoft.preferencex.PreferenceFragmentCompat;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -149,6 +159,59 @@ public class MainActivity extends AppCompatActivity {
                 binding.ExpandToolbar.animate().rotation(deg).setInterpolator(new AccelerateDecelerateInterpolator());
             }
         });
+
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.moreOptionsPreferences, new PreferencesFragment())
+                .commit();
+
+    }
+
+    public void setCanvasSize(float x, float y) {
+        binding.drawCanvas.documentSize.set(x, y);
+    }
+
+    static public class PreferencesFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
+        private boolean paused = true;
+        @Override
+        public void onCreatePreferencesFix(Bundle savedInstanceState, String rootKey) {
+            setPreferencesFromResource(R.xml.preferences, rootKey);
+            getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+        }
+
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if (paused) {
+                // Either updates the fragment if preferences have been externally updated
+                setPreferencesFromResource(R.xml.preferences, getPreferenceScreen().getKey());
+            } else if (getActivity() instanceof MainActivity) {
+                // or in some cases like document size, runs code after some settings are set
+                MainActivity activity = (MainActivity) getActivity();
+                activity.setCanvasSize(
+                        Float.parseFloat(sharedPreferences.getString("documentWidth", "816")),
+                        Float.parseFloat(sharedPreferences.getString("documentHeight", "1056"))
+                );
+            }
+        }
+
+        @Override
+        public void onResume() {
+            super.onResume();
+            paused = false;
+        }
+
+        @Override
+        public void onPause() {
+            super.onPause();
+            paused = true;
+        }
+
+        @Override
+        public void onDisplayPreferenceDialog(@NonNull androidx.preference.Preference preference) {
+            if (preference instanceof ColorPreference) {
+                ((ColorPreference) preference).showDialog(this, 0);
+            } else super.onDisplayPreferenceDialog(preference);
+        }
     }
 
     @Override
@@ -188,10 +251,6 @@ public class MainActivity extends AppCompatActivity {
             updateTool();
         }
 
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
         if (id == R.id.action_save || id == R.id.action_load) {
             intentAction = id == R.id.action_save? Intent.ACTION_CREATE_DOCUMENT : Intent.ACTION_OPEN_DOCUMENT;
             Intent intent = new Intent(intentAction);
@@ -203,7 +262,7 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
 
-        if (id == R.id.action_more) {
+        if (id == R.id.action_settings) {
             if (sheetBehavior.getState() == BottomSheetBehavior.STATE_HIDDEN) {
                 sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             } else {

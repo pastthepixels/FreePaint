@@ -7,3 +7,4 @@ Final project for my Computing Science 30 class (Android Studio).
 
 # Notes
 - It can be written in **any language**
+- Uses https://github.com/Gericop/Android-Support-Preference-V7-Fix/tree/androidx to counter a bug with preferences

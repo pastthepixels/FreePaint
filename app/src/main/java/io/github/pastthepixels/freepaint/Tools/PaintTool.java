@@ -3,6 +3,8 @@ package io.github.pastthepixels.freepaint.Tools;
 import android.graphics.Color;
 import android.view.MotionEvent;
 
+import androidx.preference.PreferenceManager;
+
 import java.util.LinkedList;
 
 import io.github.pastthepixels.freepaint.DrawAppearance;
@@ -15,6 +17,7 @@ public class PaintTool implements Tool {
     // The default appearance. We're going to be able to change this!
     private final DrawAppearance appearance = new DrawAppearance(Color.BLACK, -1);
     private DrawPath currentPath;
+
     DrawCanvas canvas;
 
     public PaintTool(DrawCanvas canvas) {
@@ -43,8 +46,10 @@ public class PaintTool implements Tool {
         // Checks for the event that occurs
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                // Starts a new line in the path
+                appearance.loadFromSettings(canvas.getContext());
+                // Starts a new line in the path -- whether or not it is closed is taken from the preferences (defaults to false)
                 currentPath = new DrawPath();
+                currentPath.isClosed = PreferenceManager.getDefaultSharedPreferences(canvas.getContext()).getBoolean("drawFilledShapes", false);
                 currentPath.appearance = appearance.clone();
                 canvas.paths.add(currentPath);
                 break;

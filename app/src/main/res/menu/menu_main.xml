@@ -23,9 +23,9 @@
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/action_more"
+        android:id="@+id/action_plugins"
         android:orderInCategory="100"
-        android:title="@string/action_more"
+        android:title="@string/action_plugins"
         app:showAsAction="never" />
 
     <!-- Tools -->

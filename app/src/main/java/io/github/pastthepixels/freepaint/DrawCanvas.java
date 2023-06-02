@@ -1,6 +1,8 @@
 package io.github.pastthepixels.freepaint;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -13,8 +15,10 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.BaseAdapter;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceManager;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -48,7 +52,7 @@ public final class DrawCanvas extends View {
     private SVG svgHelper = new SVG(this);
 
     // Letter, portrait, at 100 PPI
-    public Point documentSize = new Point(816, 1056);
+    public Point documentSize = new Point(0, 0);
     public int documentColor = Color.WHITE;
 
 
@@ -59,6 +63,12 @@ public final class DrawCanvas extends View {
         super(context, attrs, defStyleAttr);
         setFocusable(true);
         setFocusableInTouchMode(true);
+        // Initialises documentSize with the size in the last used document
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+        documentSize.set(
+                Float.parseFloat(prefs.getString("documentWidth", "816")),
+                Float.parseFloat(prefs.getString("documentHeight", "1056"))
+        );
     }
 
     public DrawCanvas(Context context, AttributeSet attrs) {
@@ -73,13 +83,17 @@ public final class DrawCanvas extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
+        centerDocument();
+    }
+
+    protected void centerDocument() {
         // Scales the canvas so that the document width takes up 80% of the screen width
-        panTool.scaleFactor = (float) ((0.8) * (w / documentSize.x));
+        panTool.scaleFactor = (float) ((0.8) * (getWidth() / documentSize.x));
         panTool.updatePanOffset();
         panTool.updateScaleFactor();
         panTool.offset.set(
-                (w/2 - documentSize.x/2),
-                (h/2 - documentSize.y/2)
+                (getWidth()/2 - documentSize.x/2),
+                (getHeight()/2 - documentSize.y/2)
         );
     }
 
@@ -88,10 +102,17 @@ public final class DrawCanvas extends View {
         svgHelper.writeFile(getContext().getContentResolver().openOutputStream(uri, "wt"));
     }
 
+    @SuppressLint("DefaultLocale")
     public void loadFile(Uri uri) throws IOException {
         svgHelper.createSVG();
         svgHelper.loadFile(getContext().getContentResolver().openInputStream(uri));
         if (getTool() != null) getTool().init();
+        centerDocument();
+        // Sets settings for document width/height to new document size
+        @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getContext()).edit();
+        editor.putString("documentWidth", String.format("%d", (int) documentSize.x));
+        editor.putString("documentHeight", String.format("%d", (int) documentSize.y));
+        editor.apply();
     }
 
     /*

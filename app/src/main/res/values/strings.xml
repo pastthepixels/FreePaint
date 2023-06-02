@@ -8,13 +8,13 @@
     <string name="previous">Previous</string>
     <string name="action_save">Save file</string>
     <string name="action_load">Load file</string>
-    <string name="action_more">More actions</string>
+    <string name="action_plugins">Plugins</string>
     <string name="tool_paintbrush">Paintbrush</string>
-    <string name="eraser">tool_eraser\n</string>
     <string name="tool_pan">Pan</string>
     <string name="tool_eraser">Eraser</string>
     <string name="toggleToolbar">Toggle toolbar visibility</string>
     <string name="tool_select">Select</string>
     <string name="document_width_setting">Document width (pixels)</string>
     <string name="document_height_setting">Document height (pixels)</string>
+    <string name="stroke_size">Stroke size (pixels)</string>
 </resources>
