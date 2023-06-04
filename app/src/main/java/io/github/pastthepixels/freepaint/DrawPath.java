@@ -61,6 +61,25 @@ public class DrawPath {
      * We need to interpolate between points, but unlike the default way of doing so, *also* contact each point.
      */
     public void finalise() {
+        /*
+        Path path = new Path();
+        for(int i = 0; i < points.size(); i ++){
+            Point point = points.get(i);
+            if(i == 0 || point.command == Point.COMMANDS.move){
+                path.moveTo(point.x, point.y);
+            } else if(i < points.size() - 1 && points.get(i + 1).command != Point.COMMANDS.move) {
+                Point next = points.get(i + 1);
+                path.quadTo(point.x, point.y, next.x, next.y);
+                i ++;
+            } else {
+                path.lineTo(point.x, point.y);
+            }
+        }
+        if (isClosed) {
+            path.close();
+        }
+        this.path = path;
+        */
         this.path = generatePath();
     }
 
