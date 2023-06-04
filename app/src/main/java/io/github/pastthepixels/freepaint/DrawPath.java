@@ -12,29 +12,27 @@ import java.util.LinkedList;
 public class DrawPath {
     public DrawAppearance appearance = new DrawAppearance(Color.BLACK, -1);
     public LinkedList<Point> points = new LinkedList<>();
+    public boolean isClosed = false;
+    public boolean drawPoints = false;
     private Path path;
 
-    public boolean isClosed = false;
-
-    public boolean drawPoints = false;
-
-    public void addPoint(Point point) {
-        points.add(point);
-    }
-
     // Constructors
-    public DrawPath() { }
-
+    public DrawPath() {
+    }
 
     public DrawPath(Path path) {
         this.path = path;
     }
 
+    public void addPoint(Point point) {
+        points.add(point);
+    }
+
     // Generates a basic path by connecting lines, ideal for previewing
     public Path generatePath() {
         Path path = new Path();
-        for(Point point : points){
-            if(point == points.get(0) || point.command == Point.COMMANDS.move){
+        for (Point point : points) {
+            if (point == points.get(0) || point.command == Point.COMMANDS.move) {
                 path.moveTo(point.x, point.y);
             } else {
                 path.lineTo(point.x, point.y);
@@ -77,7 +75,7 @@ public class DrawPath {
      * @param scaleFactor Necessary so we can draw the dots for points to always be the same size
      */
     public void draw(Canvas canvas, Paint paint, float scaleFactor) {
-        Path toDraw = path == null? generatePath() : path;
+        Path toDraw = path == null ? generatePath() : path;
         // Sets a configuration for the Paint with DrawPath.appearance
         appearance.initialisePaint(paint);
         // Fills, then...
@@ -97,7 +95,7 @@ public class DrawPath {
             paint.setAlpha(100);
             paint.setStyle(Paint.Style.STROKE);
             paint.setStrokeWidth(5.0f / scaleFactor);
-            for(Point pt : points) {
+            for (Point pt : points) {
                 paint.setColor(pt.color);
                 canvas.drawCircle(pt.x, pt.y, 5.0f / scaleFactor, paint);
             }
@@ -126,7 +124,7 @@ public class DrawPath {
     public void eraseFromStroke(DrawPath erasePath) {
         int index = 0;
         boolean state = false; // All the points we are looking at (to our knowledge) don't collide with erasePath
-        while(index < points.size()) {
+        while (index < points.size()) {
             boolean oldState = state;
             Point point = points.get(index);
             if (erasePath.contains(point)) {
@@ -134,7 +132,7 @@ public class DrawPath {
                 state = true;
             } else {
                 state = false;
-                index ++;
+                index++;
             }
             // If there's a STATE CHANGE
             if (oldState != state) {
@@ -153,7 +151,7 @@ public class DrawPath {
      * @param by The amount to translate all points in the DrawPath by
      */
     public void translate(Point by) {
-        for(Point point : points) {
+        for (Point point : points) {
             point.add(by);
         }
     }
@@ -162,9 +160,9 @@ public class DrawPath {
      * TODO: Change from <a href="https://stackoverflow.com/questions/8721406/how-to-determine-if-a-point-is-inside-a-2d-convex-polygon">...</a>
      * Return true if the given point is contained inside the boundary.
      * See: <a href="http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html">...</a>
+     *
      * @param test The point to check
      * @return true if the point is inside the boundary, false otherwise
-     *
      */
     public boolean contains(PointF test) {
         int i;
@@ -172,7 +170,7 @@ public class DrawPath {
         boolean result = false;
         for (i = 0, j = points.size() - 1; i < points.size(); j = i++) {
             if ((points.get(i).y > test.y) != (points.get(j).y > test.y) &&
-                    (test.x < (points.get(j).x - points.get(i).x) * (test.y - points.get(i).y) / (points.get(j).y-points.get(i).y) + points.get(i).x)) {
+                    (test.x < (points.get(j).x - points.get(i).x) * (test.y - points.get(i).y) / (points.get(j).y - points.get(i).y) + points.get(i).x)) {
                 result = !result;
             }
         }

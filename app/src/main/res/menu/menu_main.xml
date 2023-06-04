@@ -27,9 +27,9 @@
         android:id="@+id/tool_paintbrush"
         android:checkable="true"
         android:icon="@drawable/baseline_brush_24"
-        android:title="@string/tool_paintbrush"
         android:iconTint="?attr/colorControlNormal"
-        app:showAsAction="always"/>
+        android:title="@string/tool_paintbrush"
+        app:showAsAction="always" />
 
     <item
         android:id="@+id/tool_eraser"
@@ -45,7 +45,7 @@
         android:icon="@drawable/baseline_pan_tool_24"
         android:iconTint="?attr/colorControlNormal"
         android:title="@string/tool_pan"
-        app:showAsAction="always"/>
+        app:showAsAction="always" />
 
     <item
         android:id="@+id/tool_select"
@@ -53,6 +53,6 @@
         android:icon="@drawable/baseline_select_all_24"
         android:iconTint="?attr/colorControlNormal"
         android:title="@string/tool_select"
-        app:showAsAction="always"/>
+        app:showAsAction="always" />
 
 </menu>

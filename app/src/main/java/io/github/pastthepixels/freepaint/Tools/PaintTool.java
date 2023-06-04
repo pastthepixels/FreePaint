@@ -16,9 +16,8 @@ public class PaintTool implements Tool {
 
     // The default appearance. We're going to be able to change this!
     private final DrawAppearance appearance = new DrawAppearance(Color.BLACK, -1);
-    private DrawPath currentPath;
-
     DrawCanvas canvas;
+    private DrawPath currentPath;
 
     public PaintTool(DrawCanvas canvas) {
         this.canvas = canvas;

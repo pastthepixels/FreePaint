@@ -15,24 +15,17 @@ import io.github.pastthepixels.freepaint.Point;
 public class PanTool implements Tool {
     // Minimum (x) and maximum (y) scale factor
     private final static Point SCALE_RESTRICTIONS = new Point(0.01f, 10f);
-
-    // Scale
-    public float scaleFactor = 1f;
-
-    // Offset
-    public Point offset = new Point(0f, 0f);
-
-    public Point panOffset = new Point(0f, 0f);
-
     // Location of the last time an ACTION_DOWN touch was initialized (relative positions to that
     // are used for calculating new offsets)
     private final PointF touchDown = new PointF(0, 0);
-
     // Old offset value, recorded before a new one is set
     private final Point oldOffset = new Point(0, 0);
-
     private final ScaleGestureDetector detector;
-
+    // Scale
+    public float scaleFactor = 1f;
+    // Offset
+    public Point offset = new Point(0f, 0f);
+    public Point panOffset = new Point(0f, 0f);
     // Used in onTouchEvent.
     boolean isScaling = false;
     boolean disableIsScalingOnNextUp = false;
@@ -75,8 +68,8 @@ public class PanTool implements Tool {
 
     public void updatePanOffset() {
         panOffset.set(
-                -(float)canvas.getWidth() * scaleFactor / 2 + ((float)canvas.getWidth() / 2),
-                -(float)canvas.getHeight() * scaleFactor / 2  + ((float)canvas.getHeight() / 2)
+                -(float) canvas.getWidth() * scaleFactor / 2 + ((float) canvas.getWidth() / 2),
+                -(float) canvas.getHeight() * scaleFactor / 2 + ((float) canvas.getHeight() / 2)
         );
         panOffset.divide(scaleFactor);
     }
@@ -103,7 +96,7 @@ public class PanTool implements Tool {
         } else {
             disableIsScalingOnNextUp = true;
         }
-        if(event.getAction() == MotionEvent.ACTION_UP && disableIsScalingOnNextUp) {
+        if (event.getAction() == MotionEvent.ACTION_UP && disableIsScalingOnNextUp) {
             disableIsScalingOnNextUp = false;
             isScaling = false;
         }

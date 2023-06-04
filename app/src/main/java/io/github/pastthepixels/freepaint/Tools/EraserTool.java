@@ -68,7 +68,7 @@ public class EraserTool implements Tool {
      * See <code>DrawPath.erase</code> for how this handles erasing from strokes/filled shapes.
      */
     public void eraseCurrentPath() {
-        for(DrawPath path : canvas.paths) {
+        for (DrawPath path : canvas.paths) {
             path.erase(currentPath);
         }
         currentPath.clear();
@@ -81,7 +81,7 @@ public class EraserTool implements Tool {
      */
     public void init() {
         toolPaths.clear();
-        for(DrawPath path : canvas.paths) {
+        for (DrawPath path : canvas.paths) {
             DrawPath cloned = new DrawPath(path.getPath());
             cloned.points = path.points;
             cloned.isClosed = path.isClosed;

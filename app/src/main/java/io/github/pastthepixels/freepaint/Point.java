@@ -5,9 +5,6 @@ import android.graphics.PointF;
 
 public class Point extends PointF {
     public int color = Color.BLACK;
-
-    // SVG point commands. Only `none`, `move` and `line` are supported.
-    public enum COMMANDS {none, move, line, horizontal, vertical}
     public COMMANDS command = COMMANDS.none;
 
     public Point(float x, float y) {
@@ -35,4 +32,7 @@ public class Point extends PointF {
     public Point clone() {
         return new Point(x, y);
     }
+
+    // SVG point commands. Only `none`, `move` and `line` are supported.
+    public enum COMMANDS {none, move, line, horizontal, vertical}
 }

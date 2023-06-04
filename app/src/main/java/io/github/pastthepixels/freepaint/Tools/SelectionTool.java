@@ -5,7 +5,6 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.view.MotionEvent;
 
-
 import java.util.LinkedList;
 
 import io.github.pastthepixels.freepaint.DrawAppearance;
@@ -20,8 +19,10 @@ public class SelectionTool implements Tool {
     private final LinkedList<DrawPath> toolPaths = new LinkedList<>();
 
     private final DrawPath currentPath = new DrawPath();
-
+    public Point originalPoint = new Point(0, 0);
+    public Point previousPoint = null;
     DrawCanvas canvas;
+    private TOUCH_MODES mode;
 
     /*
      * Creates a SelectionTool instance, saying that the selection path has to be closed (it's a rectangle)
@@ -45,16 +46,6 @@ public class SelectionTool implements Tool {
         currentPath.clear();
         toolPaths.clear();
     }
-
-    public Point originalPoint = new Point(0, 0);
-
-    public Point previousPoint = null;
-
-    // You can either define a new selection or move a selection. Each touch mode is set from
-    // different conditions and reset once you lift your finger off the screen.
-    private enum TOUCH_MODES {none, define, move}
-
-    private TOUCH_MODES mode;
 
     public boolean onTouchEvent(MotionEvent event) {
         // Checks for the event that occurs
@@ -88,7 +79,7 @@ public class SelectionTool implements Tool {
                 }
                 if (mode == TOUCH_MODES.move && previousPoint != null) {
                     // If we're trying to move all the paths we selected... well, move them!
-                    for(DrawPath path : toolPaths) {
+                    for (DrawPath path : toolPaths) {
                         path.translate(touchPoint.clone().subtract(previousPoint));
                         if (path != currentPath) path.finalise();
                     }
@@ -126,7 +117,7 @@ public class SelectionTool implements Tool {
         currentPathRegion.setPath(currentPath.generatePath(), clip);
 
         // Bounding box math! (If a path collides with the current path, add it to the selection.)
-        for(DrawPath path : canvas.paths) {
+        for (DrawPath path : canvas.paths) {
             Region region = new Region();
             region.setPath(path.getPath(), clip);
             Rect bounds = region.getBounds();
@@ -165,4 +156,8 @@ public class SelectionTool implements Tool {
             currentPath.addPoint(new Point(boundsTop.x, boundsBottom.y));
         }
     }
+
+    // You can either define a new selection or move a selection. Each touch mode is set from
+    // different conditions and reset once you lift your finger off the screen.
+    private enum TOUCH_MODES {none, define, move}
 }
