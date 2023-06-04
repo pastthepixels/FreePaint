@@ -7,13 +7,13 @@
     <com.rarepebble.colorpicker.ColorPreference
         android:defaultValue="#000000"
         android:key="strokeColor"
-        android:title="Stroke color"
+        android:title="@string/pref_stroke_color"
         app:colorpicker_noneSelectedSummaryText="No color selected"
         app:colorpicker_selectNoneButtonText="No color" />
 
     <com.rarepebble.colorpicker.ColorPreference
         android:key="fillColor"
-        android:title="Fill color"
+        android:title="@string/pref_fill_color"
         app:colorpicker_noneSelectedSummaryText="No color selected"
         app:colorpicker_selectNoneButtonText="No color" />
 
@@ -28,7 +28,7 @@
     <SwitchPreferenceCompat
         app:defaultValue="false"
         app:key="drawFilledShapes"
-        app:title="Draw filled shapes" />
+        app:title="@string/pref_closed_paths" />
 
     <!-- Is set whenever you open a file, and by default is letter (according to Inkscape) -->
     <EditTextPreference
