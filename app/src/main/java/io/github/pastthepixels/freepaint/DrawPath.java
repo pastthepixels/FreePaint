@@ -8,6 +8,10 @@ import android.graphics.PointF;
 
 import java.util.LinkedList;
 
+import dev.romainguy.graphics.path.PathIterator;
+import dev.romainguy.graphics.path.PathSegment;
+import dev.romainguy.graphics.path.Paths;
+
 
 public class DrawPath {
     public DrawAppearance appearance = new DrawAppearance(Color.BLACK, -1);
@@ -108,11 +112,28 @@ public class DrawPath {
      */
     public void erase(DrawPath path) {
         if (isClosed) {
-            // TODO: regenerate list of points after this operation
             getPath().op(path.getPath(), Path.Op.DIFFERENCE);
+            regeneratePoints();
         } else {
             eraseFromStroke(path);
             finalise();
+        }
+    }
+
+    /*
+     * Regenerates points[] from DrawPath.path (android.graphics.Path)
+     */
+    public void regeneratePoints() {
+        PathIterator iterator = Paths.iterator(path);
+        points.clear();
+        float[] pointArray = new float[8];
+        while (iterator.hasNext()) {
+            PathSegment.Type type = iterator.next(pointArray, 0); // The type of segment
+            if(type != PathSegment.Type.Close) {
+                Point point = new Point(pointArray[0], pointArray[1]);
+                point.command = type == PathSegment.Type.Move? Point.COMMANDS.move : Point.COMMANDS.line;
+                points.add(point);
+            }
         }
     }
 
