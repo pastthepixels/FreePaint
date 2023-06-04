@@ -8,7 +8,6 @@
     <string name="previous">Previous</string>
     <string name="action_save">Save file</string>
     <string name="action_load">Load file</string>
-    <string name="action_plugins">Plugins</string>
     <string name="tool_paintbrush">Paintbrush</string>
     <string name="tool_pan">Pan</string>
     <string name="tool_eraser">Eraser</string>
