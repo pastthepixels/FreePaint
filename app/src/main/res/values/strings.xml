@@ -1,18 +1,17 @@
 <resources>
     <string name="app_name">FreePaint</string>
     <string name="action_settings">Settings</string>
-    <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
-    <string name="second_fragment_label">Second Fragment</string>
-    <string name="next">Next</string>
-    <string name="previous">Previous</string>
+    <!-- Actions -->
     <string name="action_save">Save file</string>
     <string name="action_load">Load file</string>
+    <!-- Tools -->
     <string name="tool_paintbrush">Paintbrush</string>
-    <string name="tool_pan">Pan</string>
-    <string name="tool_eraser">Eraser</string>
+    <string name="tool_pan">Pan tool</string>
+    <string name="tool_eraser">Eraser tool</string>
+    <string name="tool_select">Select and move tool</string>
+    <!-- MainActivity elements -->
     <string name="toggleToolbar">Toggle toolbar visibility</string>
-    <string name="tool_select">Select</string>
+    <!-- Settings -->
     <string name="document_width_setting">Document width (pixels)</string>
     <string name="document_height_setting">Document height (pixels)</string>
     <string name="stroke_size">Stroke size (pixels)</string>

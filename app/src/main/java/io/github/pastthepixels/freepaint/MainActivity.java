@@ -64,12 +64,9 @@ import com.takisoft.preferencex.PreferenceFragmentCompat;
 
 public class MainActivity extends AppCompatActivity {
 
-    private AppBarConfiguration appBarConfiguration;
     private ActivityMainBinding binding;
 
     private BottomSheetBehavior sheetBehavior;
-
-    private boolean _isHidden = false;
 
     private Menu topMenu;
 
@@ -107,7 +104,6 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
 
-
         // The "more options" dialog
         LinearLayout moreOptions = findViewById(R.id.more_options);
         int initialOptionsPaddingTop = moreOptions.getPaddingTop();
@@ -135,11 +131,6 @@ public class MainActivity extends AppCompatActivity {
 
             return WindowInsetsCompat.CONSUMED;
         });
-
-
-        //NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        //appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
-        //NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
 
         //
         int initialSystemUiVisibility = getWindow().getDecorView().getSystemUiVisibility();
@@ -309,14 +300,6 @@ public class MainActivity extends AppCompatActivity {
         }
         item.setIcon(drawable);
     }
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        return NavigationUI.navigateUp(navController, appBarConfiguration)
-                || super.onSupportNavigateUp();
-    }
-
 
     // Updates top bar icons when the user switches to dark mode
     @Override
