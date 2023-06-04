@@ -2,7 +2,7 @@
     <string name="app_name">FreePaint</string>
     <string name="action_settings">Settings</string>
     <!-- Actions -->
-    <string name="action_save">Save file</string>
+    <string name="action_save">Save as…</string>
     <string name="action_load">Load file</string>
     <!-- Tools -->
     <string name="tool_paintbrush">Paintbrush</string>

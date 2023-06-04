@@ -134,12 +134,15 @@ public class SVG {
                     command = Point.COMMANDS.none;
                     path.points = svgToPointList(element.getAttribute("d"), path.points, 0);
                     // Fill/stroke
-                    // TODO: account for opacity w/ fill-opacity and stroke-opacity
+                    float fillOpacity = element.hasAttribute("fill-opacity")? Float.parseFloat(element.getAttribute("fill-opacity")) : 1;
+                    float strokeOpacity = element.hasAttribute("stroke-opacity")? Float.parseFloat(element.getAttribute("stroke-opacity")) : 1;
                     if(element.hasAttribute("fill") && !element.getAttribute("fill").equals("none")) {
-                        path.appearance.fill = Color.parseColor(element.getAttribute("fill"));
+                        int fill = Color.parseColor(element.getAttribute("fill"));
+                        path.appearance.fill = Color.argb((int)(fillOpacity * 255), Color.red(fill), Color.green(fill), Color.blue(fill));
                     }
                     if(element.hasAttribute("stroke") && !element.getAttribute("stroke").equals("none")) {
-                        path.appearance.stroke = Color.parseColor(element.getAttribute("stroke"));
+                        int stroke = Color.parseColor(element.getAttribute("stroke"));
+                        path.appearance.stroke = Color.argb((int)(strokeOpacity * 255), Color.red(stroke), Color.green(stroke), Color.blue(stroke));
                     }
                     // Stroke width
                     if(element.hasAttribute("stroke-width")) {

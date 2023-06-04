@@ -49,8 +49,15 @@ public class DrawAppearance {
         return String.format("rgba(%d, %d, %d, %d)", Color.red(color), Color.green(color), Color.blue(color), Color.alpha(color));
     }
 
+    /*
+     * Converts an ARGB color to RGB hexadecimal string
+     *  Solution from https://stackoverflow.com/questions/6539879/how-to-convert-a-color-integer-to-a-hex-string-in-android
+     *  allows for me to not use a substring (%06X formats a hexadecimal integer)
+     * @param Color integer, in Android's preferred ARGB
+     * @return A hexadecimal string ("#RRGGBB")
+     */
     public static String colorToHex(int color) {
-        return "#" + Integer.toHexString(Color.rgb(Color.red(color), Color.green(color), Color.blue(color)));
+        return String.format("#%06X", (0xFFFFFF & color));
     }
 
     public static float getColorAlpha(int color) {
