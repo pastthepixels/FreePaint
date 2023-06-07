@@ -12,7 +12,7 @@ public class DrawAppearance {
     public int fill = -1;
     public int strokeSize = 5;
 
-    // Constructor with just stroke/fill
+    // Constructor with just stroke/fill (integer colors)
     public DrawAppearance(int stroke, int fill) {
         this.stroke = stroke;
         this.fill = fill;
@@ -25,6 +25,11 @@ public class DrawAppearance {
         this.fill = fill;
     }
 
+    /*
+     * Converts an integer color to CSS RGBA
+     * @param color The integer color value, ARGB
+     * @return The color as an RGBA string (e.g. "rgba(255, 255, 0, 0)")
+     */
     @SuppressLint("DefaultLocale")
     public static String colorToRGBA(int color) {
         return String.format("rgba(%d, %d, %d, %d)", Color.red(color), Color.green(color), Color.blue(color), Color.alpha(color));
@@ -41,10 +46,19 @@ public class DrawAppearance {
         return String.format("#%06X", (0xFFFFFF & color));
     }
 
+    /*
+     * Returns the alpha value of an integer color.
+     * @param color The integer color value, ARGB
+     * @return The alpha of the color, float, 0-1
+     */
     public static float getColorAlpha(int color) {
         return (float) Color.alpha(color) / 255f;
     }
 
+    /*
+     * Sets DrawAppearance properties from application settings
+     * @param context You need to pass a context e.g. MainActivity instance
+     */
     public void loadFromSettings(Context context) {
         this.stroke = PreferenceManager.getDefaultSharedPreferences(context).getInt("strokeColor", -1);
         this.fill = PreferenceManager.getDefaultSharedPreferences(context).getInt("fillColor", -1);
@@ -53,6 +67,7 @@ public class DrawAppearance {
 
     /*
      * Initialises a <code>Paint</code> with a default configuration.
+     * @param paint The <code>Paint</code> to initialise.
      */
     public void initialisePaint(Paint paint) {
         paint.setAntiAlias(true);
@@ -61,6 +76,10 @@ public class DrawAppearance {
         paint.setStrokeCap(Paint.Cap.ROUND);
     }
 
+    /*
+     * Creates a new DrawAppearance instance with the same values as the current one.
+     * @return The copied DrawAppearance.
+     */
     public DrawAppearance clone() {
         return new DrawAppearance(stroke, fill, strokeSize);
     }

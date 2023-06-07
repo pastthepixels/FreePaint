@@ -18,4 +18,5 @@
     <string name="pref_closed_paths">Draw closed paths</string>
     <string name="pref_fill_color">Fill color</string>
     <string name="pref_stroke_color">Stroke color</string>
+    <string name="settings_header">Settings</string>
 </resources>

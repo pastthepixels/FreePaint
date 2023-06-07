@@ -13,25 +13,53 @@ import io.github.pastthepixels.freepaint.DrawPath;
 import io.github.pastthepixels.freepaint.Point;
 
 public class PanTool implements Tool {
-    // Minimum (x) and maximum (y) scale factor
+    /**
+     * Minimum (x) and maximum (y) scale factor
+     */
     private final static Point SCALE_RESTRICTIONS = new Point(0.01f, 10f);
-    // Location of the last time an ACTION_DOWN touch was initialized (relative positions to that
-    // are used for calculating new offsets)
+
+    /**
+     * Location of the last time an ACTION_DOWN touch was initialized (relative positions to that
+     * are used for calculating new offsets)
+     */
     private final PointF touchDown = new PointF(0, 0);
-    // Old offset value, recorded before a new one is set
+
+    /**
+     * Old offset value, recorded before a new one is set
+     */
     private final Point oldOffset = new Point(0, 0);
+
     private final ScaleGestureDetector detector;
-    // Scale
+
+    /**
+     * Scale
+     */
     public float scaleFactor = 1f;
-    // Offset
+
+    /**
+     * Offset
+     */
     public Point offset = new Point(0f, 0f);
+
+    /**
+     * Offset that's applied separately to <code>offset</code>, to make sure panning is from the middle of the screen.
+     */
     public Point panOffset = new Point(0f, 0f);
-    // Used in onTouchEvent.
+
+    /**
+     * Used in onTouchEvent.
+     */
     boolean isScaling = false;
     boolean disableIsScalingOnNextUp = false;
 
     DrawCanvas canvas;
 
+    /**
+     * Binds the tool to a DrawCanvas, and sets up a <code>ScaleGestureDetector</code>
+     * to detect pinch zoom.
+     *
+     * @param canvas DrawCanvas to bind to the tool
+     */
     public PanTool(DrawCanvas canvas) {
         this.canvas = canvas;
         this.detector = new ScaleGestureDetector(canvas.getContext(), new ScaleGestureDetector.SimpleOnScaleGestureListener() {
@@ -46,7 +74,7 @@ public class PanTool implements Tool {
                 return super.onScaleBegin(detector);
             }
 
-            /*
+            /**
              * This absolute bit of math just makes sure that zooming is from the center of the canvas.
              * Zooming is typically done from the top left corner, but we can use panOffset to move
              * the canvas by an amount to make it look like we zoomed from the center.
@@ -62,10 +90,17 @@ public class PanTool implements Tool {
         });
     }
 
+    /**
+     * Clamps <code>scaleFactor</code> to minimum and maximum values (<code>SCALE_RESTRICTIONS</code>).
+     */
     public void updateScaleFactor() {
         scaleFactor = Math.max(SCALE_RESTRICTIONS.x, Math.min(scaleFactor, SCALE_RESTRICTIONS.y));
     }
 
+    /**
+     * Updates <code>panOffset</code> so that the canvas is moved to create the effect of
+     * center zoom.
+     */
     public void updatePanOffset() {
         panOffset.set(
                 -(float) canvas.getWidth() * scaleFactor / 2 + ((float) canvas.getWidth() / 2),
@@ -74,14 +109,14 @@ public class PanTool implements Tool {
         panOffset.divide(scaleFactor);
     }
 
-    /*
+    /**
      * Returns null. In the future it would be nice to draw text saying what the scale factor is.
      */
     public LinkedList<DrawPath> getToolPaths() {
         return null;
     }
 
-    /*
+    /**
      * Pans the canvas if one finger is on the screen, or zooms it if there's two.
      */
     @Override
@@ -119,8 +154,9 @@ public class PanTool implements Tool {
         return true;
     }
 
-    /*
-     * Nothing to do when the tool is initialized.
+    /**
+     * Nothing to do when the tool is initialized, but this function is required
+     * since PanTool implements Tool.
      */
     public void init() {
 

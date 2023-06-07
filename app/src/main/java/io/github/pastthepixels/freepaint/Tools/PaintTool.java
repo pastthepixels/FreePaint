@@ -12,34 +12,45 @@ import io.github.pastthepixels.freepaint.DrawCanvas;
 import io.github.pastthepixels.freepaint.DrawPath;
 
 public class PaintTool implements Tool {
-    private final LinkedList<DrawPath> toolPaths = new LinkedList<>();
-
-    // The default appearance. We're going to be able to change this!
+    /**
+     * The default appearance. You can change this! (through settings)
+     */
     private final DrawAppearance appearance = new DrawAppearance(Color.BLACK, -1);
-    DrawCanvas canvas;
+    private final DrawCanvas canvas;
     private DrawPath currentPath;
 
+    /**
+     * Constructor for PaintTool, which binds itself to a DrawCanvas
+     *
+     * @param canvas DrawCanvas to bind to
+     */
     public PaintTool(DrawCanvas canvas) {
         this.canvas = canvas;
     }
 
+    /**
+     * Returns nothing as we don't draw custom tool paths
+     */
     @Override
     public LinkedList<DrawPath> getToolPaths() {
-        return toolPaths;
+        return null;
     }
 
-    /*
-     * Nothing to do when we select the paint tool
+    /**
+     * Nothing to do when we select the paint tool (required because of <code>Tool</code>)
      */
     public void init() {
 
     }
 
-    /*
+    /**
      * When the user puts a finger on the screen, we create a new DrawPath.
      * Then, as they move it, we add each point Android is able to poll to the path.
      * (This also means that path resolution == Android's native touch polling speed)
      * Once the user lifts their finger off the screen, we finalise that path's points.
+     *
+     * @param event MotionEvent passed from a DrawCanvas
+     * @return Boolean return value passed to a DrawCanvas
      */
     public boolean onTouchEvent(MotionEvent event) {
         // Checks for the event that occurs
@@ -47,7 +58,7 @@ public class PaintTool implements Tool {
             case MotionEvent.ACTION_DOWN:
                 appearance.loadFromSettings(canvas.getContext());
                 // Starts a new line in the path -- whether or not it is closed is taken from the preferences (defaults to false)
-                currentPath = new DrawPath();
+                currentPath = new DrawPath(null);
                 currentPath.isClosed = PreferenceManager.getDefaultSharedPreferences(canvas.getContext()).getBoolean("drawFilledShapes", false);
                 currentPath.appearance = appearance.clone();
                 canvas.paths.add(currentPath);

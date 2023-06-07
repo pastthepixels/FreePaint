@@ -4,7 +4,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.PointF;
 
 import java.util.LinkedList;
 
@@ -14,25 +13,50 @@ import dev.romainguy.graphics.path.Paths;
 
 
 public class DrawPath {
+    /**
+     * Appearance of the path (ex. fill/stroke color, stroke width)
+     */
     public DrawAppearance appearance = new DrawAppearance(Color.BLACK, -1);
+
+    /**
+     * List of points
+     */
     public LinkedList<Point> points = new LinkedList<>();
+
+    /**
+     * Whether or not the path is closed (a line is drawn from the end point to the start point)
+     */
     public boolean isClosed = false;
+
+    /**
+     * Whether or not to draw each point as a circle.
+     */
     public boolean drawPoints = false;
+
+    /**
+     * android.graphics.Path instance. FreePaint handles math but this is how we get that math to be shown on the screen.
+     */
     private Path path;
 
-    // Constructors
-    public DrawPath() {
-    }
-
+    /**
+     * Constructor for DrawPath
+     */
     public DrawPath(Path path) {
         this.path = path;
     }
 
+    /**
+     * Adds an instance of <code>io.github.pastthepixels.freepaint.Point</code> to the list of points
+     */
     public void addPoint(Point point) {
         points.add(point);
     }
 
-    // Generates a basic path by connecting lines, ideal for previewing
+    /**
+     * Generates a basic path by connecting lines, ideal for previewing
+     *
+     * @return A generated path
+     */
     public Path generatePath() {
         Path path = new Path();
         for (Point point : points) {
@@ -48,13 +72,15 @@ public class DrawPath {
         return path;
     }
 
-    // Clears all points
+    /**
+     * Clears all points in a DrawPath, then resets <code>DrawPath.path</code>
+     */
     public void clear() {
         points.clear();
         this.path = null;
     }
 
-    /*
+    /**
      * Generates a "final" path by interpolating lines.
      * Right now, we are just using generatePath(). In the future, look at
      * something like https://www.stkent.com/2015/07/03/building-smooth-paths-using-bezier-curves.html
@@ -83,18 +109,20 @@ public class DrawPath {
         this.path = generatePath();
     }
 
-    /*
+    /**
      * Accessor for <code>path</code>
+     *
      * @return The <code>android.graphics.Path</code> instance used for drawing.
      */
     public Path getPath() {
         return path;
     }
 
-    /*
+    /**
      * Draws the path.
-     * @param canvas The canvas to draw to.
-     * @param paint The Paint instance to use -- this code is built for reusing the same one so memory can be saved.
+     *
+     * @param canvas      The canvas to draw to.
+     * @param paint       The Paint instance to use -- this code is built for reusing the same one so memory can be saved.
      * @param scaleFactor Necessary so we can draw the dots for points to always be the same size
      */
     public void draw(Canvas canvas, Paint paint, float scaleFactor) {
@@ -125,11 +153,19 @@ public class DrawPath {
         }
     }
 
-    /*
+    /**
      * Erases a path from another path -- assumes `path` is closed.
+     *
      * @param path The path to erase.
      */
     public void erase(DrawPath path) {
+        // If there's no path to erase we can't do an erasing operation 💀
+        if (getPath() == null) {
+            return;
+        }
+        if (path.getPath() == null) {
+            path.finalise();
+        }
         if (isClosed) {
             getPath().op(path.getPath(), Path.Op.DIFFERENCE);
             regeneratePoints();
@@ -139,7 +175,7 @@ public class DrawPath {
         }
     }
 
-    /*
+    /**
      * Regenerates points[] from DrawPath.path (android.graphics.Path)
      */
     public void regeneratePoints() {
@@ -148,17 +184,18 @@ public class DrawPath {
         float[] pointArray = new float[8];
         while (iterator.hasNext()) {
             PathSegment.Type type = iterator.next(pointArray, 0); // The type of segment
-            if(type != PathSegment.Type.Close) {
+            if (type != PathSegment.Type.Close) {
                 Point point = new Point(pointArray[0], pointArray[1]);
-                point.command = type == PathSegment.Type.Move? Point.COMMANDS.move : Point.COMMANDS.line;
+                point.command = type == PathSegment.Type.Move ? Point.COMMANDS.move : Point.COMMANDS.line;
                 points.add(point);
             }
         }
     }
 
-    /*
+    /**
      * Erases a closed path from a stroke by removing points in the stroke that are in contact with the
      * filled shape
+     *
      * @param erasePath The path to erase.
      */
     public void eraseFromStroke(DrawPath erasePath) {
@@ -186,8 +223,9 @@ public class DrawPath {
         }
     }
 
-    /*
+    /**
      * Translates all points in a path by an amount, in pixels.
+     *
      * @param by The amount to translate all points in the DrawPath by
      */
     public void translate(Point by) {
@@ -197,24 +235,19 @@ public class DrawPath {
     }
 
     /**
-     * TODO: Change from <a href="https://stackoverflow.com/questions/8721406/how-to-determine-if-a-point-is-inside-a-2d-convex-polygon">...</a>
-     * Return true if the given point is contained inside the boundary.
-     * See: <a href="http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html">...</a>
+     * Point-shape collisions. This should be better than other implementations because by using Path.op we can account
+     * for cases where getPath() returns a path with curves instead of a polygon with straight lines!
+     * We create a test path with a circle of radius of 1, and then do Point.op with that and the current path.
+     * <b>Requires getPath() to return anything but null, else throws an exception.</b>
      *
-     * @param test The point to check
-     * @return true if the point is inside the boundary, false otherwise
+     * @param point The point to test
+     * @return Whether or not <code>point</code> is inside of the DrawPath's path.
      */
-    public boolean contains(PointF test) {
-        int i;
-        int j;
-        boolean result = false;
-        for (i = 0, j = points.size() - 1; i < points.size(); j = i++) {
-            if ((points.get(i).y > test.y) != (points.get(j).y > test.y) &&
-                    (test.x < (points.get(j).x - points.get(i).x) * (test.y - points.get(i).y) / (points.get(j).y - points.get(i).y) + points.get(i).x)) {
-                result = !result;
-            }
-        }
-        return result;
+    public boolean contains(Point point) {
+        Path pointPath = new Path();
+        pointPath.addCircle(point.x, point.y, 1, Path.Direction.CW);
+        pointPath.op(getPath(), Path.Op.DIFFERENCE);
+        return pointPath.isEmpty();
     }
 
 

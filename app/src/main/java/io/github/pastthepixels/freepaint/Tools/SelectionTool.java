@@ -14,30 +14,44 @@ import io.github.pastthepixels.freepaint.Point;
 
 public class SelectionTool implements Tool {
     private final DrawAppearance SELECTION_APPEARANCE = new DrawAppearance(Color.RED, Color.argb(100, 255, 0, 0));
+
     private final DrawAppearance TRANSFORMATION_APPEARANCE = new DrawAppearance(Color.GREEN, Color.argb(100, 0, 255, 0));
 
     private final LinkedList<DrawPath> toolPaths = new LinkedList<>();
 
-    private final DrawPath currentPath = new DrawPath();
+    private final DrawPath currentPath = new DrawPath(null);
+
     public Point originalPoint = new Point(0, 0);
+
     public Point previousPoint = null;
-    DrawCanvas canvas;
+
+    private final DrawCanvas canvas;
+
     private TOUCH_MODES mode;
 
-    /*
+    /**
      * Creates a SelectionTool instance, saying that the selection path has to be closed (it's a rectangle)
+     *
+     * @param canvas The DrawCanvas to bind to
      */
     public SelectionTool(DrawCanvas canvas) {
         this.canvas = canvas;
         currentPath.isClosed = true;
     }
 
+
+    /**
+     * Returns a list of paths entirely used by the tool for visual aid purposes
+     * (e.g. showing selected paths) so that it can be drawn by a DrawCanvas
+     *
+     * @return A list of paths for the DrawCanvas to draw
+     */
     @Override
     public LinkedList<DrawPath> getToolPaths() {
         return toolPaths;
     }
 
-    /*
+    /**
      * Every time we select the selection tool (heh), it clears the previous selection.
      * One of the reasons for doing this is that if we selected a path and its shape changed/it's no longer there,
      * we can be lazy and don't have to recompute a bounding box or check if it's still there.
@@ -47,6 +61,18 @@ public class SelectionTool implements Tool {
         toolPaths.clear();
     }
 
+    /**
+     * When the user touches the canvas while the tool is selected:
+     * (1) Create a new selection if the touch point is outside the current
+     * (1a) When the user lifts their finger, resize the selection square to fit the selection,
+     * effectively repurposing the square from showing the region to select to showing the
+     * bounds of the selected paths.
+     * (2) If the touch point is in in the selected square, move the selection.
+     * (3) TODO: If the touch point is on the edges of the square (draw circle "handles" that can be used to determine this), scale the selection.
+     *
+     * @param event MotionEvent passed from the DrawCanvas
+     * @return Boolean return value passed to the DrawCanvas
+     */
     public boolean onTouchEvent(MotionEvent event) {
         // Checks for the event that occurs
         switch (event.getAction()) {
@@ -102,6 +128,10 @@ public class SelectionTool implements Tool {
         return true;
     }
 
+    /**
+     * Selects paths that overlap with the selection square, then resizes the square
+     * so it now represents the bounds of the selection.
+     */
     public void selectPaths() {
         Point startPoint = canvas.mapPoint(0, 0);
         Point endPoint = canvas.mapPoint(canvas.getWidth(), canvas.getHeight());
@@ -157,7 +187,9 @@ public class SelectionTool implements Tool {
         }
     }
 
-    // You can either define a new selection or move a selection. Each touch mode is set from
-    // different conditions and reset once you lift your finger off the screen.
+    /**
+     * You can either define a new selection or move a selection. Each touch mode is set from
+     * different conditions and reset once you lift your finger off the screen.
+     */
     private enum TOUCH_MODES {none, define, move}
 }

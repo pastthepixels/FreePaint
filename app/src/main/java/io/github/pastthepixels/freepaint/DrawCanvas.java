@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.RectF;
 import android.net.Uri;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -18,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.Objects;
 
 import io.github.pastthepixels.freepaint.File.SVG;
 import io.github.pastthepixels.freepaint.Tools.EraserTool;
@@ -27,18 +27,28 @@ import io.github.pastthepixels.freepaint.Tools.SelectionTool;
 import io.github.pastthepixels.freepaint.Tools.Tool;
 
 public final class DrawCanvas extends View {
+
     private final PaintTool paintTool = new PaintTool(this);
+
     private final EraserTool eraserTool = new EraserTool(this);
+
     private final PanTool panTool = new PanTool(this);
+
     private final SelectionTool selectionTool = new SelectionTool(this);
+
     private final SVG svgHelper = new SVG(this);
+
     public Paint paint = new Paint();
-    public LinkedList<DrawPath> paths = new LinkedList<DrawPath>();
-    // Letter, portrait, at 100 PPI
+
+    public LinkedList<DrawPath> paths = new LinkedList<>();
+
     public Point documentSize = new Point(0, 0);
+
     public int documentColor = Color.WHITE;
+
     private TOOLS tool = TOOLS.none;
-    /*
+
+    /**
      * Constructor
      */
     public DrawCanvas(Context context, @Nullable AttributeSet attrs, @Nullable int defStyleAttr) {
@@ -53,37 +63,65 @@ public final class DrawCanvas extends View {
         );
     }
 
-
+    /**
+     * Constructor
+     */
     public DrawCanvas(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
+    /**
+     * Constructor
+     */
     public DrawCanvas(Context context) {
         this(context, null, 0);
     }
 
+    /**
+     * Recenters document when the size of the View changes
+     *
+     * @param w    Current width of this view.
+     * @param h    Current height of this view.
+     * @param oldw Old width of this view.
+     * @param oldh Old height of this view.
+     */
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         centerDocument();
     }
 
+    /**
+     * Changes the pan tool's scale factor and offset so that the document is in the middle of the screen.
+     */
     private void centerDocument() {
         // Scales the canvas so that the document width takes up 80% of the screen width
         panTool.scaleFactor = (float) ((0.8) * (getWidth() / documentSize.x));
         panTool.updatePanOffset();
         panTool.updateScaleFactor();
         panTool.offset.set(
-                (getWidth() / 2 - documentSize.x / 2),
-                (getHeight() / 2 - documentSize.y / 2)
+                ((float) (getWidth()) / 2 - documentSize.x / 2),
+                ((float) (getHeight()) / 2 - documentSize.y / 2)
         );
     }
 
+    /**
+     * Saves a DrawCanvas as an SVG at a URI
+     *
+     * @param uri URI of the SVG
+     * @throws IOException May be thrown if the file path is invalid or the program can't write to it
+     */
     public void saveFile(Uri uri) throws IOException {
         svgHelper.createSVG();
         svgHelper.writeFile(getContext().getContentResolver().openOutputStream(uri, "wt"));
     }
 
+    /**
+     * Loads path data from an SVG
+     *
+     * @param uri URI of the SVG
+     * @throws IOException May be thrown if the file path is invalid or the program can't read from it.
+     */
     @SuppressLint("DefaultLocale")
     public void loadFile(Uri uri) throws IOException {
         svgHelper.createSVG();
@@ -97,13 +135,16 @@ public final class DrawCanvas extends View {
         editor.apply();
     }
 
-    /*
-     * Adds touch points when the user touches the screen
+    /**
+     * Adds touch points when the user touches the screen.
+     *
+     * @param event The motion event.
      */
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         // Runs chosenTool.onTouchEvent if it exists, otherwise don't update the screen.
-        if (tool == TOOLS.none || !getTool().onTouchEvent(event)) {
+        if (tool == TOOLS.none || !Objects.requireNonNull(getTool()).onTouchEvent(event)) {
             return false;
         } else {
             postInvalidate(); // Indicate view should be redrawn
@@ -111,8 +152,10 @@ public final class DrawCanvas extends View {
         }
     }
 
-    /*
+    /**
      * Gets the chosen tool
+     *
+     * @return A Tool instance, depending on DrawCanvas.tool
      */
     public Tool getTool() {
         switch (tool) {
@@ -130,15 +173,26 @@ public final class DrawCanvas extends View {
         return null;
     }
 
-    /*
+    /**
      * Setting tools
+     *
+     * @param tool Not a Tool instance, but rather from an Enum at <code>DrawCanvas.TOOLS</code>
      */
     public void setTool(TOOLS tool) {
         this.tool = tool;
-        if (tool != TOOLS.none) getTool().init();
+        if (tool != TOOLS.none && getTool() != null) {
+            getTool().init();
+        }
         postInvalidate(); // Indicate view should be redrawn
     }
 
+    /**
+     * Maps a point from screen coordinates to Canvas coordinates (accounts for transformations)
+     *
+     * @param x X of the screen point (top left corner = origin point)
+     * @param y Y of the screen point (top left corner = origin point)
+     * @return New Point instance for the point in Canvas coordinates (has its own origin point)
+     */
     public Point mapPoint(float x, float y) {
         return new Point(
                 (x / panTool.scaleFactor) - panTool.offset.x - panTool.panOffset.x,
@@ -146,12 +200,19 @@ public final class DrawCanvas extends View {
         );
     }
 
+    /**
+     * Gets the pan tool's scale factor.
+     *
+     * @return The scale of the pan tool (1 == 1x)
+     */
     public float getScaleFactor() {
         return panTool.scaleFactor;
     }
 
-    /*
-     * onDraw
+    /**
+     * Draws the document rectangle, paths, and then custom paths that tools create (ex. to show bounds of a selection)
+     *
+     * @param canvas the canvas on which the background will be drawn
      */
     protected void onDraw(Canvas canvas) {
         // Allows us to do things like setting a custom background
@@ -164,9 +225,14 @@ public final class DrawCanvas extends View {
         // Draws what the page will look like
         paint.setColor(documentColor);
         paint.setStyle(Paint.Style.FILL);
-        paint.setShadowLayer(12, 0, 0, Color.BLACK);
-        RectF page = new RectF(0, 0, documentSize.x, documentSize.y);
-        canvas.drawRect(page, paint);
+        paint.setShadowLayer(12, 0, 0, Color.argb(200, 0, 0, 0));
+        canvas.drawRect(0, 0, documentSize.x, documentSize.y, paint);
+        paint.reset();
+        // Draws a stroke for the page
+        paint.setColor(Color.GRAY);
+        paint.setStrokeWidth(5 / panTool.scaleFactor); // Always five pixels no matter scale
+        paint.setStyle(Paint.Style.STROKE);
+        canvas.drawRect(0, 0, documentSize.x, documentSize.y, paint);
         paint.reset();
         // Draws every path, then tool path
         for (DrawPath path : paths) {

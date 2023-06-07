@@ -32,6 +32,8 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.rarepebble.colorpicker.ColorPreference;
 import com.takisoft.preferencex.PreferenceFragmentCompat;
 
+import java.util.Objects;
+
 import io.github.pastthepixels.freepaint.databinding.ActivityMainBinding;
 
 
@@ -39,12 +41,18 @@ public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
 
-    private BottomSheetBehavior sheetBehavior;
+    private BottomSheetBehavior<View> sheetBehavior;
 
     private Menu topMenu;
 
+    /**
+     * Records the last used intent action -- used in <code>activityResultLauncher<code> to see if we should load the selected path or save to it.
+     */
     private String intentAction;
 
+    /**
+     * Handles file picker actions -- onActivityResult is called after a file path is chosen (see MainActivity.onOptionsItemSelected)
+     */
     private final ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
                 @Override
@@ -53,9 +61,9 @@ public class MainActivity extends AppCompatActivity {
                         Uri uri = result.getData().getData();
                         System.out.println(uri.getPath());
                         try {
-                            if (intentAction == Intent.ACTION_CREATE_DOCUMENT)
+                            if (Objects.equals(intentAction, Intent.ACTION_CREATE_DOCUMENT))
                                 binding.drawCanvas.saveFile(uri);
-                            if (intentAction == Intent.ACTION_OPEN_DOCUMENT)
+                            if (Objects.equals(intentAction, Intent.ACTION_OPEN_DOCUMENT))
                                 binding.drawCanvas.loadFile(uri);
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -69,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Android things (including setting/adjusting layout)
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
@@ -76,14 +85,14 @@ public class MainActivity extends AppCompatActivity {
 
         setSupportActionBar(binding.toolbar);
 
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);
 
 
-        // The "more options" dialog
-        LinearLayout moreOptions = findViewById(R.id.more_options);
-        int initialOptionsPaddingTop = moreOptions.getPaddingTop();
-        int initialOptionsPaddingBottom = moreOptions.getPaddingBottom();
-        sheetBehavior = BottomSheetBehavior.from(moreOptions);
+        // The settings popup
+        LinearLayout settings = findViewById(R.id.settings_popup);
+        int initialOptionsPaddingTop = settings.getPaddingTop();
+        int initialOptionsPaddingBottom = settings.getPaddingBottom();
+        sheetBehavior = BottomSheetBehavior.from(settings);
         sheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
 
@@ -96,36 +105,34 @@ public class MainActivity extends AppCompatActivity {
             ViewGroup.MarginLayoutParams mlp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
             mlp.bottomMargin = bottomMargin + insets.bottom;
             v.setLayoutParams(mlp);
-            // Adjusts margins for moreOptions
-            moreOptions.setPadding(
-                    moreOptions.getPaddingLeft(),
+            // Adjusts margins for the settings popup
+            settings.setPadding(
+                    settings.getPaddingLeft(),
                     initialOptionsPaddingTop + insets.top,
-                    moreOptions.getPaddingRight(),
+                    settings.getPaddingRight(),
                     initialOptionsPaddingBottom + insets.bottom
             );
 
             return WindowInsetsCompat.CONSUMED;
         });
 
-        //
+        // On click action for the FAB
         int initialSystemUiVisibility = getWindow().getDecorView().getSystemUiVisibility();
-        binding.ExpandToolbar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                float deg = 0;
-                if (getSupportActionBar().isShowing()) {
-                    // See https://stackoverflow.com/questions/30075827/android-statusbar-icons-color
-                    getWindow().getDecorView().setSystemUiVisibility(initialSystemUiVisibility | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-                    getSupportActionBar().hide();
-                    deg = 180F;
-                } else {
-                    getWindow().getDecorView().setSystemUiVisibility(initialSystemUiVisibility);
-                    getSupportActionBar().show();
-                }
-                binding.ExpandToolbar.animate().rotation(deg).setInterpolator(new AccelerateDecelerateInterpolator());
+        binding.ExpandToolbar.setOnClickListener(view -> {
+            float deg = 0;
+            if (Objects.requireNonNull(getSupportActionBar()).isShowing()) {
+                // See https://stackoverflow.com/questions/30075827/android-statusbar-icons-color
+                getWindow().getDecorView().setSystemUiVisibility(initialSystemUiVisibility | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+                getSupportActionBar().hide();
+                deg = 180F;
+            } else {
+                getWindow().getDecorView().setSystemUiVisibility(initialSystemUiVisibility);
+                getSupportActionBar().show();
             }
+            binding.ExpandToolbar.animate().rotation(deg).setInterpolator(new AccelerateDecelerateInterpolator());
         });
 
+        // Inflates settings XML
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.moreOptionsPreferences, new PreferencesFragment())
@@ -133,13 +140,21 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Sets the document size of a drawCanvas.
+     *
+     * @param x The new width of the document
+     * @param y The new height of the document
+     */
     public void setCanvasSize(float x, float y) {
         binding.drawCanvas.documentSize.set(x, y);
     }
 
+    /**
+     * Inflate the menu; this adds items to the action bar if it is present.
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         topMenu = menu;
         getMenuInflater().inflate(R.menu.menu_main, menu);
         for (int i = 0; i < topMenu.size(); i++) {
@@ -150,6 +165,9 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    /**
+     * Handles clicks for ActionBar buttons
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -196,6 +214,9 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Updates the DrawCanvas's tool based on the selected ActionBar button
+     */
     @SuppressLint("NonConstantResourceId")
     public void updateTool() {
         DrawCanvas.TOOLS tool = DrawCanvas.TOOLS.none;
@@ -214,8 +235,8 @@ public class MainActivity extends AppCompatActivity {
         binding.drawCanvas.setTool(tool);
     }
 
-    /*
-     * https://developer.android.com/develop/ui/views/components/menus#checkable
+    /**
+     * <a href="https://developer.android.com/develop/ui/views/components/menus#checkable">The Android Developers website</a>
      * says we can't make the top icons checkable through some clean, already existing means. :(
      */
     private void updateMenuItemColor(MenuItem item) {
@@ -236,7 +257,9 @@ public class MainActivity extends AppCompatActivity {
         item.setIcon(drawable);
     }
 
-    // Updates top bar icons when the user switches to dark mode
+    /**
+     * Updates top bar icons when the user switches to dark mode
+     */
     @Override
     protected void onApplyThemeResource(Resources.Theme theme, int resid, boolean first) {
         super.onApplyThemeResource(theme, resid, first);
@@ -249,6 +272,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * SETTINGS FRAGMENT (uses a separate module to use a numeric keyboard for int prefs)
+     */
     static public class PreferencesFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
         private boolean paused = true;
 
