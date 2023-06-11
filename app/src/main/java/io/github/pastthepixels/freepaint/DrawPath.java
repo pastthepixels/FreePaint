@@ -238,7 +238,7 @@ public class DrawPath {
      * Point-shape collisions. This should be better than other implementations because by using Path.op we can account
      * for cases where getPath() returns a path with curves instead of a polygon with straight lines!
      * We create a test path with a circle of radius of 1, and then do Point.op with that and the current path.
-     * <b>Requires getPath() to return anything but null, else throws an exception.</b>
+     * <b>Prioritizes using a generated path, but if it doesn't exist will use generate()</b>
      *
      * @param point The point to test
      * @return Whether or not <code>point</code> is inside of the DrawPath's path.
@@ -246,7 +246,7 @@ public class DrawPath {
     public boolean contains(Point point) {
         Path pointPath = new Path();
         pointPath.addCircle(point.x, point.y, 1, Path.Direction.CW);
-        pointPath.op(getPath(), Path.Op.DIFFERENCE);
+        pointPath.op(getPath() == null? generatePath() : getPath(), Path.Op.DIFFERENCE);
         return pointPath.isEmpty();
     }
 
