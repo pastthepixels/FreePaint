@@ -9,11 +9,13 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.TypedValue;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import androidx.activity.result.ActivityResult;
@@ -21,6 +23,7 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.graphics.drawable.DrawableCompat;
@@ -29,6 +32,7 @@ import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.rarepebble.colorpicker.ColorPreference;
 import com.takisoft.preferencex.PreferenceFragmentCompat;
 
@@ -41,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
 
-    private BottomSheetBehavior<View> sheetBehavior;
+    private ModalBottomSheet settingsBottomSheet;
 
     private Menu topMenu;
 
@@ -87,14 +91,7 @@ public class MainActivity extends AppCompatActivity {
 
         Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);
 
-
-        // The settings popup
-        LinearLayout settings = findViewById(R.id.settings_popup);
-        int initialOptionsPaddingTop = settings.getPaddingTop();
-        int initialOptionsPaddingBottom = settings.getPaddingBottom();
-        sheetBehavior = BottomSheetBehavior.from(settings);
-        sheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-
+        settingsBottomSheet = new ModalBottomSheet();
 
         // Adjusts the FAB to always be tappable (above navigation bars)
         ViewGroup.MarginLayoutParams initialMarginLayoutParams = (ViewGroup.MarginLayoutParams) binding.ExpandToolbar.getLayoutParams();
@@ -105,14 +102,6 @@ public class MainActivity extends AppCompatActivity {
             ViewGroup.MarginLayoutParams mlp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
             mlp.bottomMargin = bottomMargin + insets.bottom;
             v.setLayoutParams(mlp);
-            // Adjusts margins for the settings popup
-            settings.setPadding(
-                    settings.getPaddingLeft(),
-                    initialOptionsPaddingTop + insets.top,
-                    settings.getPaddingRight(),
-                    initialOptionsPaddingBottom + insets.bottom
-            );
-
             return WindowInsetsCompat.CONSUMED;
         });
 
@@ -131,13 +120,6 @@ public class MainActivity extends AppCompatActivity {
             }
             binding.ExpandToolbar.animate().rotation(deg).setInterpolator(new AccelerateDecelerateInterpolator());
         });
-
-        // Inflates settings XML
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.moreOptionsPreferences, new PreferencesFragment())
-                .commit();
-
     }
 
     /**
@@ -148,6 +130,7 @@ public class MainActivity extends AppCompatActivity {
      */
     public void setCanvasSize(float x, float y) {
         binding.drawCanvas.documentSize.set(x, y);
+        binding.drawCanvas.invalidate();
     }
 
     /**
@@ -204,11 +187,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (id == R.id.action_settings) {
-            if (sheetBehavior.getState() == BottomSheetBehavior.STATE_HIDDEN) {
-                sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-            } else {
-                sheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-            }
+            settingsBottomSheet.show(getSupportFragmentManager(), ModalBottomSheet.TAG);
         }
 
         return super.onOptionsItemSelected(item);
@@ -252,7 +231,6 @@ public class MainActivity extends AppCompatActivity {
             TypedValue typedValue = new TypedValue();
             this.getTheme().resolveAttribute(com.google.android.material.R.attr.colorControlNormal, typedValue, true);
             DrawableCompat.setTint(drawable, typedValue.data);
-            //DrawableCompat.setTint(drawable, ContextCompat.getColor(this, R.color.textColorPrimary));
         }
         item.setIcon(drawable);
     }
@@ -275,7 +253,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * SETTINGS FRAGMENT (uses a separate module to use a numeric keyboard for int prefs)
      */
-    static public class PreferencesFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
+    public static class PreferencesFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
         private boolean paused = true;
 
         @Override
@@ -286,6 +264,8 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            // TODO: First line: When model sheets are hidden, getContext() just becomes null and the sheets aren't destroyed
+            if (getContext() == null) return;
             if (paused) {
                 // Either updates the fragment if preferences have been externally updated
                 setPreferencesFromResource(R.xml.preferences, getPreferenceScreen().getKey());
@@ -317,5 +297,29 @@ public class MainActivity extends AppCompatActivity {
                 ((ColorPreference) preference).showDialog(this, 0);
             } else super.onDisplayPreferenceDialog(preference);
         }
+    }
+
+    /**
+     * SETTINGS DIALOG
+     */
+    public static class ModalBottomSheet extends BottomSheetDialogFragment {
+
+        @Nullable
+        @Override
+        public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+            // Inflates settings XML
+            getChildFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.moreOptionsPreferences, new PreferencesFragment())
+                    .commit();
+            return inflater.inflate(R.layout.settings_popup, container, false);
+        }
+
+        @Override
+        public void onHiddenChanged(boolean hidden) {
+            super.onHiddenChanged(hidden);
+        }
+
+        public static final String TAG = "ModalBottomSheet";
     }
 }

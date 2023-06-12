@@ -17,7 +17,7 @@
         app:colorpicker_noneSelectedSummaryText="No color selected"
         app:colorpicker_selectNoneButtonText="No color" />
 
-    <EditTextPreference
+    <com.takisoft.preferencex.EditTextPreference
         android:digits="0123456789"
         android:inputType="numberDecimal"
         app:defaultValue="5"
@@ -25,13 +25,14 @@
         app:title="@string/stroke_size"
         app:useSimpleSummaryProvider="true" />
 
-    <SwitchPreferenceCompat
+    <SwitchPreference
         app:defaultValue="false"
         app:key="drawFilledShapes"
-        app:title="@string/pref_closed_paths" />
+        app:title="@string/pref_closed_paths"
+        app:widgetLayout="@layout/switch_preference_material" />
 
     <!-- Is set whenever you open a file, and by default is letter (according to Inkscape) -->
-    <EditTextPreference
+    <com.takisoft.preferencex.EditTextPreference
         android:digits="0123456789"
         android:inputType="numberDecimal"
         app:defaultValue="816"
@@ -39,7 +40,7 @@
         app:title="@string/document_width_setting"
         app:useSimpleSummaryProvider="true" />
 
-    <EditTextPreference
+    <com.takisoft.preferencex.EditTextPreference
         android:digits="0123456789"
         android:inputType="numberDecimal"
         app:defaultValue="1056"
