@@ -106,16 +106,17 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // On click action for the FAB
+        // TODO: see if commented SystemUI darkening should be removed or not
         int initialSystemUiVisibility = getWindow().getDecorView().getSystemUiVisibility();
         binding.ExpandToolbar.setOnClickListener(view -> {
             float deg = 0;
             if (Objects.requireNonNull(getSupportActionBar()).isShowing()) {
                 // See https://stackoverflow.com/questions/30075827/android-statusbar-icons-color
-                getWindow().getDecorView().setSystemUiVisibility(initialSystemUiVisibility | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+                //getWindow().getDecorView().setSystemUiVisibility(initialSystemUiVisibility | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
                 getSupportActionBar().hide();
                 deg = 180F;
             } else {
-                getWindow().getDecorView().setSystemUiVisibility(initialSystemUiVisibility);
+                //getWindow().getDecorView().setSystemUiVisibility(initialSystemUiVisibility);
                 getSupportActionBar().show();
             }
             binding.ExpandToolbar.animate().rotation(deg).setInterpolator(new AccelerateDecelerateInterpolator());
@@ -222,17 +223,32 @@ public class MainActivity extends AppCompatActivity {
         Drawable drawable = item.getIcon();
         drawable = DrawableCompat.wrap(drawable);
 
-        // See https://stackoverflow.com/questions/75943818/how-can-i-access-theme-color-attributes-via-r-attr-colorprimary
         if (item.isChecked()) {
-            TypedValue typedValue = new TypedValue();
-            this.getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true);
-            DrawableCompat.setTint(drawable, typedValue.data);
+            DrawableCompat.setTint(drawable, getThemeColor(com.google.android.material.R.attr.colorPrimary));
         } else {
-            TypedValue typedValue = new TypedValue();
-            this.getTheme().resolveAttribute(com.google.android.material.R.attr.colorControlNormal, typedValue, true);
-            DrawableCompat.setTint(drawable, typedValue.data);
+            DrawableCompat.setTint(drawable, getThemeColor(com.google.android.material.R.attr.colorControlNormal));
         }
         item.setIcon(drawable);
+    }
+
+
+    /**
+     * Gets a themed color, same as ?attr/$COlOR
+     * For example, if you want to get ?attr/colorPrimary from Java, use MainActivity.getThemeColor(com.google.android.material.R.attr.colorControlNormal)
+     *
+     * Note that what we're passing into it is the ID for colorControlNormal. Resource ID's are the same no
+     * matter what, so if you get colorControlNormal from com.google.android.material or com.androidx it won't matter.
+     * Their values are the only thing that are overridden based on the theme.
+     *
+     * See <a href="https://stackoverflow.com/questions/75943818/how-can-i-access-theme-color-attributes-via-r-attr-colorprimary">this link</a> for more.
+     *
+     * @param resid Resource ID. (R.attr.*)
+     * @return An int, hexadecimal, ARGB color.
+     */
+    public int getThemeColor(int resid) {
+        TypedValue typedValue = new TypedValue();
+        this.getTheme().resolveAttribute(resid, typedValue, true);
+        return typedValue.data;
     }
 
     /**

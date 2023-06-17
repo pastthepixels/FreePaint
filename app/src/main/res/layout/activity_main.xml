@@ -13,7 +13,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_centerInParent="true"
-        android:background="#CCCCCC"
+        android:background="?attr/colorSurface"
+        android:backgroundTint="?attr/colorControlHighlight"
         android:fitsSystemWindows="false" />
 
 
@@ -24,7 +25,8 @@
         android:animateLayoutChanges="true"
         android:backgroundTint="#F2FFFFFF"
         android:backgroundTintMode="multiply"
-        android:fitsSystemWindows="true">
+        android:fitsSystemWindows="true"
+        android:forceHasOverlappingRendering="false">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
