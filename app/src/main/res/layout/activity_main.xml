@@ -15,8 +15,8 @@
         android:layout_centerInParent="true"
         android:background="?attr/colorSurface"
         android:backgroundTint="?attr/colorControlHighlight"
+        android:contentDescription="@string/draw_canvas_description"
         android:fitsSystemWindows="false" />
-
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"

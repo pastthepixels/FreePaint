@@ -19,4 +19,6 @@
     <string name="pref_fill_color">Fill color</string>
     <string name="pref_stroke_color">Stroke color</string>
     <string name="settings_header">Settings</string>
+    <!-- other -->
+    <string name="draw_canvas_description">A canvas containing a rectangle, representing a document which users may draw on.</string>
 </resources>
