@@ -13,7 +13,7 @@ A vector graphics drawing app for Android.
 - Eraser tool erases shapes from closed paths, or points from open paths
 - Saving/loading SVG files
 
-# Tool descriptions
+# Using FreePaint
 ## Paint tool
 Using this tool, you can either draw open or closed paths. Simply go to the overflow menu > Settings to access this and more options.
 ## Eraser tool
