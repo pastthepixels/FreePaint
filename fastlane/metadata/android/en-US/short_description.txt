@@ -1,0 +1,1 @@
+A vector graphics drawing app for Android.
