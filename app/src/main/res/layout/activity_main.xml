@@ -46,6 +46,6 @@
         android:layout_marginBottom="16dp"
         android:contentDescription="@string/toggleToolbar"
         android:src="@drawable/baseline_arrow_drop_up_24"
-        android:visibility="gone" />
+        android:visibility="visible" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

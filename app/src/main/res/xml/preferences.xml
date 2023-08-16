@@ -48,4 +48,11 @@
         app:title="@string/document_height_setting"
         app:useSimpleSummaryProvider="true" />
 
+    <!-- Non-tool preferences -->
+    <SwitchPreference
+        app:defaultValue="false"
+        app:key="toggleToolbarToggle"
+        app:title="@string/toggleToolbarToggle"
+        app:widgetLayout="@layout/switch_preference_material" />
+
 </PreferenceScreen>

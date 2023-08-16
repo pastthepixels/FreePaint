@@ -30,6 +30,7 @@ import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.preference.PreferenceManager;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
@@ -94,6 +95,7 @@ public class MainActivity extends AppCompatActivity {
         settingsBottomSheet = new ModalBottomSheet();
 
         // Adjusts the FAB to always be tappable (above navigation bars)
+        updateFABVisibility();
         ViewGroup.MarginLayoutParams initialMarginLayoutParams = (ViewGroup.MarginLayoutParams) binding.ExpandToolbar.getLayoutParams();
         int bottomMargin = initialMarginLayoutParams.bottomMargin;
         ViewCompat.setOnApplyWindowInsetsListener(binding.ExpandToolbar, (v, windowInsets) -> {
@@ -267,6 +269,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
+     * Updates the visibility of the FAB (ExpandToolbar) depending on its appropriate setting
+     */
+    public void updateFABVisibility() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        binding.ExpandToolbar.setVisibility(prefs.getBoolean("toggleToolbarToggle", false)? View.VISIBLE : View.GONE);
+    }
+
+    /**
      * SETTINGS FRAGMENT (uses a separate module to use a numeric keyboard for int prefs)
      */
     public static class PreferencesFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -288,6 +298,7 @@ public class MainActivity extends AppCompatActivity {
             } else if (getActivity() instanceof MainActivity) {
                 // or in some cases like document size, runs code after some settings are set
                 MainActivity activity = (MainActivity) getActivity();
+                activity.updateFABVisibility();
                 activity.setCanvasSize(
                         Float.parseFloat(sharedPreferences.getString("documentWidth", "816")),
                         Float.parseFloat(sharedPreferences.getString("documentHeight", "1056"))
