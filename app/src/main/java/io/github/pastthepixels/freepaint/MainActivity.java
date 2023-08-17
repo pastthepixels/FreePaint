@@ -30,6 +30,7 @@ import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.preference.Preference;
 import androidx.preference.PreferenceManager;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -49,12 +50,6 @@ public class MainActivity extends AppCompatActivity {
     private ModalBottomSheet settingsBottomSheet;
 
     private Menu topMenu;
-
-    /*
-     * Preferences fragment so it does not have to be re-created every time the menu is opened up.
-     */
-
-    static PreferencesFragment preferencesFragment = new PreferencesFragment();
 
     /**
      * Records the last used intent action -- used in <code>activityResultLauncher<code> to see if we should load the selected path or save to it.
@@ -341,10 +336,11 @@ public class MainActivity extends AppCompatActivity {
         @Nullable
         @Override
         public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+            System.out.println(true);
             // Inflates settings XML
             getChildFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.moreOptionsPreferences, MainActivity.preferencesFragment)
+                    .replace(R.id.moreOptionsPreferences, new PreferencesFragment())
                     .commit();
             return inflater.inflate(R.layout.settings_popup, container, false);
         }
