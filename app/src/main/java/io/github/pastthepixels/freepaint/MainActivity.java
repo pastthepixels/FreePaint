@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
 
-    private ModalBottomSheet settingsBottomSheet;
+    private ModalBottomSheet settingsBottomSheet = new ModalBottomSheet();
 
     private Menu topMenu;
 
@@ -93,7 +93,8 @@ public class MainActivity extends AppCompatActivity {
 
         Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);
 
-        settingsBottomSheet = new ModalBottomSheet();
+        // Sets default settings values
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
         // Adjusts the FAB to always be tappable (above navigation bars)
         updateFABVisibility();
