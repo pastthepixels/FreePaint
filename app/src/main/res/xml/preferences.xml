@@ -20,7 +20,7 @@
     <com.takisoft.preferencex.EditTextPreference
         android:digits="0123456789"
         android:inputType="numberDecimal"
-        android:defaultValue="25"
+        android:defaultValue="5"
         app:key="strokeSize"
         app:title="@string/stroke_size"
         app:useSimpleSummaryProvider="true" />

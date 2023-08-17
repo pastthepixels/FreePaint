@@ -286,7 +286,6 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onCreatePreferencesFix(Bundle savedInstanceState, String rootKey) {
-            System.out.println("Pref fragment created!!");
             setPreferencesFromResource(R.xml.preferences, rootKey);
             getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
         }
