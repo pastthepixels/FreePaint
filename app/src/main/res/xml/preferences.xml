@@ -20,13 +20,13 @@
     <com.takisoft.preferencex.EditTextPreference
         android:digits="0123456789"
         android:inputType="numberDecimal"
-        app:defaultValue="5"
+        android:defaultValue="25"
         app:key="strokeSize"
         app:title="@string/stroke_size"
         app:useSimpleSummaryProvider="true" />
 
     <SwitchPreference
-        app:defaultValue="false"
+        android:defaultValue="false"
         app:key="drawFilledShapes"
         app:title="@string/pref_closed_paths"
         app:widgetLayout="@layout/switch_preference_material" />
@@ -35,7 +35,7 @@
     <com.takisoft.preferencex.EditTextPreference
         android:digits="0123456789"
         android:inputType="numberDecimal"
-        app:defaultValue="816"
+        android:defaultValue="816"
         app:key="documentWidth"
         app:title="@string/document_width_setting"
         app:useSimpleSummaryProvider="true" />
@@ -43,14 +43,14 @@
     <com.takisoft.preferencex.EditTextPreference
         android:digits="0123456789"
         android:inputType="numberDecimal"
-        app:defaultValue="1056"
+        android:defaultValue="1056"
         app:key="documentHeight"
         app:title="@string/document_height_setting"
         app:useSimpleSummaryProvider="true" />
 
     <!-- Non-tool preferences -->
     <SwitchPreference
-        app:defaultValue="false"
+        android:defaultValue="false"
         app:key="toggleToolbarToggle"
         app:title="@string/toggleToolbarToggle"
         app:widgetLayout="@layout/switch_preference_material" />
