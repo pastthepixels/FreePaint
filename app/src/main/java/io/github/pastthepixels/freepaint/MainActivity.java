@@ -50,6 +50,12 @@ public class MainActivity extends AppCompatActivity {
 
     private Menu topMenu;
 
+    /*
+     * Preferences fragment so it does not have to be re-created every time the menu is opened up.
+     */
+
+    static PreferencesFragment preferencesFragment = new PreferencesFragment();
+
     /**
      * Records the last used intent action -- used in <code>activityResultLauncher<code> to see if we should load the selected path or save to it.
      */
@@ -284,6 +290,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onCreatePreferencesFix(Bundle savedInstanceState, String rootKey) {
+            System.out.println("Pref fragment created!!");
             setPreferencesFromResource(R.xml.preferences, rootKey);
             getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
         }
@@ -337,7 +344,7 @@ public class MainActivity extends AppCompatActivity {
             // Inflates settings XML
             getChildFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.moreOptionsPreferences, new PreferencesFragment())
+                    .replace(R.id.moreOptionsPreferences, MainActivity.preferencesFragment)
                     .commit();
             return inflater.inflate(R.layout.settings_popup, container, false);
         }
