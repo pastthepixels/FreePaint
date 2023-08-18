@@ -1,6 +1,18 @@
-# FreePaint
+<!-- Using HTML on markdown is just cursed... -->
+<h1 align="center"> <img height="32px" src="fastlane/metadata/android/en-US/images/icon.png"/> FreePaint </h1>
+
+<p align="center">
+  <a href="https://f-droid.org/en/packages/io.github.pastthepixels.FreePaint"><img src="https://img.shields.io/f-droid/v/io.github.pastthepixels.FreePaint" /></a>
+  <a href="https://github.com/pastthepixels/FreePaint/releases/latest"><img src="https://img.shields.io/github/downloads/pastthepixels/FreePaint/latest/total" /></a>
+  <a href="https://github.com/pastthepixels/FreePaint/issues"><img src="https://img.shields.io/github/issues/pastthepixels/FreePaint" /></a>
+  <a href="https://github.com/pastthepixels/FreePaint/graphs/contributors"><img src="https://img.shields.io/github/contributors/pastthepixels/FreePaint" /></a>
+</p>
 
 A vector graphics drawing app for Android.
+
+<a href="https://apt.izzysoft.de/fdroid/index/apk/io.github.pastthepixels.freepaint">Get it on IzzyOnDroid!</a>
+
+<a href="https://gitlab.com/fdroid/fdroiddata/-/merge_requests/13569">Coming soon on F-Droid!</a>
 
 # Screenshots
 <img width="200px" src="https://github.com/pastthepixels/FreePaint/assets/52388215/665d393b-f937-4263-bac5-8cf5b0239257" />
