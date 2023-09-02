@@ -2,7 +2,7 @@
 <h1 align="center"> <img height="32px" src="fastlane/metadata/android/en-US/images/icon.png"/> FreePaint </h1>
 
 <p align="center">
-  <a href="https://f-droid.org/en/packages/io.github.pastthepixels.freepaint"><img src="https://img.shields.io/f-droid/v/io.github.pastthepixels.FreePaint" /></a>
+  <a href="https://f-droid.org/en/packages/io.github.pastthepixels.freepaint"><img src="https://img.shields.io/f-droid/v/io.github.pastthepixels.freepaint" /></a>
   <a href="https://github.com/pastthepixels/FreePaint/releases/latest"><img src="https://img.shields.io/github/downloads/pastthepixels/FreePaint/latest/total" /></a>
   <a href="https://github.com/pastthepixels/FreePaint/issues"><img src="https://img.shields.io/github/issues/pastthepixels/FreePaint" /></a>
   <a href="https://github.com/pastthepixels/FreePaint/graphs/contributors"><img src="https://img.shields.io/github/contributors/pastthepixels/FreePaint" /></a>
