@@ -10,8 +10,6 @@
 
 A vector graphics drawing app for Android.
 
-<a href="https://apt.izzysoft.de/fdroid/index/apk/io.github.pastthepixels.freepaint">Get it on IzzyOnDroid!</a>
-
 <a href="https://f-droid.org/en/packages/io.github.pastthepixels.freepaint/">Get it on F-Droid!</a>
 
 # Screenshots
