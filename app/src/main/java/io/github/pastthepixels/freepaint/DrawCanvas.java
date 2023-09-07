@@ -210,6 +210,15 @@ public final class DrawCanvas extends View {
     }
 
     /**
+     * Gets the pan tool's offset
+     *
+     * @return The offset of the pan tool
+     */
+    public Point getPosition() {
+        return panTool.offset;
+    }
+
+    /**
      * Draws the document rectangle, paths, and then custom paths that tools create (ex. to show bounds of a selection)
      *
      * @param canvas the canvas on which the background will be drawn
@@ -217,6 +226,8 @@ public final class DrawCanvas extends View {
     protected void onDraw(Canvas canvas) {
         // Allows us to do things like setting a custom background
         super.onDraw(canvas);
+        //
+        ((MainActivity) getContext()).updateInfoBar();
         // Draws things on the screen
         canvas.save();
         // SCALES, THEN TRANSLATES (translations are independent of scales)

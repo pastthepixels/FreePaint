@@ -41,11 +41,22 @@
         android:id="@+id/ExpandToolbar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|start"
-        android:layout_marginStart="@dimen/fab_margin"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="@dimen/fab_margin"
         android:layout_marginBottom="16dp"
         android:contentDescription="@string/toggleToolbar"
         android:src="@drawable/baseline_arrow_drop_up_24"
         android:visibility="visible" />
+
+    <TextView
+        android:id="@+id/infoBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorSurface"
+        android:backgroundTint="#F2FFFFFF"
+        android:backgroundTintMode="multiply"
+        android:padding="10dp"
+        app:layout_anchor="@+id/drawCanvas"
+        app:layout_anchorGravity="bottom|center" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
