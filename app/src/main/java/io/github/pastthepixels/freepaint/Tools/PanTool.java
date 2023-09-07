@@ -14,11 +14,6 @@ import io.github.pastthepixels.freepaint.Point;
 
 public class PanTool implements Tool {
     /**
-     * Minimum (x) and maximum (y) scale factor
-     */
-    private final static Point SCALE_RESTRICTIONS = new Point(0.01f, 10f);
-
-    /**
      * Location of the last time an ACTION_DOWN touch was initialized (relative positions to that
      * are used for calculating new offsets)
      */
@@ -82,19 +77,11 @@ public class PanTool implements Tool {
             @Override
             public boolean onScale(@NonNull ScaleGestureDetector detector) {
                 scaleFactor *= detector.getScaleFactor();
-                updateScaleFactor();
                 updatePanOffset();
                 canvas.invalidate();
                 return true;
             }
         });
-    }
-
-    /**
-     * Clamps <code>scaleFactor</code> to minimum and maximum values (<code>SCALE_RESTRICTIONS</code>).
-     */
-    public void updateScaleFactor() {
-        scaleFactor = Math.max(SCALE_RESTRICTIONS.x, Math.min(scaleFactor, SCALE_RESTRICTIONS.y));
     }
 
     /**
