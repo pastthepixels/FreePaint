@@ -1,5 +1,6 @@
 package io.github.pastthepixels.freepaint.Tools;
 
+import android.graphics.Color;
 import android.view.MotionEvent;
 
 import java.util.LinkedList;

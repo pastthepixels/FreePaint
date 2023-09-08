@@ -8,8 +8,9 @@ import androidx.annotation.NonNull;
 public class Point extends PointF {
     /**
      * Color for drawing -- currently used to signify when a path stops (red) and continues (green)
+     * Works best with Paint.setBlendMode(BlendMode.EXCLUSION);
      */
-    public int color = Color.BLACK;
+    public int color = Color.WHITE;
 
     /**
      * Command for the point -- when we draw a line, we loop through all points. When we get to this point,

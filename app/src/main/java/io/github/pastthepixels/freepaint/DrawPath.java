@@ -1,5 +1,6 @@
 package io.github.pastthepixels.freepaint;
 
+import android.graphics.BlendMode;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -143,6 +144,7 @@ public class DrawPath {
         }
         // If enabled, draw points on top of everything else
         if (drawPoints) {
+            paint.setBlendMode(BlendMode.EXCLUSION);
             paint.setAlpha(100);
             paint.setStyle(Paint.Style.STROKE);
             paint.setStrokeWidth(5.0f / scaleFactor);
