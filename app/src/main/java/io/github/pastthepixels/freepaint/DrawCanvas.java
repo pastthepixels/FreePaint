@@ -98,7 +98,6 @@ public final class DrawCanvas extends View {
         // Scales the canvas so that the document width takes up 80% of the screen width
         panTool.scaleFactor = (float) ((0.8) * (getWidth() / documentSize.x));
         panTool.updatePanOffset();
-        panTool.updateScaleFactor();
         panTool.offset.set(
                 ((float) (getWidth()) / 2 - documentSize.x / 2),
                 ((float) (getHeight()) / 2 - documentSize.y / 2)
