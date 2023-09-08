@@ -271,6 +271,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
+     * Updates the info bar with current scaling and position information.
+     */
+    @SuppressLint({"SetTextI18n", "DefaultLocale"})
+    public void updateInfoBar() {
+        binding.infoBar.setText(String.format("%.2fx, (%.1f, %.1f)",
+                binding.drawCanvas.getScaleFactor(),
+                binding.drawCanvas.getPosition().x,
+                binding.drawCanvas.getPosition().y
+        ));
+    }
+
+    /**
      * Updates the visibility of the FAB (ExpandToolbar) depending on its appropriate setting
      */
     public void updateFABVisibility() {
