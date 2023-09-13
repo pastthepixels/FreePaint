@@ -1,6 +1,7 @@
 package io.github.pastthepixels.freepaint;
 
 import android.graphics.Color;
+import android.graphics.Path;
 import android.graphics.PointF;
 
 import androidx.annotation.NonNull;
@@ -66,6 +67,13 @@ public class Point extends PointF {
         this.x /= number;
         this.y /= number;
         return this;
+    }
+
+    /**
+     * Gets the shape associates with the path type
+     */
+    public Path getShape(float size) {
+        return Shapes.diamondShape(x, y, size);
     }
 
     /**

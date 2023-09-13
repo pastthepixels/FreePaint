@@ -126,10 +126,10 @@ public class DrawPath {
      * @param paint       The Paint instance to use -- this code is built for reusing the same one so memory can be saved.
      * @param scaleFactor Necessary so we can draw the dots for points to always be the same size
      */
-    public void draw(Canvas canvas, Paint paint, float scaleFactor) {
+    public void draw(Canvas canvas, Paint paint, float screenDensity, float scaleFactor) {
         Path toDraw = path == null ? generatePath() : path;
         // Sets a configuration for the Paint with DrawPath.appearance
-        appearance.initialisePaint(paint);
+        appearance.initialisePaint(paint, screenDensity / scaleFactor);
         // Fills, then...
         if (appearance.fill != -1) {
             paint.setColor(appearance.fill);
@@ -144,13 +144,20 @@ public class DrawPath {
         }
         // If enabled, draw points on top of everything else
         if (drawPoints) {
-            paint.setBlendMode(BlendMode.EXCLUSION);
-            paint.setAlpha(100);
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeWidth(5.0f / scaleFactor);
+            // Laggy but provides good contrast
+            //paint.setBlendMode(BlendMode.EXCLUSION);
+            paint.setStrokeWidth(1.0f * screenDensity / scaleFactor);
             for (Point pt : points) {
+                Path shape = pt.getShape(6 * screenDensity / scaleFactor);
+                // Fill
                 paint.setColor(pt.color);
-                canvas.drawCircle(pt.x, pt.y, 5.0f / scaleFactor, paint);
+                paint.setStyle(Paint.Style.FILL);
+                canvas.drawPath(shape, paint);
+                // Stroke
+                paint.setColor(Color.BLACK);
+                paint.setStyle(Paint.Style.STROKE);
+                canvas.drawPath(shape, paint);
+                // Done
             }
         }
     }
@@ -213,13 +220,13 @@ public class DrawPath {
                 state = false;
                 index++;
             }
-            // If there's a STATE CHANGE
+            // If there's a STATE CHANGE (uncomment lines to debug path starting/ending points)
             if (oldState != state) {
                 if (!state) {
                     point.command = Point.COMMANDS.move;
-                    point.color = Color.GREEN;
+                    //point.color = Color.GREEN;
                 } else if (index > 0) {
-                    points.get(index - 1).color = Color.RED;
+                    //points.get(index - 1).color = Color.RED;
                 }
             }
         }

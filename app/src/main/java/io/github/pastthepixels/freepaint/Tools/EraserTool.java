@@ -104,9 +104,11 @@ public class EraserTool implements Tool {
             cloned.points = path.points;
             cloned.isClosed = path.isClosed;
             if (cloned.isClosed) {
-                cloned.appearance = new DrawAppearance(path.appearance.stroke != -1? Color.GRAY : -1, Color.GREEN);
+                cloned.appearance = new DrawAppearance(-1, Color.GREEN);
             } else {
-                cloned.appearance = new DrawAppearance(Color.GREEN, path.appearance.fill != -1? Color.LTGRAY : -1);
+                cloned.appearance = new DrawAppearance(Color.GREEN, -1);
+                cloned.appearance.strokeSize = 1;
+                cloned.appearance.useDP = true;
                 cloned.drawPoints = true;
             }
             toolPaths.add(cloned);

@@ -12,6 +12,9 @@ public class DrawAppearance {
     public int fill = -1;
     public int strokeSize = 5;
 
+    // If this is set to true, stroke size is measured in dp instead of px
+    public boolean useDP = false;
+
     // Constructor with just stroke/fill (integer colors)
     public DrawAppearance(int stroke, int fill) {
         this.stroke = stroke;
@@ -69,9 +72,9 @@ public class DrawAppearance {
      * Initialises a <code>Paint</code> with a default configuration.
      * @param paint The <code>Paint</code> to initialise.
      */
-    public void initialisePaint(Paint paint) {
+    public void initialisePaint(Paint paint, float dpCorrection) {
         paint.setAntiAlias(true);
-        paint.setStrokeWidth(strokeSize);
+        paint.setStrokeWidth(useDP == false? strokeSize : strokeSize * dpCorrection);
         paint.setStrokeJoin(Paint.Join.ROUND);
         paint.setStrokeCap(Paint.Cap.ROUND);
     }

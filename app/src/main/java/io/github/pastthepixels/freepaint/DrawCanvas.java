@@ -225,6 +225,7 @@ public final class DrawCanvas extends View {
     protected void onDraw(Canvas canvas) {
         // Allows us to do things like setting a custom background
         super.onDraw(canvas);
+        float screenDensity = getResources().getDisplayMetrics().density;
         //
         ((MainActivity) getContext()).updateInfoBar();
         // Draws things on the screen
@@ -247,7 +248,7 @@ public final class DrawCanvas extends View {
         // Draws every path, then tool path
         for (DrawPath path : paths) {
             paint.reset();
-            path.draw(canvas, paint, getScaleFactor());
+            path.draw(canvas, paint, screenDensity, getScaleFactor());
         }
         if (getTool() != null && getTool().getToolPaths() != null) {
             if(getTool() instanceof EraserTool) {
@@ -257,7 +258,7 @@ public final class DrawCanvas extends View {
             }
             for (DrawPath path : getTool().getToolPaths()) {
                 paint.reset();
-                path.draw(canvas, paint, getScaleFactor());
+                path.draw(canvas, paint, screenDensity, getScaleFactor());
             }
         }
 
