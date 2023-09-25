@@ -1,6 +1,7 @@
 package io.github.pastthepixels.freepaint;
 
 import android.graphics.Color;
+import android.graphics.Path;
 import android.graphics.PointF;
 
 import androidx.annotation.NonNull;
@@ -8,8 +9,9 @@ import androidx.annotation.NonNull;
 public class Point extends PointF {
     /**
      * Color for drawing -- currently used to signify when a path stops (red) and continues (green)
+     * Works best with Paint.setBlendMode(BlendMode.EXCLUSION);
      */
-    public int color = Color.BLACK;
+    public int color = Color.WHITE;
 
     /**
      * Command for the point -- when we draw a line, we loop through all points. When we get to this point,
@@ -65,6 +67,13 @@ public class Point extends PointF {
         this.x /= number;
         this.y /= number;
         return this;
+    }
+
+    /**
+     * Gets the shape associates with the path type
+     */
+    public Path getShape(float size) {
+        return Shapes.diamondShape(x, y, size);
     }
 
     /**
