@@ -162,6 +162,7 @@ public class SVG {
                 if (node.getNodeType() == Node.ELEMENT_NODE && ((Element) node).getTagName().equals("path")) {
                     Element element = (Element) node;
                     DrawPath path = new DrawPath(null);
+                    path.appearance.stroke = path.appearance.fill = -1;
                     path.isClosed = element.getAttribute("d").toUpperCase().contains("Z");
                     // Points
                     path.points = parsePath(element.getAttribute("d"));
@@ -226,11 +227,12 @@ public class SVG {
 
         // 2. Separate each string into points with the command of the letter at the start of the string.
         for(int i = 0; i < commands.size(); i++) {
+            System.out.println(commands.get(i));
             // Take the first letter out; that's a command, not a number.
             Point.COMMANDS command = svgToPointCommand(commands.get(i).charAt(0));
             boolean isCommandRelative = Character.isLowerCase(commands.get(i).charAt(0));
             // Note: commas are ignored (as per W3 spec) and replaced with spaces
-            String[] numbers = commands.get(i).replace(",", " ").substring(1).split(" ");
+            String[] numbers = commands.get(i).replace(",", " ").substring(1).strip().split(" ");
             switch(command) {
                 // Horizontal lines ("H" command)
                 case horizontal:
