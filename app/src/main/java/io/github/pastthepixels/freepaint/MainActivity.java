@@ -2,6 +2,7 @@ package io.github.pastthepixels.freepaint;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -39,6 +40,7 @@ import com.rarepebble.colorpicker.ColorPreference;
 import com.takisoft.preferencex.PreferenceFragmentCompat;
 
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
 import io.github.pastthepixels.freepaint.databinding.ActivityMainBinding;
 
@@ -82,6 +84,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Resets settings if the setting is enabled to do that
+        if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean("savePrefsOnExit", true)) {
+            @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
+            editor.clear();
+            editor.putBoolean("savePrefsOnExit", false);
+            editor.commit();
+        }
 
         // Android things (including setting/adjusting layout)
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
