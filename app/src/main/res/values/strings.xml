@@ -22,4 +22,5 @@
     <!-- other -->
     <string name="draw_canvas_description">A canvas containing a rectangle, representing a document which users may draw on.</string>
     <string name="toggleToolbarToggle">Show a button to toggle the toolbar</string>
+    <string name="save_preferences_on_exit">Save preferences on exit</string>
 </resources>
