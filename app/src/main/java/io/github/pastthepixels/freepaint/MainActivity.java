@@ -119,6 +119,11 @@ public class MainActivity extends AppCompatActivity {
             v.setLayoutParams(mlp);
             return WindowInsetsCompat.CONSUMED;
         });
+        ViewCompat.setOnApplyWindowInsetsListener(binding.infoBar, (v, windowInsets) -> {
+            Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), insets.bottom);
+            return WindowInsetsCompat.CONSUMED;
+        });
 
         // On click action for the FAB
         // TODO: see if commented SystemUI darkening should be removed or not
