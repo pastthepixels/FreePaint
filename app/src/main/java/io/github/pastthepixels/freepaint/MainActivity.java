@@ -121,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
         });
         ViewCompat.setOnApplyWindowInsetsListener(binding.infoBar, (v, windowInsets) -> {
             Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), insets.bottom);
+            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), v.getPaddingBottom() + insets.bottom);
             return WindowInsetsCompat.CONSUMED;
         });
 
