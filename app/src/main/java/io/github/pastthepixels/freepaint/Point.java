@@ -28,6 +28,10 @@ public class Point extends PointF {
     public Point(float x, float y) {
         super(x, y);
     }
+    public Point(float x, float y, COMMANDS command) {
+        super(x, y);
+        this.command = command;
+    }
 
     /**
      * Adds the coordinates of another point to the current point.
