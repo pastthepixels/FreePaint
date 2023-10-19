@@ -90,7 +90,8 @@ public class MainActivity extends AppCompatActivity {
             @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
             editor.clear();
             editor.putBoolean("savePrefsOnExit", false);
-            editor.commit();
+            editor.apply();
+            PreferenceManager.setDefaultValues(this, R.xml.preferences, true);
         }
 
         // Android things (including setting/adjusting layout)
