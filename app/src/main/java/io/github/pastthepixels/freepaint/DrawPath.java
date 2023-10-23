@@ -14,6 +14,8 @@ import dev.romainguy.graphics.path.Paths;
 
 
 public class DrawPath {
+    // watch about adding new variables because you have to add them to the clone function at the bottom!
+
     /**
      * Appearance of the path (ex. fill/stroke color, stroke width)
      */
@@ -259,5 +261,23 @@ public class DrawPath {
         return pointPath.isEmpty();
     }
 
+    /**
+     * Deep clones a DrawPath.
+     * @return A cloned version of the DrawPath.
+     */
+    @Override
+    public DrawPath clone() {
+        DrawPath cloned = new DrawPath(new Path());
+        // 1. Copy variables.
+        cloned.drawPoints = drawPoints;
+        cloned.isClosed = isClosed;
+        cloned.appearance = appearance.clone();
+        // 2. Copy points.
+        for (Point point : points) {
+            cloned.points.add(point.clone());
+        }
+        cloned.finalise();
+        return cloned;
+    }
 
 }

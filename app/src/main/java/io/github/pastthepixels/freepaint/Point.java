@@ -28,9 +28,16 @@ public class Point extends PointF {
     public Point(float x, float y) {
         super(x, y);
     }
+
     public Point(float x, float y, COMMANDS command) {
         super(x, y);
         this.command = command;
+    }
+
+    public Point(float x, float y, COMMANDS command, int color) {
+        super(x, y);
+        this.command = command;
+        this.color = color;
     }
 
     /**
@@ -88,7 +95,7 @@ public class Point extends PointF {
     @NonNull
     @Override
     public Point clone() {
-        return new Point(x, y);
+        return new Point(x, y, command, color);
     }
 
     // SVG point commands. Only `none`, `move` and `line` are supported.

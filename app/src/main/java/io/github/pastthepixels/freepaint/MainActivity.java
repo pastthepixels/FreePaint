@@ -196,6 +196,8 @@ public class MainActivity extends AppCompatActivity {
             updateTool();
         }
 
+        // TODO: switch statement???
+
         if (id == R.id.action_save || id == R.id.action_load) {
             intentAction = id == R.id.action_save ? Intent.ACTION_CREATE_DOCUMENT : Intent.ACTION_OPEN_DOCUMENT;
             Intent intent = new Intent(intentAction);
@@ -205,6 +207,14 @@ public class MainActivity extends AppCompatActivity {
             intent = Intent.createChooser(intent, "Save/load file");
             activityResultLauncher.launch(intent);
             return true;
+        }
+
+        if (id == R.id.action_undo) {
+            binding.drawCanvas.undo();
+        }
+
+        if (id == R.id.action_redo) {
+            binding.drawCanvas.redo();
         }
 
         if (id == R.id.action_settings) {

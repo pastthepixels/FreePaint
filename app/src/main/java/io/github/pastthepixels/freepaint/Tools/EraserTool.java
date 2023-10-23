@@ -115,4 +115,9 @@ public class EraserTool implements Tool {
         }
         toolPaths.add(currentPath);
     }
+
+    public boolean allowVersionBackup() {
+        return true;
+    }
+
 }

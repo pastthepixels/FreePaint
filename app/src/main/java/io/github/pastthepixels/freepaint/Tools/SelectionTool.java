@@ -77,6 +77,7 @@ public class SelectionTool implements Tool {
         // Checks for the event that occurs
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                changedDrawPaths = false;
                 // If the touch action is outside the currently selected rectangle, we're not trying to manipulate it
                 // -- we're trying to make a new one
                 originalPoint = canvas.mapPoint(event.getX(), event.getY());
@@ -105,6 +106,7 @@ public class SelectionTool implements Tool {
                 }
                 if (mode == TOUCH_MODES.move && previousPoint != null) {
                     // If we're trying to move all the paths we selected... well, move them!
+                    changedDrawPaths = true;
                     for (DrawPath path : toolPaths) {
                         path.translate(touchPoint.clone().subtract(previousPoint));
                         if (path != currentPath) path.finalise();
@@ -121,6 +123,9 @@ public class SelectionTool implements Tool {
                     selectPaths();
                 }
                 mode = TOUCH_MODES.none;
+                break; // Usually we would say we consumed the input and we shouldn't do a redraw
+                       // but this is also when we lift our finger a.k.a when we make backups of
+                       // DrawCanvas.drawPaths.
 
             default:
                 return false;
@@ -192,4 +197,9 @@ public class SelectionTool implements Tool {
      * different conditions and reset once you lift your finger off the screen.
      */
     private enum TOUCH_MODES {none, define, move}
+
+    boolean changedDrawPaths = false;
+    public boolean allowVersionBackup() {
+        return changedDrawPaths;
+    }
 }

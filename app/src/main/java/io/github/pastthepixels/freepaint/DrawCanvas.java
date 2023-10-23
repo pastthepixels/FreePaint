@@ -16,6 +16,7 @@ import androidx.preference.PreferenceManager;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Objects;
 
@@ -41,6 +42,14 @@ public final class DrawCanvas extends View {
     public Paint paint = new Paint();
 
     public LinkedList<DrawPath> paths = new LinkedList<>();
+
+    // Stores previous "versions" of DrawCanvas.paths you can restore
+    // You can move back and forth between this, but every time you create a new change
+    // it removes everything after the current index (solving the grandfather paradox, btw)
+    public ArrayList<LinkedList<DrawPath>> versions = new ArrayList<>();
+    public final int MAX_VERSIONS = 256;
+    private int version_index = -1;
+
 
     public Point documentSize = new Point(0, 0);
 
@@ -146,9 +155,64 @@ public final class DrawCanvas extends View {
         if (tool == TOOLS.none || !Objects.requireNonNull(getTool()).onTouchEvent(event)) {
             return false;
         } else {
+            if(getTool().allowVersionBackup() && event.getAction() == MotionEvent.ACTION_UP) {
+                // Remove any edits after the current.
+                while (versions.size() > version_index + 1) {
+                    versions.remove(versions.size() - 1);
+                }
+                versions.add(cloneDrawPathList(paths)); // adds to the end ∴ newest changes are at the end of the list
+                System.out.println(versions + " " + versions.size());
+                if (versions.size() < MAX_VERSIONS - 1) version_index += 1;
+                if (versions.size() > MAX_VERSIONS)
+                    versions.remove(0); // delete the oldest change if the list has grown too much
+            }
             postInvalidate(); // Indicate view should be redrawn
             return true; // Indicate we've consumed the touch
         }
+    }
+
+    /**
+     * (deep) Clones a list of DrawPaths.
+     * TODO: Instead of making a new list, with pointers to the same DrawPaths, clone those DrawPaths (deep clone the list).
+     *       This is so that if you erase a part of a path, and modify it, you can undo that.
+     * @param listToClone The list you want to clone.
+     * @return A deep cloned version of the list.
+     */
+    public LinkedList<DrawPath> cloneDrawPathList(LinkedList<DrawPath> listToClone) {
+        LinkedList<DrawPath> list = new LinkedList<>();
+        for(DrawPath pathToClone : listToClone) {
+            list.add(pathToClone.clone());
+        }
+        return list;
+    }
+
+    /**
+     * Undoes an operation by resetting DrawCanvas.paths to what it looked like after the previous operation.
+     */
+    public void undo() {
+        if (version_index > 0) {
+            System.out.println(versions.toString() + (version_index - 1));
+            version_index -= 1;
+            paths = cloneDrawPathList(versions.get(version_index));
+        } else {
+            paths.clear();
+        }
+        // Force redraw
+        postInvalidate();
+    }
+
+    /**
+     * Redoes an operation by setting DrawCanvas.paths to what it looked like after an operation you undid to.
+     */
+    public void redo() {
+        if (version_index < versions.size() - 1) {
+            version_index += 1;
+            paths = cloneDrawPathList(versions.get(version_index));
+        } else if (version_index == 0) {
+            paths = cloneDrawPathList(versions.get(0));
+        }
+        // Force redraw
+        postInvalidate();
     }
 
     /**

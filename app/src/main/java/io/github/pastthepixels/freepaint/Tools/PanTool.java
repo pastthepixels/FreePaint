@@ -148,4 +148,8 @@ public class PanTool implements Tool {
     public void init() {
 
     }
+
+    public boolean allowVersionBackup() {
+        return false;
+    }
 }
