@@ -1,10 +1,11 @@
 package io.github.pastthepixels.freepaint;
 
-import android.graphics.BlendMode;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+
+import androidx.annotation.NonNull;
 
 import java.util.LinkedList;
 
@@ -86,7 +87,7 @@ public class DrawPath {
     /**
      * Generates a "final" path by interpolating lines.
      * Right now, we are just using generatePath(). In the future, look at
-     * something like https://www.stkent.com/2015/07/03/building-smooth-paths-using-bezier-curves.html
+     * something like <a href="https://www.stkent.com/2015/07/03/building-smooth-paths-using-bezier-curves.html">this</a>
      * We need to interpolate between points, but unlike the default way of doing so, *also* contact each point.
      */
     public void finalise() {
@@ -148,7 +149,7 @@ public class DrawPath {
         if (drawPoints) {
             // Laggy but provides good contrast
             //paint.setBlendMode(BlendMode.EXCLUSION);
-            paint.setStrokeWidth(1.0f * screenDensity / scaleFactor);
+            paint.setStrokeWidth(screenDensity / scaleFactor);
             for (Point pt : points) {
                 Path shape = pt.getShape(6 * screenDensity / scaleFactor);
                 // Fill
@@ -227,9 +228,9 @@ public class DrawPath {
                 if (!state) {
                     point.command = Point.COMMANDS.move;
                     //point.color = Color.GREEN;
-                } else if (index > 0) {
-                    //points.get(index - 1).color = Color.RED;
-                }
+                }/* else if (index > 0) {
+                    points.get(index - 1).color = Color.RED;
+                }*/
             }
         }
     }
@@ -265,6 +266,7 @@ public class DrawPath {
      * Deep clones a DrawPath.
      * @return A cloned version of the DrawPath.
      */
+    @NonNull
     @Override
     public DrawPath clone() {
         DrawPath cloned = new DrawPath(new Path());

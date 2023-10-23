@@ -11,6 +11,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
 import org.jetbrains.annotations.Nullable;
@@ -60,7 +61,7 @@ public final class DrawCanvas extends View {
     /**
      * Constructor
      */
-    public DrawCanvas(Context context, @Nullable AttributeSet attrs, @Nullable int defStyleAttr) {
+    public DrawCanvas(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         setFocusable(true);
         setFocusableInTouchMode(true);
@@ -87,7 +88,7 @@ public final class DrawCanvas extends View {
     }
 
     /**
-     * Recenters document when the size of the View changes
+     * Re-centers document when the size of the View changes
      *
      * @param w    Current width of this view.
      * @param h    Current height of this view.
@@ -121,7 +122,7 @@ public final class DrawCanvas extends View {
      */
     public void saveFile(Uri uri) throws IOException {
         svgHelper.createSVG();
-        svgHelper.writeFile(getContext().getContentResolver().openOutputStream(uri, "wt"));
+        svgHelper.writeFile(Objects.requireNonNull(getContext().getContentResolver().openOutputStream(uri, "wt")));
     }
 
     /**
@@ -135,7 +136,7 @@ public final class DrawCanvas extends View {
         // Clear path list/history
         paths.clear();
         versions.clear();
-        version_index = 0;
+        version_index = -1;
         // Load the file
         svgHelper.createSVG();
         svgHelper.loadFile(getContext().getContentResolver().openInputStream(uri));
@@ -200,6 +201,7 @@ public final class DrawCanvas extends View {
             version_index -= 1;
             paths = cloneDrawPathList(versions.get(version_index));
         } else {
+            version_index = -1;
             paths.clear();
         }
         // Force redraw
@@ -213,7 +215,8 @@ public final class DrawCanvas extends View {
         if (version_index < versions.size() - 1) {
             version_index += 1;
             paths = cloneDrawPathList(versions.get(version_index));
-        } else if (version_index == 0) {
+        } else if (version_index <= 0) {
+            version_index = 0;
             paths = cloneDrawPathList(versions.get(0));
         }
         // Force redraw
@@ -291,7 +294,7 @@ public final class DrawCanvas extends View {
      *
      * @param canvas the canvas on which the background will be drawn
      */
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(@NonNull Canvas canvas) {
         // Allows us to do things like setting a custom background
         super.onDraw(canvas);
         float screenDensity = getResources().getDisplayMetrics().density;
