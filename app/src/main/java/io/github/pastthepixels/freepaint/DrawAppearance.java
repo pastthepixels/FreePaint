@@ -5,17 +5,20 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
-import android.graphics.PathEffect;
 
+import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
+
+import java.util.Objects;
 
 public class DrawAppearance {
     // Basic implementation of special FX
-    public enum EFFECTS {none, dashed};
+    public enum EFFECTS {none, dashed}
+
     public EFFECTS effect = EFFECTS.none;
 
-    public int stroke = -1;
-    public int fill = -1;
+    public int stroke;
+    public int fill;
     public int strokeSize = 5;
 
     // If this is set to true, stroke size is measured in dp instead of px
@@ -80,15 +83,14 @@ public class DrawAppearance {
      */
     public void initialisePaint(Paint paint, float dpCorrection) {
         paint.setAntiAlias(true);
-        paint.setStrokeWidth(useDP == false? strokeSize : strokeSize * dpCorrection);
+        paint.setStrokeWidth(!useDP ? strokeSize : strokeSize * dpCorrection);
         paint.setStrokeJoin(Paint.Join.ROUND);
         paint.setStrokeCap(Paint.Cap.ROUND);
-        switch(effect) {
-            case dashed:
-                paint.setPathEffect(new DashPathEffect(new float[]{
-                        useDP == false? 5 : 5 * dpCorrection,
-                        useDP == false? 15 : 15 * dpCorrection
-                }, 0));
+        if (Objects.requireNonNull(effect) == EFFECTS.dashed) {
+            paint.setPathEffect(new DashPathEffect(new float[]{
+                    !useDP ? 5 : 5 * dpCorrection,
+                    !useDP ? 15 : 15 * dpCorrection
+            }, 0));
         }
     }
 
@@ -96,6 +98,8 @@ public class DrawAppearance {
      * Creates a new DrawAppearance instance with the same values as the current one.
      * @return The copied DrawAppearance.
      */
+    @NonNull
+    @Override
     public DrawAppearance clone() {
         return new DrawAppearance(stroke, fill, strokeSize);
     }

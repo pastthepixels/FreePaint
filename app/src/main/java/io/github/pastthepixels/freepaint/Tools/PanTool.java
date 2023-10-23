@@ -34,12 +34,12 @@ public class PanTool implements Tool {
     /**
      * Offset
      */
-    public Point offset = new Point(0f, 0f);
+    public final Point offset = new Point(0f, 0f);
 
     /**
      * Offset that's applied separately to <code>offset</code>, to make sure panning is from the middle of the screen.
      */
-    public Point panOffset = new Point(0f, 0f);
+    public final Point panOffset = new Point(0f, 0f);
 
     /**
      * Used in onTouchEvent.
@@ -47,7 +47,7 @@ public class PanTool implements Tool {
     boolean isScaling = false;
     boolean disableIsScalingOnNextUp = false;
 
-    DrawCanvas canvas;
+    final DrawCanvas canvas;
 
     /**
      * Binds the tool to a DrawCanvas, and sets up a <code>ScaleGestureDetector</code>

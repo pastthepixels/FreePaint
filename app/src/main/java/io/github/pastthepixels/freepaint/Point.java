@@ -45,12 +45,10 @@ public class Point extends PointF {
      * Returns the current point for single-line operations.
      *
      * @param point The point which has the coordinates you want to add.
-     * @return The point you are preforming the operation on (<code>this</code>)
      */
-    public Point add(Point point) {
+    public void add(Point point) {
         this.x += point.x;
         this.y += point.y;
-        return this;
     }
 
     /**
@@ -72,12 +70,10 @@ public class Point extends PointF {
      * Returns the current point for single-line operations.
      *
      * @param number The number which you want to divide both the x and y coordinates by
-     * @return The point you are preforming the operation on (<code>this</code>)
      */
-    public Point divide(float number) {
+    public void divide(float number) {
         this.x /= number;
         this.y /= number;
-        return this;
     }
 
     /**

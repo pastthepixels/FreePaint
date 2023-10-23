@@ -1,7 +1,6 @@
 package io.github.pastthepixels.freepaint.Tools;
 
 import android.graphics.Color;
-import android.graphics.DashPathEffect;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.view.MotionEvent;
@@ -14,9 +13,9 @@ import io.github.pastthepixels.freepaint.DrawPath;
 import io.github.pastthepixels.freepaint.Point;
 
 public class SelectionTool implements Tool {
-    private DrawAppearance APPEARANCE = new DrawAppearance(Color.GRAY, Color.argb(32, 64, 64, 64));
+    private final DrawAppearance APPEARANCE = new DrawAppearance(Color.GRAY, Color.argb(32, 64, 64, 64));
 
-    private DrawAppearance APPEARANCE_SELECTED = new DrawAppearance(Color.BLUE,-1);
+    private final DrawAppearance APPEARANCE_SELECTED = new DrawAppearance(Color.BLUE,-1);
 
     private final LinkedList<DrawPath> toolPaths = new LinkedList<>();
 

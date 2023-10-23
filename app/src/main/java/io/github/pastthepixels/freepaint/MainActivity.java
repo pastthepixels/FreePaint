@@ -2,7 +2,6 @@ package io.github.pastthepixels.freepaint;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -16,8 +15,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
@@ -31,16 +28,13 @@ import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.preference.Preference;
 import androidx.preference.PreferenceManager;
 
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.rarepebble.colorpicker.ColorPreference;
 import com.takisoft.preferencex.PreferenceFragmentCompat;
 
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 
 import io.github.pastthepixels.freepaint.databinding.ActivityMainBinding;
 
@@ -49,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
 
-    private ModalBottomSheet settingsBottomSheet = new ModalBottomSheet();
+    private final ModalBottomSheet settingsBottomSheet = new ModalBottomSheet();
 
     private Menu topMenu;
 
@@ -67,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
                 public void onActivityResult(ActivityResult result) {
                     if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                         Uri uri = result.getData().getData();
-                        System.out.println(uri.getPath());
+                        System.out.println(Objects.requireNonNull(uri).getPath());
                         try {
                             if (Objects.equals(intentAction, Intent.ACTION_CREATE_DOCUMENT))
                                 binding.drawCanvas.saveFile(uri);
@@ -251,7 +245,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private void updateMenuItemColor(MenuItem item) {
         Drawable drawable = item.getIcon();
-        drawable = DrawableCompat.wrap(drawable);
+        drawable = DrawableCompat.wrap(Objects.requireNonNull(drawable));
 
         if (item.isChecked()) {
             DrawableCompat.setTint(drawable, getThemeColor(com.google.android.material.R.attr.colorPrimary));
@@ -265,11 +259,11 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Gets a themed color, same as ?attr/$COlOR
      * For example, if you want to get ?attr/colorPrimary from Java, use MainActivity.getThemeColor(com.google.android.material.R.attr.colorControlNormal)
-     *
+     * <p>
      * Note that what we're passing into it is the ID for colorControlNormal. Resource ID's are the same no
      * matter what, so if you get colorControlNormal from com.google.android.material or com.androidx it won't matter.
      * Their values are the only thing that are overridden based on the theme.
-     *
+     * <p>
      * See <a href="https://stackoverflow.com/questions/75943818/how-can-i-access-theme-color-attributes-via-r-attr-colorprimary">this link</a> for more.
      *
      * @param resid Resource ID. (R.attr.*)
@@ -325,7 +319,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onCreatePreferencesFix(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.preferences, rootKey);
-            getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+            Objects.requireNonNull(getPreferenceScreen().getSharedPreferences()).registerOnSharedPreferenceChangeListener(this);
         }
 
         @Override

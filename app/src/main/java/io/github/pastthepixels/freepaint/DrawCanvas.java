@@ -40,19 +40,19 @@ public final class DrawCanvas extends View {
 
     private final SVG svgHelper = new SVG(this);
 
-    public Paint paint = new Paint();
+    public final Paint paint = new Paint();
 
     public LinkedList<DrawPath> paths = new LinkedList<>();
 
     // Stores previous "versions" of DrawCanvas.paths you can restore
     // You can move back and forth between this, but every time you create a new change
     // it removes everything after the current index (solving the grandfather paradox, btw)
-    public ArrayList<LinkedList<DrawPath>> versions = new ArrayList<>();
+    public final ArrayList<LinkedList<DrawPath>> versions = new ArrayList<>();
     public final int MAX_VERSIONS = 256;
     private int version_index = -1;
 
 
-    public Point documentSize = new Point(0, 0);
+    public final Point documentSize = new Point(0, 0);
 
     public int documentColor = Color.WHITE;
 
