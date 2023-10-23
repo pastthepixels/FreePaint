@@ -3,11 +3,17 @@ package io.github.pastthepixels.freepaint;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.DashPathEffect;
 import android.graphics.Paint;
+import android.graphics.PathEffect;
 
 import androidx.preference.PreferenceManager;
 
 public class DrawAppearance {
+    // Basic implementation of special FX
+    public enum EFFECTS {none, dashed};
+    public EFFECTS effect = EFFECTS.none;
+
     public int stroke = -1;
     public int fill = -1;
     public int strokeSize = 5;
@@ -77,6 +83,13 @@ public class DrawAppearance {
         paint.setStrokeWidth(useDP == false? strokeSize : strokeSize * dpCorrection);
         paint.setStrokeJoin(Paint.Join.ROUND);
         paint.setStrokeCap(Paint.Cap.ROUND);
+        switch(effect) {
+            case dashed:
+                paint.setPathEffect(new DashPathEffect(new float[]{
+                        useDP == false? 5 : 5 * dpCorrection,
+                        useDP == false? 15 : 15 * dpCorrection
+                }, 0));
+        }
     }
 
     /*

@@ -1,6 +1,7 @@
 package io.github.pastthepixels.freepaint.Tools;
 
 import android.graphics.Color;
+import android.graphics.DashPathEffect;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.view.MotionEvent;
@@ -13,9 +14,9 @@ import io.github.pastthepixels.freepaint.DrawPath;
 import io.github.pastthepixels.freepaint.Point;
 
 public class SelectionTool implements Tool {
-    private final DrawAppearance SELECTION_APPEARANCE = new DrawAppearance(Color.RED, Color.argb(100, 255, 0, 0));
+    private DrawAppearance APPEARANCE = new DrawAppearance(Color.GRAY, Color.argb(32, 64, 64, 64));
 
-    private final DrawAppearance TRANSFORMATION_APPEARANCE = new DrawAppearance(Color.GREEN, Color.argb(100, 0, 255, 0));
+    private DrawAppearance APPEARANCE_SELECTED = new DrawAppearance(Color.BLUE,-1);
 
     private final LinkedList<DrawPath> toolPaths = new LinkedList<>();
 
@@ -37,6 +38,9 @@ public class SelectionTool implements Tool {
     public SelectionTool(DrawCanvas canvas) {
         this.canvas = canvas;
         currentPath.isClosed = true;
+        APPEARANCE.useDP = APPEARANCE_SELECTED.useDP = true;
+        APPEARANCE.strokeSize = APPEARANCE_SELECTED.strokeSize = 3;
+        APPEARANCE_SELECTED.effect = DrawAppearance.EFFECTS.dashed;
     }
 
 
@@ -82,13 +86,12 @@ public class SelectionTool implements Tool {
                 // -- we're trying to make a new one
                 originalPoint = canvas.mapPoint(event.getX(), event.getY());
                 if (!currentPath.contains(originalPoint)) {
-                    currentPath.appearance = SELECTION_APPEARANCE;
+                    currentPath.appearance = APPEARANCE.clone();
                     mode = TOUCH_MODES.define;
                     toolPaths.clear();
                     toolPaths.add(currentPath);
                     currentPath.clear();
                 } else {
-                    currentPath.appearance = TRANSFORMATION_APPEARANCE;
                     mode = TOUCH_MODES.move;
                     previousPoint = null;
                 }
@@ -121,6 +124,7 @@ public class SelectionTool implements Tool {
                     // If we're releasing our finger from selecting a bunch of paths, we need to
                     // do math to actually select those paths.
                     selectPaths();
+                    currentPath.appearance = APPEARANCE_SELECTED;
                 }
                 mode = TOUCH_MODES.none;
                 break; // Usually we would say we consumed the input and we shouldn't do a redraw
