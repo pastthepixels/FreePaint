@@ -78,4 +78,8 @@ public class PaintTool implements Tool {
         }
         return true;
     }
+
+    public boolean allowVersionBackup() {
+        return true;
+    }
 }

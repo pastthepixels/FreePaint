@@ -13,11 +13,12 @@ import io.github.pastthepixels.freepaint.DrawPath;
 import io.github.pastthepixels.freepaint.Point;
 
 public class SelectionTool implements Tool {
-    private final DrawAppearance SELECTION_APPEARANCE = new DrawAppearance(Color.RED, Color.argb(100, 255, 0, 0));
+    private final DrawAppearance APPEARANCE = new DrawAppearance(Color.GRAY, Color.argb(32, 64, 64, 64));
 
-    private final DrawAppearance TRANSFORMATION_APPEARANCE = new DrawAppearance(Color.GREEN, Color.argb(100, 0, 255, 0));
+    private final DrawAppearance APPEARANCE_SELECTED = new DrawAppearance(Color.BLUE,-1);
 
     private final LinkedList<DrawPath> toolPaths = new LinkedList<>();
+    private final LinkedList<DrawPath> selectedPaths = new LinkedList<>();
 
     private final DrawPath currentPath = new DrawPath(null);
 
@@ -37,6 +38,9 @@ public class SelectionTool implements Tool {
     public SelectionTool(DrawCanvas canvas) {
         this.canvas = canvas;
         currentPath.isClosed = true;
+        APPEARANCE.useDP = APPEARANCE_SELECTED.useDP = true;
+        APPEARANCE.strokeSize = APPEARANCE_SELECTED.strokeSize = 3;
+        APPEARANCE_SELECTED.effect = DrawAppearance.EFFECTS.dashed;
     }
 
 
@@ -57,8 +61,10 @@ public class SelectionTool implements Tool {
      * we can be lazy and don't have to recompute a bounding box or check if it's still there.
      */
     public void init() {
+        selectedPaths.clear();
         currentPath.clear();
         toolPaths.clear();
+        toolPaths.add(currentPath);
     }
 
     /**
@@ -77,17 +83,16 @@ public class SelectionTool implements Tool {
         // Checks for the event that occurs
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                changedDrawPaths = false;
                 // If the touch action is outside the currently selected rectangle, we're not trying to manipulate it
                 // -- we're trying to make a new one
                 originalPoint = canvas.mapPoint(event.getX(), event.getY());
                 if (!currentPath.contains(originalPoint)) {
-                    currentPath.appearance = SELECTION_APPEARANCE;
+                    currentPath.appearance = APPEARANCE.clone();
                     mode = TOUCH_MODES.define;
-                    toolPaths.clear();
-                    toolPaths.add(currentPath);
+                    selectedPaths.clear();
                     currentPath.clear();
                 } else {
-                    currentPath.appearance = TRANSFORMATION_APPEARANCE;
                     mode = TOUCH_MODES.move;
                     previousPoint = null;
                 }
@@ -105,9 +110,11 @@ public class SelectionTool implements Tool {
                 }
                 if (mode == TOUCH_MODES.move && previousPoint != null) {
                     // If we're trying to move all the paths we selected... well, move them!
-                    for (DrawPath path : toolPaths) {
+                    changedDrawPaths = true;
+                    currentPath.translate(touchPoint.clone().subtract(previousPoint));
+                    for (DrawPath path : selectedPaths) {
                         path.translate(touchPoint.clone().subtract(previousPoint));
-                        if (path != currentPath) path.finalise();
+                        path.finalise();
                     }
                 }
                 // Important for second if statement
@@ -119,8 +126,12 @@ public class SelectionTool implements Tool {
                     // If we're releasing our finger from selecting a bunch of paths, we need to
                     // do math to actually select those paths.
                     selectPaths();
+                    currentPath.appearance = APPEARANCE_SELECTED;
                 }
                 mode = TOUCH_MODES.none;
+                break; // Usually we would say we consumed the input and we shouldn't do a redraw
+                       // but this is also when we lift our finger a.k.a when we make backups of
+                       // DrawCanvas.drawPaths.
 
             default:
                 return false;
@@ -152,7 +163,7 @@ public class SelectionTool implements Tool {
             region.setPath(path.getPath(), clip);
             Rect bounds = region.getBounds();
             if (!region.quickReject(currentPathRegion) && region.op(currentPathRegion, Region.Op.INTERSECT)) {
-                toolPaths.add(path);
+                selectedPaths.add(path);
                 // Checks to see if the bounding box for all selections can be expanded.
                 // Speaking of expanding things, you should click the minimise button the left for each if statement.
                 if (boundsTop == null) {
@@ -192,4 +203,9 @@ public class SelectionTool implements Tool {
      * different conditions and reset once you lift your finger off the screen.
      */
     private enum TOUCH_MODES {none, define, move}
+
+    boolean changedDrawPaths = false;
+    public boolean allowVersionBackup() {
+        return changedDrawPaths;
+    }
 }

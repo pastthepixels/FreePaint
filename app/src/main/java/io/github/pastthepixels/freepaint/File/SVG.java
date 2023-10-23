@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -18,6 +20,7 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.LinkedList;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -33,12 +36,6 @@ public class SVG {
     private final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 
     private String data = "";
-
-    private Point.COMMANDS command = Point.COMMANDS.none;
-
-    private boolean isCommandRelative = false;
-
-    private Point previousPoint = new Point(0, 0);
 
     /**
      * Creates a new SVG instance, but we need a canvas with paths to export/import to.
@@ -136,6 +133,11 @@ public class SVG {
 
     /**
      * Parses an SVG, as a String, directly affecting the canvas of which it is bound to.
+     * <p>
+     * Note that FreePaint right now only supports Path elements with certain path commands
+     * (see SVG.parsePath).
+     * In the future, getting more coverage of the SVG spec shouldn't be too hard (ex.
+     * polylines are really similar to paths).
      *
      * @param data The SVG as a String (ex. <code>"\<svg\>\<path\/\>\<\/\svg\>"</code>
      */
@@ -160,10 +162,10 @@ public class SVG {
                 if (node.getNodeType() == Node.ELEMENT_NODE && ((Element) node).getTagName().equals("path")) {
                     Element element = (Element) node;
                     DrawPath path = new DrawPath(null);
+                    path.appearance.stroke = path.appearance.fill = -1;
                     path.isClosed = element.getAttribute("d").toUpperCase().contains("Z");
                     // Points
-                    command = Point.COMMANDS.none;
-                    path.points = svgToPointList(element.getAttribute("d"), path.points, 0);
+                    path.points = parsePath(element.getAttribute("d"));
                     // Fill/stroke
                     float fillOpacity = element.hasAttribute("fill-opacity") ? Float.parseFloat(element.getAttribute("fill-opacity")) : 1;
                     float strokeOpacity = element.hasAttribute("stroke-opacity") ? Float.parseFloat(element.getAttribute("stroke-opacity")) : 1;
@@ -192,85 +194,108 @@ public class SVG {
     }
 
     /**
-     * Recursive function that reads the <code>d</code> attribute on a <code>path</code> element,
-     * as a string, and iterates through that to create a list of <code>io.github.pastthepixels.freepaint.Point</code>
-     * instances.
-     * TODO: Account for cases where there's no spacing, like in Material Design icons (material.io/icons)
+     * Parses a path's <code>d</code> parameter (as a String) into a linked list of points.
+     * <b>If you want to add support for an SVG command</b>, add a value for Point.COMMANDS,
+     * then update SVG.svgToPointCommand to convert an SVG command to a Point command (case
+     * insensitive). Then, make your implementation by adding a case in the switch statement
+     * in this function.
+     * <p>
+     * Note the boolean isCommandRelative and how other statements set the x and y of penCoords.
+     * SVG spec means that each point with an absolute command sets the position of the "pen"
+     * and each point with a relative command moves the pen by some amount.
      *
-     * @param attribute     The full value of the <code>d</code> attribute of an SVG
-     * @param currentPoints Current list of points generated from the function (pass an empty list when calling it)
-     * @param index         Index of where the function is in reading the String <code>attribute</code>. (pass 0 when calling this function)
-     * @return <code>currentPoints</code>.
+     * @param d The "d" attribute of an SVG path element.
+     * @return A linked list of points, with proper commands, that you can use in a DrawPath.
      */
-    public LinkedList<Point> svgToPointList(String attribute, LinkedList<Point> currentPoints, int index) {
-        System.out.println(attribute);
-        if (index + 1 >= attribute.length()) {
-            return currentPoints;
-        }
-        // Pull the selected character to a variable
-        String character = attribute.substring(index, index + 1);
-        // Commands (can't use a switch statement because STRINGS!!!
-        if (character.equalsIgnoreCase("M")) {
-            command = Point.COMMANDS.move;
-            isCommandRelative = character.equals("m");
-        }
-        if (character.equalsIgnoreCase("L") || (previousPoint != null && previousPoint.command == Point.COMMANDS.move && command == Point.COMMANDS.none && character.equals(" "))) {
-            // Apparently a set of coords with no command with them *after* an M
-            // is interpreted as an L
-            command = Point.COMMANDS.line;
-            isCommandRelative = character.equals("l");
-        }
-        if (character.equalsIgnoreCase("H")) {
-            command = Point.COMMANDS.horizontal;
-            isCommandRelative = character.equals("h");
-        }
-        if (character.equalsIgnoreCase("V")) {
-            command = Point.COMMANDS.vertical;
-            isCommandRelative = character.equals("v");
-        }
-        if (character.equals("-") || isFloat(character)) {
-            // Iterates through the rest of the string until we have two numbers
-            String[] point = {"", ""};
-            int pointIndex = 0;
-            while (
-                    index + 1 < attribute.length() &&
-                            !(!point[1].equals("") && (character.equals(" ") || character.equals(",")))
-            ) {
-                character = attribute.substring(index, index + 1);
-                // If the character's not a dot (decimal), not a negative symbol, and not a float...
-                if (character.equals(" ") || character.equals(",")) {
-                    if (command == Point.COMMANDS.vertical || command == Point.COMMANDS.horizontal) {
-                        // Vertical line == Y value, no X value
-                        if (command == Point.COMMANDS.vertical) {
-                            point[1] = point[0];
-                            point[0] = "";
-                        }
-                        // If we have a command that's just supposed to take in one float, end this here
-                        command = Point.COMMANDS.line;
-                        break;
-                    }
-                    pointIndex++;
-                    index++;
-                    continue;
-                }
-                point[pointIndex] += character;
-                index++;
+    public LinkedList<Point> parsePath(@NonNull String d) {
+        // We start with a "pen" that we set the position of (capital letters) or move around by an amount (lowercase letters)
+        Point penCoords = new Point(0, 0);
+        LinkedList<Point> points = new LinkedList<>();
+
+        // 1. Separate the string into 1 string per command (ex. "M 12 240 10 4" (multiple points with same command), "L 4")
+        LinkedList<String> commands = new LinkedList<>();
+        for(int i = 0; i < d.length(); i ++) {
+            if (Character.isLetter(d.charAt(i))) {
+                commands.add(String.valueOf(d.charAt(i)));
+            } else {
+                commands.set(
+                        commands.size() - 1,
+                        commands.get(commands.size() - 1).concat(String.valueOf(d.charAt(i)))
+                );
             }
-            index--;
-            System.out.println(point[0] + " " + point[1]);
-            // Then creates a point to add
-            Point toAdd = new Point(
-                    isFloat(point[0]) ? parseFloat(point[0]) : previousPoint.x,
-                    isFloat(point[1]) ? parseFloat(point[1]) : previousPoint.y
-            );
-            if (isCommandRelative) toAdd.add(previousPoint);
-            System.out.println(toAdd.x + " " + toAdd.y);
-            toAdd.command = command;
-            previousPoint = toAdd;
-            currentPoints.add(toAdd);
-            command = Point.COMMANDS.none;
         }
-        return svgToPointList(attribute, currentPoints, index + 1);
+
+        // 2. Separate each string into points with the command of the letter at the start of the string.
+        for(int i = 0; i < commands.size(); i++) {
+            System.out.println(commands.get(i));
+            // Take the first letter out; that's a command, not a number.
+            Point.COMMANDS command = svgToPointCommand(commands.get(i).charAt(0));
+            boolean isCommandRelative = Character.isLowerCase(commands.get(i).charAt(0));
+            // Note: commas are ignored (as per W3 spec) and replaced with spaces
+            String[] numbers = commands.get(i).replace(",", " ").substring(1).strip().split(" ");
+            switch(command) {
+                // Horizontal lines ("H" command)
+                case horizontal:
+                    penCoords.x = isCommandRelative? penCoords.x + parseFloat(numbers[0]) : parseFloat(numbers[0]);
+                    points.add(new Point(penCoords.x, penCoords.y, Point.COMMANDS.line));
+
+                // Vertical lines ("V" command)
+                case vertical:
+                    penCoords.y = isCommandRelative? penCoords.y + parseFloat(numbers[0]) : parseFloat(numbers[0]);
+                    points.add(new Point(penCoords.x, penCoords.y, Point.COMMANDS.line));
+
+                // Moveto command ("M")
+                case move:
+                    for(int j = 0; j < numbers.length; j ++) {
+                        // Even index: likely x coordinate
+                        if(j % 2 == 0) {
+                            penCoords.x = isCommandRelative? penCoords.x + parseFloat(numbers[j]) : parseFloat(numbers[j]);
+                        } else {
+                            penCoords.y = isCommandRelative? penCoords.y + parseFloat(numbers[j]) : parseFloat(numbers[j]);
+                        }
+                    }
+                    points.add(new Point(penCoords.x, penCoords.y, Point.COMMANDS.move));
+
+                // Lineto command ("L")
+                case line:
+                    for(int j = 0; j < numbers.length; j ++) {
+                        // Even index: likely x coordinate
+                        if(j % 2 == 0) {
+                            penCoords.x = isCommandRelative? penCoords.x + parseFloat(numbers[j]) : parseFloat(numbers[j]);
+                        } else {
+                            // Odd index: y component of a coordinate, completes
+                            // a coordinate which we add as a Point.
+                            penCoords.y = isCommandRelative? penCoords.y + parseFloat(numbers[j]) : parseFloat(numbers[j]);
+                            points.add(new Point(penCoords.x, penCoords.y, Point.COMMANDS.line));
+                        }
+                    }
+            }
+        }
+
+        return points;
+    }
+
+    /**
+     * Converts an SVG command, case insensitive (ex. moveto "M", lineto "L") to a corresponding Point.COMMANDS command.
+     *
+     * @param svgCommand Char containing SVG path letter command
+     * @return an equivalent Path.COMMANDS commnd
+     */
+    public Point.COMMANDS svgToPointCommand(char svgCommand) {
+        // Only moveto and line commands are supported--SVGs with a "c/s" command won't load
+        // as FreePaint doesnt' support Bezier curves right now
+        switch(Character.toLowerCase(svgCommand)) {
+            case 'm':
+                return Point.COMMANDS.move;
+            case 'l':
+                return Point.COMMANDS.line;
+            case 'h':
+                return Point.COMMANDS.horizontal;
+            case 'v':
+                return Point.COMMANDS.vertical;
+            default:
+                return Point.COMMANDS.none;
+        }
     }
 
     /**
@@ -283,7 +308,7 @@ public class SVG {
     private float parseFloat(String input) {
         DecimalFormat df = new DecimalFormat();
         try {
-            return df.parse(input).floatValue();
+            return Objects.requireNonNull(df.parse(input.trim())).floatValue();
         } catch (Exception e) {
             Log.e("Warning:", "There was an issue parsing a float. It's been replaced with 0, but here's the error:");
             e.printStackTrace();

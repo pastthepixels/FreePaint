@@ -15,8 +15,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
@@ -30,10 +28,8 @@ import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.preference.Preference;
 import androidx.preference.PreferenceManager;
 
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.rarepebble.colorpicker.ColorPreference;
 import com.takisoft.preferencex.PreferenceFragmentCompat;
@@ -47,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
 
-    private ModalBottomSheet settingsBottomSheet = new ModalBottomSheet();
+    private final ModalBottomSheet settingsBottomSheet = new ModalBottomSheet();
 
     private Menu topMenu;
 
@@ -65,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
                 public void onActivityResult(ActivityResult result) {
                     if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                         Uri uri = result.getData().getData();
-                        System.out.println(uri.getPath());
+                        System.out.println(Objects.requireNonNull(uri).getPath());
                         try {
                             if (Objects.equals(intentAction, Intent.ACTION_CREATE_DOCUMENT))
                                 binding.drawCanvas.saveFile(uri);
@@ -83,6 +79,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Resets settings if the setting is enabled to do that
+        if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean("savePrefsOnExit", true)) {
+            @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
+            editor.clear();
+            editor.putBoolean("savePrefsOnExit", false);
+            editor.apply();
+            PreferenceManager.setDefaultValues(this, R.xml.preferences, true);
+        }
+
         // Android things (including setting/adjusting layout)
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
 
@@ -98,14 +103,19 @@ public class MainActivity extends AppCompatActivity {
 
         // Adjusts the FAB to always be tappable (above navigation bars)
         updateFABVisibility();
-        ViewGroup.MarginLayoutParams initialMarginLayoutParams = (ViewGroup.MarginLayoutParams) binding.ExpandToolbar.getLayoutParams();
-        int bottomMargin = initialMarginLayoutParams.bottomMargin;
+        int fabBottomMargin = ((ViewGroup.MarginLayoutParams) binding.ExpandToolbar.getLayoutParams()).bottomMargin;
+        int infobarBottomMargin = ((ViewGroup.MarginLayoutParams) binding.ExpandToolbar.getLayoutParams()).bottomMargin;
         ViewCompat.setOnApplyWindowInsetsListener(binding.ExpandToolbar, (v, windowInsets) -> {
             Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
             // Adjusts the FAB's position
             ViewGroup.MarginLayoutParams mlp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
-            mlp.bottomMargin = bottomMargin + insets.bottom;
+            mlp.bottomMargin = fabBottomMargin + insets.bottom;
             v.setLayoutParams(mlp);
+            return WindowInsetsCompat.CONSUMED;
+        });
+        ViewCompat.setOnApplyWindowInsetsListener(binding.infoBar, (v, windowInsets) -> {
+            Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), infobarBottomMargin + insets.bottom);
             return WindowInsetsCompat.CONSUMED;
         });
 
@@ -180,6 +190,8 @@ public class MainActivity extends AppCompatActivity {
             updateTool();
         }
 
+        // TODO: switch statement???
+
         if (id == R.id.action_save || id == R.id.action_load) {
             intentAction = id == R.id.action_save ? Intent.ACTION_CREATE_DOCUMENT : Intent.ACTION_OPEN_DOCUMENT;
             Intent intent = new Intent(intentAction);
@@ -189,6 +201,14 @@ public class MainActivity extends AppCompatActivity {
             intent = Intent.createChooser(intent, "Save/load file");
             activityResultLauncher.launch(intent);
             return true;
+        }
+
+        if (id == R.id.action_undo) {
+            binding.drawCanvas.undo();
+        }
+
+        if (id == R.id.action_redo) {
+            binding.drawCanvas.redo();
         }
 
         if (id == R.id.action_settings) {
@@ -225,7 +245,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private void updateMenuItemColor(MenuItem item) {
         Drawable drawable = item.getIcon();
-        drawable = DrawableCompat.wrap(drawable);
+        drawable = DrawableCompat.wrap(Objects.requireNonNull(drawable));
 
         if (item.isChecked()) {
             DrawableCompat.setTint(drawable, getThemeColor(com.google.android.material.R.attr.colorPrimary));
@@ -239,11 +259,11 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Gets a themed color, same as ?attr/$COlOR
      * For example, if you want to get ?attr/colorPrimary from Java, use MainActivity.getThemeColor(com.google.android.material.R.attr.colorControlNormal)
-     *
+     * <p>
      * Note that what we're passing into it is the ID for colorControlNormal. Resource ID's are the same no
      * matter what, so if you get colorControlNormal from com.google.android.material or com.androidx it won't matter.
      * Their values are the only thing that are overridden based on the theme.
-     *
+     * <p>
      * See <a href="https://stackoverflow.com/questions/75943818/how-can-i-access-theme-color-attributes-via-r-attr-colorprimary">this link</a> for more.
      *
      * @param resid Resource ID. (R.attr.*)
@@ -271,6 +291,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
+     * Updates the info bar with current scaling and position information.
+     */
+    @SuppressLint({"SetTextI18n", "DefaultLocale"})
+    public void updateInfoBar() {
+        binding.infoBar.setText(String.format("%.2fx, (%.1f, %.1f)",
+                binding.drawCanvas.getScaleFactor(),
+                binding.drawCanvas.getPosition().x,
+                binding.drawCanvas.getPosition().y
+        ));
+    }
+
+    /**
      * Updates the visibility of the FAB (ExpandToolbar) depending on its appropriate setting
      */
     public void updateFABVisibility() {
@@ -287,7 +319,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onCreatePreferencesFix(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.preferences, rootKey);
-            getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+            Objects.requireNonNull(getPreferenceScreen().getSharedPreferences()).registerOnSharedPreferenceChangeListener(this);
         }
 
         @Override

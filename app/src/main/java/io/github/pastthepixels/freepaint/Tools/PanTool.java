@@ -14,11 +14,6 @@ import io.github.pastthepixels.freepaint.Point;
 
 public class PanTool implements Tool {
     /**
-     * Minimum (x) and maximum (y) scale factor
-     */
-    private final static Point SCALE_RESTRICTIONS = new Point(0.01f, 10f);
-
-    /**
      * Location of the last time an ACTION_DOWN touch was initialized (relative positions to that
      * are used for calculating new offsets)
      */
@@ -39,12 +34,12 @@ public class PanTool implements Tool {
     /**
      * Offset
      */
-    public Point offset = new Point(0f, 0f);
+    public final Point offset = new Point(0f, 0f);
 
     /**
      * Offset that's applied separately to <code>offset</code>, to make sure panning is from the middle of the screen.
      */
-    public Point panOffset = new Point(0f, 0f);
+    public final Point panOffset = new Point(0f, 0f);
 
     /**
      * Used in onTouchEvent.
@@ -52,7 +47,7 @@ public class PanTool implements Tool {
     boolean isScaling = false;
     boolean disableIsScalingOnNextUp = false;
 
-    DrawCanvas canvas;
+    final DrawCanvas canvas;
 
     /**
      * Binds the tool to a DrawCanvas, and sets up a <code>ScaleGestureDetector</code>
@@ -82,19 +77,11 @@ public class PanTool implements Tool {
             @Override
             public boolean onScale(@NonNull ScaleGestureDetector detector) {
                 scaleFactor *= detector.getScaleFactor();
-                updateScaleFactor();
                 updatePanOffset();
                 canvas.invalidate();
                 return true;
             }
         });
-    }
-
-    /**
-     * Clamps <code>scaleFactor</code> to minimum and maximum values (<code>SCALE_RESTRICTIONS</code>).
-     */
-    public void updateScaleFactor() {
-        scaleFactor = Math.max(SCALE_RESTRICTIONS.x, Math.min(scaleFactor, SCALE_RESTRICTIONS.y));
     }
 
     /**
@@ -160,5 +147,9 @@ public class PanTool implements Tool {
      */
     public void init() {
 
+    }
+
+    public boolean allowVersionBackup() {
+        return false;
     }
 }

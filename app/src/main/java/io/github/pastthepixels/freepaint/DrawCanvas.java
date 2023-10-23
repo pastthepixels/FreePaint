@@ -11,11 +11,13 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Objects;
 
@@ -38,11 +40,19 @@ public final class DrawCanvas extends View {
 
     private final SVG svgHelper = new SVG(this);
 
-    public Paint paint = new Paint();
+    public final Paint paint = new Paint();
 
     public LinkedList<DrawPath> paths = new LinkedList<>();
 
-    public Point documentSize = new Point(0, 0);
+    // Stores previous "versions" of DrawCanvas.paths you can restore
+    // You can move back and forth between this, but every time you create a new change
+    // it removes everything after the current index (solving the grandfather paradox, btw)
+    public final ArrayList<LinkedList<DrawPath>> versions = new ArrayList<>();
+    public final int MAX_VERSIONS = 256;
+    private int version_index = -1;
+
+
+    public final Point documentSize = new Point(0, 0);
 
     public int documentColor = Color.WHITE;
 
@@ -51,7 +61,7 @@ public final class DrawCanvas extends View {
     /**
      * Constructor
      */
-    public DrawCanvas(Context context, @Nullable AttributeSet attrs, @Nullable int defStyleAttr) {
+    public DrawCanvas(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         setFocusable(true);
         setFocusableInTouchMode(true);
@@ -78,7 +88,7 @@ public final class DrawCanvas extends View {
     }
 
     /**
-     * Recenters document when the size of the View changes
+     * Re-centers document when the size of the View changes
      *
      * @param w    Current width of this view.
      * @param h    Current height of this view.
@@ -98,7 +108,6 @@ public final class DrawCanvas extends View {
         // Scales the canvas so that the document width takes up 80% of the screen width
         panTool.scaleFactor = (float) ((0.8) * (getWidth() / documentSize.x));
         panTool.updatePanOffset();
-        panTool.updateScaleFactor();
         panTool.offset.set(
                 ((float) (getWidth()) / 2 - documentSize.x / 2),
                 ((float) (getHeight()) / 2 - documentSize.y / 2)
@@ -113,7 +122,7 @@ public final class DrawCanvas extends View {
      */
     public void saveFile(Uri uri) throws IOException {
         svgHelper.createSVG();
-        svgHelper.writeFile(getContext().getContentResolver().openOutputStream(uri, "wt"));
+        svgHelper.writeFile(Objects.requireNonNull(getContext().getContentResolver().openOutputStream(uri, "wt")));
     }
 
     /**
@@ -124,6 +133,11 @@ public final class DrawCanvas extends View {
      */
     @SuppressLint("DefaultLocale")
     public void loadFile(Uri uri) throws IOException {
+        // Clear path list/history
+        paths.clear();
+        versions.clear();
+        version_index = -1;
+        // Load the file
         svgHelper.createSVG();
         svgHelper.loadFile(getContext().getContentResolver().openInputStream(uri));
         if (getTool() != null) getTool().init();
@@ -147,9 +161,66 @@ public final class DrawCanvas extends View {
         if (tool == TOOLS.none || !Objects.requireNonNull(getTool()).onTouchEvent(event)) {
             return false;
         } else {
+            if(getTool().allowVersionBackup() && event.getAction() == MotionEvent.ACTION_UP) {
+                // Remove any edits after the current.
+                while (versions.size() > version_index + 1) {
+                    versions.remove(versions.size() - 1);
+                }
+                versions.add(cloneDrawPathList(paths)); // adds to the end ∴ newest changes are at the end of the list
+                System.out.println(versions + " " + versions.size());
+                if (versions.size() < MAX_VERSIONS - 1) version_index += 1;
+                if (versions.size() > MAX_VERSIONS)
+                    versions.remove(0); // delete the oldest change if the list has grown too much
+            }
             postInvalidate(); // Indicate view should be redrawn
             return true; // Indicate we've consumed the touch
         }
+    }
+
+    /**
+     * (deep) Clones a list of DrawPaths.
+     * TODO: Instead of making a new list, with pointers to the same DrawPaths, clone those DrawPaths (deep clone the list).
+     *       This is so that if you erase a part of a path, and modify it, you can undo that.
+     * @param listToClone The list you want to clone.
+     * @return A deep cloned version of the list.
+     */
+    public LinkedList<DrawPath> cloneDrawPathList(LinkedList<DrawPath> listToClone) {
+        LinkedList<DrawPath> list = new LinkedList<>();
+        for(DrawPath pathToClone : listToClone) {
+            list.add(pathToClone.clone());
+        }
+        return list;
+    }
+
+    /**
+     * Undoes an operation by resetting DrawCanvas.paths to what it looked like after the previous operation.
+     */
+    public void undo() {
+        if (version_index > 0) {
+            System.out.println(versions.toString() + (version_index - 1));
+            version_index -= 1;
+            paths = cloneDrawPathList(versions.get(version_index));
+        } else {
+            version_index = -1;
+            paths.clear();
+        }
+        // Force redraw
+        postInvalidate();
+    }
+
+    /**
+     * Redoes an operation by setting DrawCanvas.paths to what it looked like after an operation you undid to.
+     */
+    public void redo() {
+        if (version_index < versions.size() - 1) {
+            version_index += 1;
+            paths = cloneDrawPathList(versions.get(version_index));
+        } else if (version_index <= 0) {
+            version_index = 0;
+            paths = cloneDrawPathList(versions.get(0));
+        }
+        // Force redraw
+        postInvalidate();
     }
 
     /**
@@ -210,13 +281,25 @@ public final class DrawCanvas extends View {
     }
 
     /**
+     * Gets the pan tool's offset
+     *
+     * @return The offset of the pan tool
+     */
+    public Point getPosition() {
+        return panTool.offset;
+    }
+
+    /**
      * Draws the document rectangle, paths, and then custom paths that tools create (ex. to show bounds of a selection)
      *
      * @param canvas the canvas on which the background will be drawn
      */
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(@NonNull Canvas canvas) {
         // Allows us to do things like setting a custom background
         super.onDraw(canvas);
+        float screenDensity = getResources().getDisplayMetrics().density;
+        //
+        ((MainActivity) getContext()).updateInfoBar();
         // Draws things on the screen
         canvas.save();
         // SCALES, THEN TRANSLATES (translations are independent of scales)
@@ -237,12 +320,17 @@ public final class DrawCanvas extends View {
         // Draws every path, then tool path
         for (DrawPath path : paths) {
             paint.reset();
-            path.draw(canvas, paint, getScaleFactor());
+            path.draw(canvas, paint, screenDensity, getScaleFactor());
         }
         if (getTool() != null && getTool().getToolPaths() != null) {
+            if(getTool() instanceof EraserTool) {
+                paint.setARGB(150, 0, 0, 0);
+                paint.setStyle(Paint.Style.FILL);
+                canvas.drawPaint(paint);
+            }
             for (DrawPath path : getTool().getToolPaths()) {
                 paint.reset();
-                path.draw(canvas, paint, getScaleFactor());
+                path.draw(canvas, paint, screenDensity, getScaleFactor());
             }
         }
 

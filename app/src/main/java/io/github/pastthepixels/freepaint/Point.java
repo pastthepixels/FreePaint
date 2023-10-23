@@ -1,6 +1,7 @@
 package io.github.pastthepixels.freepaint;
 
 import android.graphics.Color;
+import android.graphics.Path;
 import android.graphics.PointF;
 
 import androidx.annotation.NonNull;
@@ -8,8 +9,9 @@ import androidx.annotation.NonNull;
 public class Point extends PointF {
     /**
      * Color for drawing -- currently used to signify when a path stops (red) and continues (green)
+     * Works best with Paint.setBlendMode(BlendMode.EXCLUSION);
      */
-    public int color = Color.BLACK;
+    public int color = Color.WHITE;
 
     /**
      * Command for the point -- when we draw a line, we loop through all points. When we get to this point,
@@ -27,17 +29,26 @@ public class Point extends PointF {
         super(x, y);
     }
 
+    public Point(float x, float y, COMMANDS command) {
+        super(x, y);
+        this.command = command;
+    }
+
+    public Point(float x, float y, COMMANDS command, int color) {
+        super(x, y);
+        this.command = command;
+        this.color = color;
+    }
+
     /**
      * Adds the coordinates of another point to the current point.
      * Returns the current point for single-line operations.
      *
      * @param point The point which has the coordinates you want to add.
-     * @return The point you are preforming the operation on (<code>this</code>)
      */
-    public Point add(Point point) {
+    public void add(Point point) {
         this.x += point.x;
         this.y += point.y;
-        return this;
     }
 
     /**
@@ -59,12 +70,17 @@ public class Point extends PointF {
      * Returns the current point for single-line operations.
      *
      * @param number The number which you want to divide both the x and y coordinates by
-     * @return The point you are preforming the operation on (<code>this</code>)
      */
-    public Point divide(float number) {
+    public void divide(float number) {
         this.x /= number;
         this.y /= number;
-        return this;
+    }
+
+    /**
+     * Gets the shape associates with the path type
+     */
+    public Path getShape(float size) {
+        return Shapes.diamondShape(x, y, size);
     }
 
     /**
@@ -75,7 +91,7 @@ public class Point extends PointF {
     @NonNull
     @Override
     public Point clone() {
-        return new Point(x, y);
+        return new Point(x, y, command, color);
     }
 
     // SVG point commands. Only `none`, `move` and `line` are supported.

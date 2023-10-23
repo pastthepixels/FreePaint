@@ -4,14 +4,14 @@ plugins {
 
 android {
     namespace 'io.github.pastthepixels.freepaint'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "io.github.pastthepixels.freepaint"
         minSdk 24
-        targetSdk 33
+        targetSdk 34
         versionCode 3
-        versionName "1.0.2"
+        versionName "1.1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -34,13 +34,13 @@ android {
 dependencies {
 
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'com.google.android.material:material:1.10.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'androidx.navigation:navigation-fragment:2.5.3'
-    implementation 'androidx.navigation:navigation-ui:2.5.3'
+    implementation 'androidx.navigation:navigation-fragment:2.7.4'
+    implementation 'androidx.navigation:navigation-ui:2.7.4'
     /* Begin custom modules */
     implementation 'com.github.martin-stone:hsv-alpha-color-picker-android:3.0.1'
-    implementation 'androidx.preference:preference:1.1.0'
+    implementation 'androidx.preference:preference:1.2.1'
     implementation 'com.takisoft.preferencex:preferencex:1.1.0'
     implementation 'dev.romainguy:pathway:0.10.0'
     /* End custom modules */

@@ -24,6 +24,11 @@ public interface Tool {
     boolean onTouchEvent(MotionEvent event);
 
     /**
+     * Whether to make a backup of DrawCanvas.paths when your finger is lifted from the screen with this tool.
+     */
+    boolean allowVersionBackup();
+
+    /**
      * Every time this tool is selected, run this.
      */
     void init();

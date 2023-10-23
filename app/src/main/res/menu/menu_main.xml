@@ -22,6 +22,18 @@
         android:title="@string/action_load"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/action_undo"
+        android:orderInCategory="100"
+        android:title="@string/action_undo"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_redo"
+        android:orderInCategory="100"
+        android:title="@string/action_redo"
+        app:showAsAction="never" />
+
     <!-- Tools -->
     <item
         android:id="@+id/tool_paintbrush"

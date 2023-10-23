@@ -107,10 +107,17 @@ public class EraserTool implements Tool {
                 cloned.appearance = new DrawAppearance(-1, Color.GREEN);
             } else {
                 cloned.appearance = new DrawAppearance(Color.GREEN, -1);
+                cloned.appearance.strokeSize = 1;
+                cloned.appearance.useDP = true;
                 cloned.drawPoints = true;
             }
             toolPaths.add(cloned);
         }
         toolPaths.add(currentPath);
     }
+
+    public boolean allowVersionBackup() {
+        return true;
+    }
+
 }
