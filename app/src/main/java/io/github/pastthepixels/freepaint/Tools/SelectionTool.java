@@ -18,6 +18,7 @@ public class SelectionTool implements Tool {
     private final DrawAppearance APPEARANCE_SELECTED = new DrawAppearance(Color.BLUE,-1);
 
     private final LinkedList<DrawPath> toolPaths = new LinkedList<>();
+    private final LinkedList<DrawPath> selectedPaths = new LinkedList<>();
 
     private final DrawPath currentPath = new DrawPath(null);
 
@@ -60,8 +61,10 @@ public class SelectionTool implements Tool {
      * we can be lazy and don't have to recompute a bounding box or check if it's still there.
      */
     public void init() {
+        selectedPaths.clear();
         currentPath.clear();
         toolPaths.clear();
+        toolPaths.add(currentPath);
     }
 
     /**
@@ -87,8 +90,7 @@ public class SelectionTool implements Tool {
                 if (!currentPath.contains(originalPoint)) {
                     currentPath.appearance = APPEARANCE.clone();
                     mode = TOUCH_MODES.define;
-                    toolPaths.clear();
-                    toolPaths.add(currentPath);
+                    selectedPaths.clear();
                     currentPath.clear();
                 } else {
                     mode = TOUCH_MODES.move;
@@ -109,9 +111,10 @@ public class SelectionTool implements Tool {
                 if (mode == TOUCH_MODES.move && previousPoint != null) {
                     // If we're trying to move all the paths we selected... well, move them!
                     changedDrawPaths = true;
-                    for (DrawPath path : toolPaths) {
+                    currentPath.translate(touchPoint.clone().subtract(previousPoint));
+                    for (DrawPath path : selectedPaths) {
                         path.translate(touchPoint.clone().subtract(previousPoint));
-                        if (path != currentPath) path.finalise();
+                        path.finalise();
                     }
                 }
                 // Important for second if statement
@@ -160,7 +163,7 @@ public class SelectionTool implements Tool {
             region.setPath(path.getPath(), clip);
             Rect bounds = region.getBounds();
             if (!region.quickReject(currentPathRegion) && region.op(currentPathRegion, Region.Op.INTERSECT)) {
-                toolPaths.add(path);
+                selectedPaths.add(path);
                 // Checks to see if the bounding box for all selections can be expanded.
                 // Speaking of expanding things, you should click the minimise button the left for each if statement.
                 if (boundsTop == null) {
