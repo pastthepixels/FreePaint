@@ -132,6 +132,11 @@ public final class DrawCanvas extends View {
      */
     @SuppressLint("DefaultLocale")
     public void loadFile(Uri uri) throws IOException {
+        // Clear path list/history
+        paths.clear();
+        versions.clear();
+        version_index = 0;
+        // Load the file
         svgHelper.createSVG();
         svgHelper.loadFile(getContext().getContentResolver().openInputStream(uri));
         if (getTool() != null) getTool().init();
