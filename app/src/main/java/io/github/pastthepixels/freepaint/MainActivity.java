@@ -109,19 +109,19 @@ public class MainActivity extends AppCompatActivity {
 
         // Adjusts the FAB to always be tappable (above navigation bars)
         updateFABVisibility();
-        ViewGroup.MarginLayoutParams initialMarginLayoutParams = (ViewGroup.MarginLayoutParams) binding.ExpandToolbar.getLayoutParams();
-        int bottomMargin = initialMarginLayoutParams.bottomMargin;
+        int fabBottomMargin = ((ViewGroup.MarginLayoutParams) binding.ExpandToolbar.getLayoutParams()).bottomMargin;
+        int infobarBottomMargin = ((ViewGroup.MarginLayoutParams) binding.ExpandToolbar.getLayoutParams()).bottomMargin;
         ViewCompat.setOnApplyWindowInsetsListener(binding.ExpandToolbar, (v, windowInsets) -> {
             Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
             // Adjusts the FAB's position
             ViewGroup.MarginLayoutParams mlp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
-            mlp.bottomMargin = bottomMargin + insets.bottom;
+            mlp.bottomMargin = fabBottomMargin + insets.bottom;
             v.setLayoutParams(mlp);
             return WindowInsetsCompat.CONSUMED;
         });
         ViewCompat.setOnApplyWindowInsetsListener(binding.infoBar, (v, windowInsets) -> {
             Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), v.getPaddingBottom() + insets.bottom);
+            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), infobarBottomMargin + insets.bottom);
             return WindowInsetsCompat.CONSUMED;
         });
 
