@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="io.github.pastthepixels.freepaint.MainActivity">    <!-- Overflow menu -->
+
+    <item
+        android:orderInCategory="100"
+        android:title="@string/opt_category_file">
+        <menu>
+            <group
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:menuCategory="secondary">
+                <item
+                    android:id="@+id/action_save"
+                    android:title="@string/action_save" />
+                <item
+                    android:id="@+id/action_load"
+                    android:title="@string/action_load" />
+            </group>
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/action_settings"
+        android:orderInCategory="100"
+        android:title="@string/action_settings"/>
+
+    <item
+        android:id="@+id/action_undo"
+        android:orderInCategory="100"
+        android:title="@string/action_undo"/>
+
+    <item
+        android:id="@+id/action_redo"
+        android:orderInCategory="100"
+        android:title="@string/action_redo"/>
+</menu>

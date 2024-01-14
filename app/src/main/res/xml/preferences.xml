@@ -50,12 +50,6 @@
 
     <!-- Non-tool preferences -->
     <SwitchPreference
-        android:defaultValue="false"
-        app:key="toggleToolbarToggle"
-        app:title="@string/toggleToolbarToggle"
-        app:widgetLayout="@layout/switch_preference_material" />
-
-    <SwitchPreference
         android:defaultValue="true"
         app:key="savePrefsOnExit"
         app:title="@string/save_preferences_on_exit"

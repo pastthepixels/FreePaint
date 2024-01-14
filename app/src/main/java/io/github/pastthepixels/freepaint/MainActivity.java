@@ -9,8 +9,10 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.TypedValue;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -118,8 +120,10 @@ public class MainActivity extends AppCompatActivity {
         // TODO: see if commented SystemUI darkening should be removed or not
         int initialSystemUiVisibility = getWindow().getDecorView().getSystemUiVisibility();
         binding.FAB.setOnClickListener(view -> {
-            System.out.println("yippee"); // TODO: menu
+            settingsBottomSheet.show(getSupportFragmentManager(), ModalBottomSheet.TAG);
         });
+        // Right click/press and hold for the FAB
+        registerForContextMenu(binding.FAB);
 
         // On click action for the bottom bar
         BottomNavigationView bottomNavigationView;
@@ -138,6 +142,24 @@ public class MainActivity extends AppCompatActivity {
         binding.drawCanvas.documentSize.set(x, y);
         binding.drawCanvas.invalidate();
     }
+
+
+    /**
+     * Whenever something with a context menu is activated, that opens the context menu
+     *
+     * @param menu The context menu that is being built
+     * @param v The view for which the context menu is being built
+     * @param menuInfo Extra information about the item for which the
+     *            context menu should be shown. This information will vary
+     *            depending on the class of v.
+     */
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.context_menu, menu);
+    }
+
 
     /**
      * Switches the DrawCanvas tool when a tool has been selected from the UI.
@@ -164,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
      * Handles clicks for ActionBar buttons
      */
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onContextItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
