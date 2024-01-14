@@ -30,6 +30,7 @@ import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.preference.PreferenceManager;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.rarepebble.colorpicker.ColorPreference;
 import com.takisoft.preferencex.PreferenceFragmentCompat;
@@ -119,6 +120,15 @@ public class MainActivity extends AppCompatActivity {
         binding.FAB.setOnClickListener(view -> {
             System.out.println("yippee"); // TODO: menu
         });
+
+        // On click action for the bottom bar
+        BottomNavigationView bottomNavigationView;
+        bottomNavigationView = (BottomNavigationView) findViewById(R.id.bottom_navigation);
+        bottomNavigationView.setOnItemSelectedListener(tool -> {
+            System.out.println("bleh");
+            return onToolSelected(tool);
+        });
+        binding.drawCanvas.setTool(DrawCanvas.TOOLS.paint);
     }
 
     /**
@@ -132,18 +142,20 @@ public class MainActivity extends AppCompatActivity {
         binding.drawCanvas.invalidate();
     }
 
-    /**
-     * Inflate the menu; this adds items to the action bar if it is present.
-     */
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        topMenu = menu;
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        for (int i = 0; i < topMenu.size(); i++) {
-            if (topMenu.getItem(i).getIcon() != null) {
-                updateMenuItemColor(topMenu.getItem(i));
-            }
-        }
+
+    public boolean onToolSelected(MenuItem item) {
+        DrawCanvas.TOOLS tool = DrawCanvas.TOOLS.none;
+        int id = item.getItemId();
+        System.out.print(id);
+        // Can't use a switch statement because we get an error about R.id.* not being constant
+        if (id == R.id.tool_paintbrush)
+            tool = DrawCanvas.TOOLS.paint;
+        if (id == R.id.tool_eraser)
+            tool = DrawCanvas.TOOLS.eraser;
+        if (id == R.id.tool_pan) tool = DrawCanvas.TOOLS.pan;
+        if (id == R.id.tool_select)
+            tool = DrawCanvas.TOOLS.select;
+        binding.drawCanvas.setTool(tool);
         return true;
     }
 
@@ -159,19 +171,15 @@ public class MainActivity extends AppCompatActivity {
         // If the item has an icon, it is a tool which you can toggle
         if (item.getIcon() != null) {
             item.setChecked(!item.isChecked());
-            updateMenuItemColor(item);
             // If the item has been checked, uncheck everything else.
             if (item.isChecked()) {
                 // TODO: Tool buttons are identified based on having an image. Find some better way to do this.
                 for (int i = 0; i < topMenu.size(); i++) {
                     if (topMenu.getItem(i).getIcon() != null && topMenu.getItem(i) != item) {
                         topMenu.getItem(i).setChecked(false);
-                        updateMenuItemColor(topMenu.getItem(i));
                     }
                 }
             }
-            // Set the current tool to the selected image button.
-            updateTool();
         }
 
         // TODO: switch statement???
@@ -200,78 +208,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    /**
-     * Updates the DrawCanvas's tool based on the selected ActionBar button
-     */
-    @SuppressLint("NonConstantResourceId")
-    public void updateTool() {
-        DrawCanvas.TOOLS tool = DrawCanvas.TOOLS.none;
-        for (int i = 0; i < topMenu.size(); i++) {
-            if (topMenu.getItem(i).getIcon() != null && topMenu.getItem(i).isChecked()) {
-                // Can't use a switch statement because we get an error about R.id.* not being constant
-                if (topMenu.getItem(i).getItemId() == R.id.tool_paintbrush)
-                    tool = DrawCanvas.TOOLS.paint;
-                if (topMenu.getItem(i).getItemId() == R.id.tool_eraser)
-                    tool = DrawCanvas.TOOLS.eraser;
-                if (topMenu.getItem(i).getItemId() == R.id.tool_pan) tool = DrawCanvas.TOOLS.pan;
-                if (topMenu.getItem(i).getItemId() == R.id.tool_select)
-                    tool = DrawCanvas.TOOLS.select;
-            }
-        }
-        binding.drawCanvas.setTool(tool);
-    }
-
-    /**
-     * <a href="https://developer.android.com/develop/ui/views/components/menus#checkable">The Android Developers website</a>
-     * says we can't make the top icons checkable through some clean, already existing means. :(
-     */
-    private void updateMenuItemColor(MenuItem item) {
-        Drawable drawable = item.getIcon();
-        drawable = DrawableCompat.wrap(Objects.requireNonNull(drawable));
-
-        if (item.isChecked()) {
-            DrawableCompat.setTint(drawable, getThemeColor(com.google.android.material.R.attr.colorPrimary));
-        } else {
-            DrawableCompat.setTint(drawable, getThemeColor(com.google.android.material.R.attr.colorControlNormal));
-        }
-        //item.setIcon(drawable); TODO
-    }
-
-
-    /**
-     * Gets a themed color, same as ?attr/$COlOR
-     * For example, if you want to get ?attr/colorPrimary from Java, use MainActivity.getThemeColor(com.google.android.material.R.attr.colorControlNormal)
-     * <p>
-     * Note that what we're passing into it is the ID for colorControlNormal. Resource ID's are the same no
-     * matter what, so if you get colorControlNormal from com.google.android.material or com.androidx it won't matter.
-     * Their values are the only thing that are overridden based on the theme.
-     * <p>
-     * See <a href="https://stackoverflow.com/questions/75943818/how-can-i-access-theme-color-attributes-via-r-attr-colorprimary">this link</a> for more.
-     *
-     * @param resid Resource ID. (R.attr.*)
-     * @return An int, hexadecimal, ARGB color.
-     */
-    public int getThemeColor(int resid) {
-        TypedValue typedValue = new TypedValue();
-        this.getTheme().resolveAttribute(resid, typedValue, true);
-        return typedValue.data;
-    }
-
-    /**
-     * Updates top bar icons when the user switches to dark mode
-     */
-    @Override
-    protected void onApplyThemeResource(Resources.Theme theme, int resid, boolean first) {
-        super.onApplyThemeResource(theme, resid, first);
-        if (topMenu != null) {
-            for (int i = 0; i < topMenu.size(); i++) {
-                if (topMenu.getItem(i).getIcon() != null) {
-                    updateMenuItemColor(topMenu.getItem(i));
-                }
-            }
-        }
     }
 
     /**
