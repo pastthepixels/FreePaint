@@ -124,10 +124,7 @@ public class MainActivity extends AppCompatActivity {
         // On click action for the bottom bar
         BottomNavigationView bottomNavigationView;
         bottomNavigationView = (BottomNavigationView) findViewById(R.id.bottom_navigation);
-        bottomNavigationView.setOnItemSelectedListener(tool -> {
-            System.out.println("bleh");
-            return onToolSelected(tool);
-        });
+        bottomNavigationView.setOnItemSelectedListener(this::onToolSelected);
         binding.drawCanvas.setTool(DrawCanvas.TOOLS.paint);
     }
 
@@ -142,7 +139,11 @@ public class MainActivity extends AppCompatActivity {
         binding.drawCanvas.invalidate();
     }
 
-
+    /**
+     * Switches the DrawCanvas tool when a tool has been selected from the UI.
+     * @param item MenuItem for the selected tool
+     * @return some boolean, I don't know and didn't look up why
+     */
     public boolean onToolSelected(MenuItem item) {
         DrawCanvas.TOOLS tool = DrawCanvas.TOOLS.none;
         int id = item.getItemId();
