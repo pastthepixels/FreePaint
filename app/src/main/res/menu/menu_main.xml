@@ -3,37 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="io.github.pastthepixels.freepaint.MainActivity">
 
-    <!-- Overflow menu -->
-    <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="100"
-        android:title="@string/action_settings"
-        app:showAsAction="never" />
-
-    <item
-        android:id="@+id/action_save"
-        android:orderInCategory="100"
-        android:title="@string/action_save"
-        app:showAsAction="never" />
-
-    <item
-        android:id="@+id/action_load"
-        android:orderInCategory="100"
-        android:title="@string/action_load"
-        app:showAsAction="never" />
-
-    <item
-        android:id="@+id/action_undo"
-        android:orderInCategory="100"
-        android:title="@string/action_undo"
-        app:showAsAction="never" />
-
-    <item
-        android:id="@+id/action_redo"
-        android:orderInCategory="100"
-        android:title="@string/action_redo"
-        app:showAsAction="never" />
-
     <!-- Tools -->
     <item
         android:id="@+id/tool_paintbrush"
@@ -41,6 +10,7 @@
         android:icon="@drawable/baseline_brush_24"
         android:iconTint="?attr/colorControlNormal"
         android:title="@string/tool_paintbrush"
+        app:widgetLayout="?attr/materialIconButtonStyle"
         app:showAsAction="always" />
 
     <item

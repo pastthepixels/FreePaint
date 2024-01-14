@@ -94,46 +94,30 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        setSupportActionBar(binding.toolbar);
-
-        Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);
-
         // Sets default settings values
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
         // Adjusts the FAB to always be tappable (above navigation bars)
-        updateFABVisibility();
-        int fabBottomMargin = ((ViewGroup.MarginLayoutParams) binding.ExpandToolbar.getLayoutParams()).bottomMargin;
-        int infobarBottomMargin = ((ViewGroup.MarginLayoutParams) binding.ExpandToolbar.getLayoutParams()).bottomMargin;
-        ViewCompat.setOnApplyWindowInsetsListener(binding.ExpandToolbar, (v, windowInsets) -> {
-            Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            // Adjusts the FAB's position
-            ViewGroup.MarginLayoutParams mlp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
-            mlp.bottomMargin = fabBottomMargin + insets.bottom;
-            v.setLayoutParams(mlp);
-            return WindowInsetsCompat.CONSUMED;
-        });
+        int infobarBottomMargin = ((ViewGroup.MarginLayoutParams) binding.infoBar.getLayoutParams()).bottomMargin;
         ViewCompat.setOnApplyWindowInsetsListener(binding.infoBar, (v, windowInsets) -> {
             Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), infobarBottomMargin + insets.bottom);
+            return WindowInsetsCompat.CONSUMED;
+        });
+        ViewCompat.setOnApplyWindowInsetsListener(binding.FAB, (v, windowInsets) -> {
+            Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            // Adjusts the FAB's position
+            ViewGroup.MarginLayoutParams mlp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+            mlp.bottomMargin = insets.bottom / 2;
+            v.setLayoutParams(mlp);
             return WindowInsetsCompat.CONSUMED;
         });
 
         // On click action for the FAB
         // TODO: see if commented SystemUI darkening should be removed or not
         int initialSystemUiVisibility = getWindow().getDecorView().getSystemUiVisibility();
-        binding.ExpandToolbar.setOnClickListener(view -> {
-            float deg = 0;
-            if (Objects.requireNonNull(getSupportActionBar()).isShowing()) {
-                // See https://stackoverflow.com/questions/30075827/android-statusbar-icons-color
-                //getWindow().getDecorView().setSystemUiVisibility(initialSystemUiVisibility | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-                getSupportActionBar().hide();
-                deg = 180F;
-            } else {
-                //getWindow().getDecorView().setSystemUiVisibility(initialSystemUiVisibility);
-                getSupportActionBar().show();
-            }
-            binding.ExpandToolbar.animate().rotation(deg).setInterpolator(new AccelerateDecelerateInterpolator());
+        binding.FAB.setOnClickListener(view -> {
+            System.out.println("yippee"); // TODO: menu
         });
     }
 
@@ -252,7 +236,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             DrawableCompat.setTint(drawable, getThemeColor(com.google.android.material.R.attr.colorControlNormal));
         }
-        item.setIcon(drawable);
+        //item.setIcon(drawable); TODO
     }
 
 
@@ -303,14 +287,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Updates the visibility of the FAB (ExpandToolbar) depending on its appropriate setting
-     */
-    public void updateFABVisibility() {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        binding.ExpandToolbar.setVisibility(prefs.getBoolean("toggleToolbarToggle", false)? View.VISIBLE : View.GONE);
-    }
-
-    /**
      * SETTINGS FRAGMENT (uses a separate module to use a numeric keyboard for int prefs)
      */
     public static class PreferencesFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -332,7 +308,6 @@ public class MainActivity extends AppCompatActivity {
             } else if (getActivity() instanceof MainActivity) {
                 // or in some cases like document size, runs code after some settings are set
                 MainActivity activity = (MainActivity) getActivity();
-                activity.updateFABVisibility();
                 activity.setCanvasSize(
                         Float.parseFloat(sharedPreferences.getString("documentWidth", "816")),
                         Float.parseFloat(sharedPreferences.getString("documentHeight", "1056"))
