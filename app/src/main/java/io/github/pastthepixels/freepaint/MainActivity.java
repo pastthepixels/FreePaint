@@ -101,10 +101,9 @@ public class MainActivity extends AppCompatActivity {
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
         // Adjusts the FAB to always be tappable (above navigation bars)
-        int infobarBottomMargin = ((ViewGroup.MarginLayoutParams) binding.infoBar.getLayoutParams()).bottomMargin;
-        ViewCompat.setOnApplyWindowInsetsListener(binding.infoBar, (v, windowInsets) -> {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.bottomAppBar, (v, windowInsets) -> {
             Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), infobarBottomMargin + insets.bottom);
+            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), insets.bottom);
             return WindowInsetsCompat.CONSUMED;
         });
         ViewCompat.setOnApplyWindowInsetsListener(binding.FAB, (v, windowInsets) -> {
@@ -126,10 +125,10 @@ public class MainActivity extends AppCompatActivity {
         registerForContextMenu(binding.FAB);
 
         // On click action for the bottom bar
-        BottomNavigationView bottomNavigationView;
+        /*BottomNavigationView bottomNavigationView;
         bottomNavigationView = (BottomNavigationView) findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnItemSelectedListener(this::onToolSelected);
-        binding.drawCanvas.setTool(DrawCanvas.TOOLS.paint);
+        binding.drawCanvas.setTool(DrawCanvas.TOOLS.paint);*/
     }
 
     /**
