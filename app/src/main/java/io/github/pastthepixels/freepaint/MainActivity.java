@@ -2,6 +2,10 @@ package io.github.pastthepixels.freepaint;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -31,6 +35,7 @@ import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.fragment.app.DialogFragment;
 import androidx.preference.PreferenceManager;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
@@ -38,6 +43,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.shape.CornerFamily;
 import com.google.android.material.shape.MaterialShapeDrawable;
 import com.google.android.material.shape.ShapeAppearanceModel;
+import com.rarepebble.colorpicker.ColorPickerView;
 import com.rarepebble.colorpicker.ColorPreference;
 import com.takisoft.preferencex.PreferenceFragmentCompat;
 
@@ -239,6 +245,14 @@ public class MainActivity extends AppCompatActivity {
             settingsBottomSheet.show(getSupportFragmentManager(), SettingsBottomSheet.TAG);
         }
 
+        if (id == R.id.action_set_fill) {
+            (new ColorPickerDialog("fillColor")).show(getSupportFragmentManager(), "COLOR_PICKER_DIALOG");
+        }
+
+        if (id == R.id.action_set_stroke) {
+            (new ColorPickerDialog("strokeColor")).show(getSupportFragmentManager(), "COLOR_PICKER_DIALOG");
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -366,4 +380,58 @@ public class MainActivity extends AppCompatActivity {
 
         public static final String TAG = "ToolsBottomSheet";
     }
+
+
+    /*
+     * Color picker dialog that attempts to recreate the one in the preferences screen
+     *
+     * FIXME: Button strings in English
+     */
+    public static class ColorPickerDialog extends DialogFragment {
+
+        int initialColor;
+
+        String prefName;
+
+        ColorPickerDialog(String prefName) {
+            this.prefName = prefName;
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            // Use the Builder class for convenient dialog construction.
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+            final ColorPickerView picker = new ColorPickerView(getContext());
+            picker.setColor(PreferenceManager.getDefaultSharedPreferences(requireContext()).getInt(prefName, Color.BLACK));
+            System.out.println(picker.getColor());
+
+            builder
+                    .setTitle(null)
+                    .setView(picker)
+                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(requireContext());
+                            SharedPreferences.Editor editor = preferences.edit();
+                            editor.putInt(prefName, picker.getColor());
+                            editor.apply();
+                            // Then, update MainActivity
+                            if (getActivity() instanceof MainActivity) {
+                                ((MainActivity) getActivity()).updateBottomBarColors(
+                                        PreferenceManager.getDefaultSharedPreferences(requireContext()).getInt("fillColor", 0x10000000),
+                                        PreferenceManager.getDefaultSharedPreferences(requireContext()).getInt("strokeColor", 0x10000000)
+                                );
+                            }
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                        }
+                    });
+            // Create the AlertDialog object and return it.
+            return builder.create();
+        }
+    }
+
 }
