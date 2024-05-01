@@ -14,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
@@ -22,6 +23,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
@@ -30,6 +32,9 @@ import androidx.preference.PreferenceManager;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.shape.CornerFamily;
+import com.google.android.material.shape.MaterialShapeDrawable;
+import com.google.android.material.shape.ShapeAppearanceModel;
 import com.rarepebble.colorpicker.ColorPreference;
 import com.takisoft.preferencex.PreferenceFragmentCompat;
 
@@ -96,10 +101,27 @@ public class MainActivity extends AppCompatActivity {
         // Sets default settings values
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
+        // Styles the info bar
+        // Courtesy of https://stackoverflow.com/questions/18781902/rounded-corner-for-textview-in-android/61768682#61768682
+        float radius = getResources().getDimension(com.google.android.material.R.dimen.cardview_default_radius);
+        ShapeAppearanceModel shapeAppearanceModel = new ShapeAppearanceModel()
+                .toBuilder()
+                .setAllCorners(CornerFamily.ROUNDED,radius)
+                .build();
+        MaterialShapeDrawable shapeDrawable = new MaterialShapeDrawable(shapeAppearanceModel);
+        shapeDrawable.setAlpha(100);
+        ViewCompat.setBackground(binding.infoBar, shapeDrawable);
+
         // Adjusts views on the edges to always be tappable (above navigation bars)
+        ViewGroup.MarginLayoutParams infobarParams = (ViewGroup.MarginLayoutParams) binding.infoBar.getLayoutParams();
         ViewCompat.setOnApplyWindowInsetsListener(binding.infoBar, (v, windowInsets) -> {
             Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(v.getPaddingLeft(), insets.top, v.getPaddingRight(), v.getPaddingBottom());
+            CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(
+                    CoordinatorLayout.LayoutParams.WRAP_CONTENT,
+                    CoordinatorLayout.LayoutParams.WRAP_CONTENT
+            );
+            params.setMargins(infobarParams.leftMargin, insets.top + infobarParams.topMargin, 0, 0);
+            binding.infoBar.setLayoutParams(params);
             return WindowInsetsCompat.CONSUMED;
         });
         ViewCompat.setOnApplyWindowInsetsListener(binding.bottomAppBar, (v, windowInsets) -> {
