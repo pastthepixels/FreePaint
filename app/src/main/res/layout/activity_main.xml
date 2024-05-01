@@ -34,15 +34,16 @@
 
     <TextView
         android:id="@+id/infoBar"
-        style="@style/Widget.Material3.Snackbar.TextView"
+        style="@style/Widget.AppCompat.TextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
         android:layout_marginTop="10dp"
-        android:background="?attr/colorSurface"
+        android:background="@color/black"
         android:backgroundTint="#F2FFFFFF"
         android:backgroundTintMode="multiply"
         android:padding="10dp"
+        android:textColor="#FFFFFF"
         android:visibility="visible"
         app:layout_anchorGravity="bottom|center" />
 
