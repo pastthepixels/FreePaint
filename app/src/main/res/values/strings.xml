@@ -6,9 +6,9 @@
     <string name="action_load">Load file</string>
     <!-- Tools -->
     <string name="tool_paintbrush">Paintbrush</string>
-    <string name="tool_pan">Pan tool</string>
-    <string name="tool_eraser">Eraser tool</string>
-    <string name="tool_select">Select and move tool</string>
+    <string name="tool_pan">Pan</string>
+    <string name="tool_eraser">Eraser</string>
+    <string name="tool_select">Select and move</string>
     <!-- MainActivity elements -->
     <string name="toggleToolbar">Toggle toolbar visibility</string>
     <!-- Settings -->

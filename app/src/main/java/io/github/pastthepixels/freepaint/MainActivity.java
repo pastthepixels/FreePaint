@@ -46,7 +46,9 @@ public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
 
-    private final ModalBottomSheet settingsBottomSheet = new ModalBottomSheet();
+    private final SettingsBottomSheet settingsBottomSheet = new SettingsBottomSheet();
+
+    private final ToolsBottomSheet toolsBottomSheet = new ToolsBottomSheet();
 
     private Menu topMenu;
 
@@ -117,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
 
         // On click action for the FAB
         binding.FAB.setOnClickListener(view -> {
-            settingsBottomSheet.show(getSupportFragmentManager(), ModalBottomSheet.TAG);
+            toolsBottomSheet.show(getSupportFragmentManager(), ToolsBottomSheet.TAG);
         });
 
         // On click action for the bottom bar
@@ -203,7 +205,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (id == R.id.action_settings) {
-            settingsBottomSheet.show(getSupportFragmentManager(), ModalBottomSheet.TAG);
+            settingsBottomSheet.show(getSupportFragmentManager(), SettingsBottomSheet.TAG);
         }
 
         return super.onOptionsItemSelected(item);
@@ -273,7 +275,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * SETTINGS DIALOG
      */
-    public static class ModalBottomSheet extends BottomSheetDialogFragment {
+    public static class SettingsBottomSheet extends BottomSheetDialogFragment {
 
         @Nullable
         @Override
@@ -292,6 +294,26 @@ public class MainActivity extends AppCompatActivity {
             super.onHiddenChanged(hidden);
         }
 
-        public static final String TAG = "ModalBottomSheet";
+        public static final String TAG = "SettingsBottomSheet";
+    }
+
+    /**
+     * Tool selection dialog
+     */
+    public static class ToolsBottomSheet extends BottomSheetDialogFragment {
+
+        @Nullable
+        @Override
+        public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+            System.out.println(true);
+            return inflater.inflate(R.layout.tool_popup, container, false);
+        }
+
+        @Override
+        public void onHiddenChanged(boolean hidden) {
+            super.onHiddenChanged(hidden);
+        }
+
+        public static final String TAG = "ToolsBottomSheet";
     }
 }
