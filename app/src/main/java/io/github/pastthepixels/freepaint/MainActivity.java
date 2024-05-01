@@ -116,19 +116,15 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // On click action for the FAB
-        // TODO: see if commented SystemUI darkening should be removed or not
-        int initialSystemUiVisibility = getWindow().getDecorView().getSystemUiVisibility();
         binding.FAB.setOnClickListener(view -> {
             settingsBottomSheet.show(getSupportFragmentManager(), ModalBottomSheet.TAG);
         });
-        // Right click/press and hold for the FAB
-        registerForContextMenu(binding.FAB);
 
         // On click action for the bottom bar
-        /*BottomNavigationView bottomNavigationView;
-        bottomNavigationView = (BottomNavigationView) findViewById(R.id.bottom_navigation);
-        bottomNavigationView.setOnItemSelectedListener(this::onToolSelected);
-        binding.drawCanvas.setTool(DrawCanvas.TOOLS.paint);*/
+        binding.bottomAppBar.setOnMenuItemClickListener(this::onBottomBarItemSelected);
+
+        // Sets default tool
+        binding.drawCanvas.setTool(DrawCanvas.TOOLS.paint);
     }
 
     /**
@@ -184,27 +180,8 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Handles clicks for ActionBar buttons
      */
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+    public boolean onBottomBarItemSelected(MenuItem item) {
         int id = item.getItemId();
-        // If the item has an icon, it is a tool which you can toggle
-        if (item.getIcon() != null) {
-            item.setChecked(!item.isChecked());
-            // If the item has been checked, uncheck everything else.
-            if (item.isChecked()) {
-                // TODO: Tool buttons are identified based on having an image. Find some better way to do this.
-                for (int i = 0; i < topMenu.size(); i++) {
-                    if (topMenu.getItem(i).getIcon() != null && topMenu.getItem(i) != item) {
-                        topMenu.getItem(i).setChecked(false);
-                    }
-                }
-            }
-        }
-
-        // TODO: switch statement???
 
         if (id == R.id.action_save || id == R.id.action_load) {
             intentAction = id == R.id.action_save ? Intent.ACTION_CREATE_DOCUMENT : Intent.ACTION_OPEN_DOCUMENT;
