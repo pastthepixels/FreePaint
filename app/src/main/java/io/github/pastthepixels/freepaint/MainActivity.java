@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.ContextMenu;
@@ -25,6 +27,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.graphics.Insets;
+import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -148,6 +151,27 @@ public class MainActivity extends AppCompatActivity {
 
         // Sets default tool
         setTool(R.id.select_tool_paintbrush);
+
+        updateBottomBarColors(
+                PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getInt("fillColor", 0x10000000),
+                PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getInt("strokeColor", 0x10000000)
+        );
+    }
+
+    /**
+     * Updates the fill/stroke colors in the bottom bar.
+     * FIXME: uses magic numbers for indices
+     */
+    public void updateBottomBarColors(int fillColor, int strokeColor) {
+        Menu menu = binding.bottomAppBar.getMenu();
+        MenuItem fillItem = menu.getItem(3);
+        MenuItem strokeItem = menu.getItem(2);
+        Drawable fillDrawable = fillItem.getIcon();
+        Drawable strokeDrawable = strokeItem.getIcon();
+        DrawableCompat.setTint(fillDrawable, fillColor);
+        DrawableCompat.setTint(strokeDrawable, strokeColor);
+        fillItem.setIcon(fillDrawable);
+        strokeItem.setIcon(strokeDrawable);
     }
 
     /**
@@ -255,6 +279,10 @@ public class MainActivity extends AppCompatActivity {
                 activity.setCanvasSize(
                         Float.parseFloat(sharedPreferences.getString("documentWidth", "816")),
                         Float.parseFloat(sharedPreferences.getString("documentHeight", "1056"))
+                );
+                activity.updateBottomBarColors(
+                        sharedPreferences.getInt("fillColor", 0x10000000),
+                        sharedPreferences.getInt("strokeColor", 0x10000000)
                 );
             }
         }
