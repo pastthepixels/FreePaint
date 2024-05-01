@@ -4,11 +4,8 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.TypedValue;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -16,7 +13,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.Button;
 
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
@@ -26,14 +23,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
-import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.preference.PreferenceManager;
 
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.rarepebble.colorpicker.ColorPreference;
 import com.takisoft.preferencex.PreferenceFragmentCompat;
 
@@ -126,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
         binding.bottomAppBar.setOnMenuItemClickListener(this::onBottomBarItemSelected);
 
         // Sets default tool
-        binding.drawCanvas.setTool(DrawCanvas.TOOLS.paint);
+        setTool(R.id.select_tool_paintbrush);
     }
 
     /**
@@ -160,23 +156,27 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Switches the DrawCanvas tool when a tool has been selected from the UI.
-     * @param item MenuItem for the selected tool
-     * @return some boolean, I don't know and didn't look up why
+     * @param id the ID of the tool button
      */
-    public boolean onToolSelected(MenuItem item) {
+    public void setTool(int id) {
         DrawCanvas.TOOLS tool = DrawCanvas.TOOLS.none;
-        int id = item.getItemId();
-        System.out.print(id);
-        // Can't use a switch statement because we get an error about R.id.* not being constant
-        if (id == R.id.tool_paintbrush)
+        if (id == R.id.select_tool_paintbrush) {
+            binding.FAB.setImageResource(R.drawable.baseline_brush_24);
             tool = DrawCanvas.TOOLS.paint;
-        if (id == R.id.tool_eraser)
+        }
+        if (id == R.id.select_tool_eraser) {
+            binding.FAB.setImageResource(R.drawable.baseline_eraser_24);
             tool = DrawCanvas.TOOLS.eraser;
-        if (id == R.id.tool_pan) tool = DrawCanvas.TOOLS.pan;
-        if (id == R.id.tool_select)
+        }
+        if (id == R.id.select_tool_pan) {
+            binding.FAB.setImageResource(R.drawable.baseline_pan_tool_24);
+            tool = DrawCanvas.TOOLS.pan;
+        }
+        if (id == R.id.select_tool_select) {
+            binding.FAB.setImageResource(R.drawable.baseline_select_all_24);
             tool = DrawCanvas.TOOLS.select;
+        }
         binding.drawCanvas.setTool(tool);
-        return true;
     }
 
     /**
@@ -280,7 +280,6 @@ public class MainActivity extends AppCompatActivity {
         @Nullable
         @Override
         public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-            System.out.println(true);
             // Inflates settings XML
             getChildFragmentManager()
                     .beginTransaction()
@@ -305,8 +304,24 @@ public class MainActivity extends AppCompatActivity {
         @Nullable
         @Override
         public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-            System.out.println(true);
-            return inflater.inflate(R.layout.tool_popup, container, false);
+            View view = inflater.inflate(R.layout.tool_popup, container, false);
+            // Manually connect each button...
+            Button[] buttons = {
+                    view.findViewById(R.id.select_tool_paintbrush),
+                    view.findViewById(R.id.select_tool_eraser),
+                    view.findViewById(R.id.select_tool_pan),
+                    view.findViewById(R.id.select_tool_select),
+            };
+            for (Button button : buttons) {
+                button.setOnClickListener(event -> {
+                    // Hack but we can do this because the activity is always MainActivity
+                    ((MainActivity) requireActivity()).setTool(button.getId());
+                    // Dismiss the bottom sheet.
+                    dismiss();
+                });
+            }
+            // Done
+            return view;
         }
 
         @Override

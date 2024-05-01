@@ -38,7 +38,7 @@
         android:layout_height="wrap_content"
         android:contentDescription="@string/tool_select"
         android:padding="20dp"
-        android:text="@string/tool_pan"
+        android:text="@string/tool_select"
         android:textAlignment="textStart"
         app:icon="@drawable/baseline_select_all_24" />
 
@@ -48,7 +48,7 @@
         android:layout_height="wrap_content"
         android:contentDescription="@string/tool_pan"
         android:padding="20dp"
-        android:text="@string/tool_select"
+        android:text="@string/tool_pan"
         android:textAlignment="textStart"
         app:icon="@drawable/baseline_pan_tool_24" />
 
