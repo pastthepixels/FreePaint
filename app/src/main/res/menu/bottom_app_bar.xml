@@ -20,7 +20,7 @@
     <item
         android:id="@+id/action_set_stroke"
         android:title="@string/action_set_stroke"
-        android:icon="@drawable/baseline_circle_24"
+        android:icon="@drawable/outline_circle_24"
         app:showAsAction="always" />
 
     <item

@@ -32,6 +32,17 @@
         app:fabAnchorMode="embed"
         app:paddingBottomSystemWindowInsets="false"/>
 
+    <TextView
+        android:id="@+id/infoBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorSurface"
+        android:backgroundTint="#F2FFFFFF"
+        android:backgroundTintMode="multiply"
+        android:padding="10dp"
+        android:visibility="visible"
+        app:layout_anchorGravity="bottom|center" />
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/FAB"
         android:layout_width="wrap_content"
@@ -39,18 +50,6 @@
         android:src="@drawable/baseline_brush_24"
         app:layout_anchor="@id/bottomAppBar" />
 
-
-    <TextView
-        android:id="@+id/infoBar"
-        android:layout_width="match_parent"
-        android:layout_height="28dp"
-        android:background="?attr/colorSurface"
-        android:backgroundTint="#F2FFFFFF"
-        android:backgroundTintMode="multiply"
-        android:padding="10dp"
-        android:visibility="invisible"
-        app:layout_anchor="@+id/drawCanvas"
-        app:layout_anchorGravity="bottom|center" />
 
     <!-- <include layout="@layout/content_main" /> -->
 

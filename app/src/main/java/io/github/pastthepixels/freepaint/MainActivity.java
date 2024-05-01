@@ -46,8 +46,6 @@ public class MainActivity extends AppCompatActivity {
 
     private final ToolsBottomSheet toolsBottomSheet = new ToolsBottomSheet();
 
-    private Menu topMenu;
-
     /**
      * Records the last used intent action -- used in <code>activityResultLauncher<code> to see if we should load the selected path or save to it.
      */
@@ -98,7 +96,12 @@ public class MainActivity extends AppCompatActivity {
         // Sets default settings values
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
-        // Adjusts the FAB to always be tappable (above navigation bars)
+        // Adjusts views on the edges to always be tappable (above navigation bars)
+        ViewCompat.setOnApplyWindowInsetsListener(binding.infoBar, (v, windowInsets) -> {
+            Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(v.getPaddingLeft(), insets.top, v.getPaddingRight(), v.getPaddingBottom());
+            return WindowInsetsCompat.CONSUMED;
+        });
         ViewCompat.setOnApplyWindowInsetsListener(binding.bottomAppBar, (v, windowInsets) -> {
             Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), insets.bottom);
@@ -135,24 +138,6 @@ public class MainActivity extends AppCompatActivity {
         binding.drawCanvas.documentSize.set(x, y);
         binding.drawCanvas.invalidate();
     }
-
-
-    /**
-     * Whenever something with a context menu is activated, that opens the context menu
-     *
-     * @param menu The context menu that is being built
-     * @param v The view for which the context menu is being built
-     * @param menuInfo Extra information about the item for which the
-     *            context menu should be shown. This information will vary
-     *            depending on the class of v.
-     */
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.context_menu, menu);
-    }
-
 
     /**
      * Switches the DrawCanvas tool when a tool has been selected from the UI.
