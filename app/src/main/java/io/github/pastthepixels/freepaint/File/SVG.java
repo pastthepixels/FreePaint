@@ -214,7 +214,7 @@ public class SVG {
 
         // 1. Separate the string into 1 string per command (ex. "M 12 240 10 4" (multiple points with same command), "L 4")
         LinkedList<String> commands = new LinkedList<>();
-        for(int i = 0; i < d.length(); i ++) {
+        for (int i = 0; i < d.length(); i++) {
             if (Character.isLetter(d.charAt(i))) {
                 commands.add(String.valueOf(d.charAt(i)));
             } else {
@@ -226,46 +226,46 @@ public class SVG {
         }
 
         // 2. Separate each string into points with the command of the letter at the start of the string.
-        for(int i = 0; i < commands.size(); i++) {
+        for (int i = 0; i < commands.size(); i++) {
             System.out.println(commands.get(i));
             // Take the first letter out; that's a command, not a number.
             Point.COMMANDS command = svgToPointCommand(commands.get(i).charAt(0));
             boolean isCommandRelative = Character.isLowerCase(commands.get(i).charAt(0));
             // Note: commas are ignored (as per W3 spec) and replaced with spaces
             String[] numbers = commands.get(i).replace(",", " ").substring(1).strip().split(" ");
-            switch(command) {
+            switch (command) {
                 // Horizontal lines ("H" command)
                 case horizontal:
-                    penCoords.x = isCommandRelative? penCoords.x + parseFloat(numbers[0]) : parseFloat(numbers[0]);
+                    penCoords.x = isCommandRelative ? penCoords.x + parseFloat(numbers[0]) : parseFloat(numbers[0]);
                     points.add(new Point(penCoords.x, penCoords.y, Point.COMMANDS.line));
 
-                // Vertical lines ("V" command)
+                    // Vertical lines ("V" command)
                 case vertical:
-                    penCoords.y = isCommandRelative? penCoords.y + parseFloat(numbers[0]) : parseFloat(numbers[0]);
+                    penCoords.y = isCommandRelative ? penCoords.y + parseFloat(numbers[0]) : parseFloat(numbers[0]);
                     points.add(new Point(penCoords.x, penCoords.y, Point.COMMANDS.line));
 
-                // Moveto command ("M")
+                    // Moveto command ("M")
                 case move:
-                    for(int j = 0; j < numbers.length; j ++) {
+                    for (int j = 0; j < numbers.length; j++) {
                         // Even index: likely x coordinate
-                        if(j % 2 == 0) {
-                            penCoords.x = isCommandRelative? penCoords.x + parseFloat(numbers[j]) : parseFloat(numbers[j]);
+                        if (j % 2 == 0) {
+                            penCoords.x = isCommandRelative ? penCoords.x + parseFloat(numbers[j]) : parseFloat(numbers[j]);
                         } else {
-                            penCoords.y = isCommandRelative? penCoords.y + parseFloat(numbers[j]) : parseFloat(numbers[j]);
+                            penCoords.y = isCommandRelative ? penCoords.y + parseFloat(numbers[j]) : parseFloat(numbers[j]);
                         }
                     }
                     points.add(new Point(penCoords.x, penCoords.y, Point.COMMANDS.move));
 
-                // Lineto command ("L")
+                    // Lineto command ("L")
                 case line:
-                    for(int j = 0; j < numbers.length; j ++) {
+                    for (int j = 0; j < numbers.length; j++) {
                         // Even index: likely x coordinate
-                        if(j % 2 == 0) {
-                            penCoords.x = isCommandRelative? penCoords.x + parseFloat(numbers[j]) : parseFloat(numbers[j]);
+                        if (j % 2 == 0) {
+                            penCoords.x = isCommandRelative ? penCoords.x + parseFloat(numbers[j]) : parseFloat(numbers[j]);
                         } else {
                             // Odd index: y component of a coordinate, completes
                             // a coordinate which we add as a Point.
-                            penCoords.y = isCommandRelative? penCoords.y + parseFloat(numbers[j]) : parseFloat(numbers[j]);
+                            penCoords.y = isCommandRelative ? penCoords.y + parseFloat(numbers[j]) : parseFloat(numbers[j]);
                             points.add(new Point(penCoords.x, penCoords.y, Point.COMMANDS.line));
                         }
                     }
@@ -284,7 +284,7 @@ public class SVG {
     public Point.COMMANDS svgToPointCommand(char svgCommand) {
         // Only moveto and line commands are supported--SVGs with a "c/s" command won't load
         // as FreePaint doesnt' support Bezier curves right now
-        switch(Character.toLowerCase(svgCommand)) {
+        switch (Character.toLowerCase(svgCommand)) {
             case 'm':
                 return Point.COMMANDS.move;
             case 'l':

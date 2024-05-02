@@ -14,40 +14,33 @@ import io.github.pastthepixels.freepaint.Point;
 
 public class PanTool implements Tool {
     /**
-     * Location of the last time an ACTION_DOWN touch was initialized (relative positions to that
-     * are used for calculating new offsets)
-     */
-    private final PointF touchDown = new PointF(0, 0);
-
-    /**
-     * Old offset value, recorded before a new one is set
-     */
-    private final Point oldOffset = new Point(0, 0);
-
-    private final ScaleGestureDetector detector;
-
-    /**
-     * Scale
-     */
-    public float scaleFactor = 1f;
-
-    /**
      * Offset
      */
     public final Point offset = new Point(0f, 0f);
-
     /**
      * Offset that's applied separately to <code>offset</code>, to make sure panning is from the middle of the screen.
      */
     public final Point panOffset = new Point(0f, 0f);
-
+    final DrawCanvas canvas;
+    /**
+     * Location of the last time an ACTION_DOWN touch was initialized (relative positions to that
+     * are used for calculating new offsets)
+     */
+    private final PointF touchDown = new PointF(0, 0);
+    /**
+     * Old offset value, recorded before a new one is set
+     */
+    private final Point oldOffset = new Point(0, 0);
+    private final ScaleGestureDetector detector;
+    /**
+     * Scale
+     */
+    public float scaleFactor = 1f;
     /**
      * Used in onTouchEvent.
      */
     boolean isScaling = false;
     boolean disableIsScalingOnNextUp = false;
-
-    final DrawCanvas canvas;
 
     /**
      * Binds the tool to a DrawCanvas, and sets up a <code>ScaleGestureDetector</code>

@@ -7,28 +7,28 @@
     <!-- Options -->
     <item
         android:id="@+id/action_undo"
-        android:title="@string/action_undo"
         android:icon="@drawable/baseline_undo_24"
+        android:title="@string/action_undo"
         app:iconTint="?attr/colorControlNormal"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/action_redo"
-        android:title="@string/action_redo"
         android:icon="@drawable/baseline_redo_24"
+        android:title="@string/action_redo"
         app:iconTint="?attr/colorControlNormal"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/action_set_stroke"
-        android:title="@string/action_set_stroke"
         android:icon="@drawable/outline_circle_24"
+        android:title="@string/action_set_stroke"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/action_set_fill"
-        android:title="@string/action_set_fill"
         android:icon="@drawable/baseline_circle_24"
+        android:title="@string/action_set_fill"
         app:showAsAction="always" />
 
     <!-- Overflow options -->

@@ -258,12 +258,13 @@ public class DrawPath {
     public boolean contains(Point point) {
         Path pointPath = new Path();
         pointPath.addCircle(point.x, point.y, 1, Path.Direction.CW);
-        pointPath.op(getPath() == null? generatePath() : getPath(), Path.Op.DIFFERENCE);
+        pointPath.op(getPath() == null ? generatePath() : getPath(), Path.Op.DIFFERENCE);
         return pointPath.isEmpty();
     }
 
     /**
      * Deep clones a DrawPath.
+     *
      * @return A cloned version of the DrawPath.
      */
     @NonNull

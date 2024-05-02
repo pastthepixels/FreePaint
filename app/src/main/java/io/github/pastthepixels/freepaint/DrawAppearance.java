@@ -12,15 +12,10 @@ import androidx.preference.PreferenceManager;
 import java.util.Objects;
 
 public class DrawAppearance {
-    // Basic implementation of special FX
-    public enum EFFECTS {none, dashed}
-
     public EFFECTS effect = EFFECTS.none;
-
     public int stroke;
     public int fill;
     public int strokeSize = 5;
-
     // If this is set to true, stroke size is measured in dp instead of px
     public boolean useDP = false;
 
@@ -103,4 +98,7 @@ public class DrawAppearance {
     public DrawAppearance clone() {
         return new DrawAppearance(stroke, fill, strokeSize);
     }
+
+    // Basic implementation of special FX
+    public enum EFFECTS {none, dashed}
 }

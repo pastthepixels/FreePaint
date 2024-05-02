@@ -15,20 +15,18 @@ import io.github.pastthepixels.freepaint.Point;
 public class SelectionTool implements Tool {
     private final DrawAppearance APPEARANCE = new DrawAppearance(Color.GRAY, Color.argb(32, 64, 64, 64));
 
-    private final DrawAppearance APPEARANCE_SELECTED = new DrawAppearance(Color.BLUE,-1);
+    private final DrawAppearance APPEARANCE_SELECTED = new DrawAppearance(Color.BLUE, -1);
 
     private final LinkedList<DrawPath> toolPaths = new LinkedList<>();
     private final LinkedList<DrawPath> selectedPaths = new LinkedList<>();
 
     private final DrawPath currentPath = new DrawPath(null);
-
-    public Point originalPoint = new Point(0, 0);
-
-    public Point previousPoint = null;
-
     private final DrawCanvas canvas;
-
+    public Point originalPoint = new Point(0, 0);
+    public Point previousPoint = null;
+    boolean changedDrawPaths = false;
     private TOUCH_MODES mode;
+
 
     /**
      * Creates a SelectionTool instance, saying that the selection path has to be closed (it's a rectangle)
@@ -42,7 +40,6 @@ public class SelectionTool implements Tool {
         APPEARANCE.strokeSize = APPEARANCE_SELECTED.strokeSize = 3;
         APPEARANCE_SELECTED.effect = DrawAppearance.EFFECTS.dashed;
     }
-
 
     /**
      * Returns a list of paths entirely used by the tool for visual aid purposes
@@ -130,8 +127,8 @@ public class SelectionTool implements Tool {
                 }
                 mode = TOUCH_MODES.none;
                 break; // Usually we would say we consumed the input and we shouldn't do a redraw
-                       // but this is also when we lift our finger a.k.a when we make backups of
-                       // DrawCanvas.drawPaths.
+            // but this is also when we lift our finger a.k.a when we make backups of
+            // DrawCanvas.drawPaths.
 
             default:
                 return false;
@@ -198,14 +195,13 @@ public class SelectionTool implements Tool {
         }
     }
 
+    public boolean allowVersionBackup() {
+        return changedDrawPaths;
+    }
+
     /**
      * You can either define a new selection or move a selection. Each touch mode is set from
      * different conditions and reset once you lift your finger off the screen.
      */
     private enum TOUCH_MODES {none, define, move}
-
-    boolean changedDrawPaths = false;
-    public boolean allowVersionBackup() {
-        return changedDrawPaths;
-    }
 }

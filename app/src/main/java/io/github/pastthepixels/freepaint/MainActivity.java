@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,15 +11,12 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.TextView;
 
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
@@ -39,7 +35,6 @@ import androidx.fragment.app.DialogFragment;
 import androidx.preference.PreferenceManager;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.shape.CornerFamily;
 import com.google.android.material.shape.MaterialShapeDrawable;
 import com.google.android.material.shape.ShapeAppearanceModel;
@@ -54,12 +49,9 @@ import io.github.pastthepixels.freepaint.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
 
-    private ActivityMainBinding binding;
-
     private final SettingsBottomSheet settingsBottomSheet = new SettingsBottomSheet();
-
     private final ToolsBottomSheet toolsBottomSheet = new ToolsBottomSheet();
-
+    private ActivityMainBinding binding;
     /**
      * Records the last used intent action -- used in <code>activityResultLauncher<code> to see if we should load the selected path or save to it.
      */
@@ -115,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
         float radius = getResources().getDimension(com.google.android.material.R.dimen.cardview_default_radius);
         ShapeAppearanceModel shapeAppearanceModel = new ShapeAppearanceModel()
                 .toBuilder()
-                .setAllCorners(CornerFamily.ROUNDED,radius)
+                .setAllCorners(CornerFamily.ROUNDED, radius)
                 .build();
         MaterialShapeDrawable shapeDrawable = new MaterialShapeDrawable(shapeAppearanceModel);
         shapeDrawable.setAlpha(100);
@@ -193,6 +185,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Switches the DrawCanvas tool when a tool has been selected from the UI.
+     *
      * @param id the ID of the tool button
      */
     public void setTool(int id) {
@@ -326,6 +319,8 @@ public class MainActivity extends AppCompatActivity {
      */
     public static class SettingsBottomSheet extends BottomSheetDialogFragment {
 
+        public static final String TAG = "SettingsBottomSheet";
+
         @Nullable
         @Override
         public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -341,14 +336,14 @@ public class MainActivity extends AppCompatActivity {
         public void onHiddenChanged(boolean hidden) {
             super.onHiddenChanged(hidden);
         }
-
-        public static final String TAG = "SettingsBottomSheet";
     }
 
     /**
      * Tool selection dialog
      */
     public static class ToolsBottomSheet extends BottomSheetDialogFragment {
+
+        public static final String TAG = "ToolsBottomSheet";
 
         @Nullable
         @Override
@@ -377,8 +372,6 @@ public class MainActivity extends AppCompatActivity {
         public void onHiddenChanged(boolean hidden) {
             super.onHiddenChanged(hidden);
         }
-
-        public static final String TAG = "ToolsBottomSheet";
     }
 
 
