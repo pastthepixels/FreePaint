@@ -10,8 +10,8 @@ android {
         applicationId "io.github.pastthepixels.freepaint"
         minSdk 24
         targetSdk 34
-        versionCode 4 // Change this when you want to make another version!!
-        versionName "1.1.0"
+        versionCode 5 // Change this when you want to make another version!!
+        versionName "1.2.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
