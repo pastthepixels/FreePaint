@@ -7,6 +7,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -17,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
@@ -42,6 +44,7 @@ import com.rarepebble.colorpicker.ColorPickerView;
 import com.rarepebble.colorpicker.ColorPreference;
 import com.takisoft.preferencex.PreferenceFragmentCompat;
 
+import java.io.OutputStream;
 import java.util.Objects;
 
 import io.github.pastthepixels.freepaint.databinding.ActivityMainBinding;
@@ -52,29 +55,54 @@ public class MainActivity extends AppCompatActivity {
     private final SettingsBottomSheet settingsBottomSheet = new SettingsBottomSheet();
     private final ToolsBottomSheet toolsBottomSheet = new ToolsBottomSheet();
     private ActivityMainBinding binding;
-    /**
-     * Records the last used intent action -- used in <code>activityResultLauncher<code> to see if we should load the selected path or save to it.
-     */
-    private String intentAction;
 
     /**
      * Handles file picker actions -- onActivityResult is called after a file path is chosen (see MainActivity.onOptionsItemSelected)
      */
-    private final ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
-                @Override
-                public void onActivityResult(ActivityResult result) {
-                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                        Uri uri = result.getData().getData();
-                        System.out.println(Objects.requireNonNull(uri).getPath());
-                        try {
-                            if (Objects.equals(intentAction, Intent.ACTION_CREATE_DOCUMENT))
-                                binding.drawCanvas.saveFile(uri);
-                            if (Objects.equals(intentAction, Intent.ACTION_OPEN_DOCUMENT))
-                                binding.drawCanvas.loadFile(uri);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+    private final ActivityResultLauncher<Intent> activityResultLauncherSave = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            (result) -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    Uri uri = result.getData().getData();
+                    System.out.println(Objects.requireNonNull(uri).getPath());
+                    try {
+                        binding.drawCanvas.saveFile(uri);
+                    } catch (Exception e) {
+                        Toast.makeText(getApplicationContext(), "An error was encountered while saving.", Toast.LENGTH_LONG).show();
+                        e.printStackTrace();
+                    }
+                }
+            }
+    );
+
+    private final ActivityResultLauncher<Intent> activityResultLauncherLoad = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            (result) -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    Uri uri = result.getData().getData();
+                    System.out.println(Objects.requireNonNull(uri).getPath());
+                    try {
+                        binding.drawCanvas.loadFile(uri);
+                    } catch (Exception e) {
+                        Toast.makeText(getApplicationContext(), "An error was encountered while loading.", Toast.LENGTH_LONG).show();
+                        e.printStackTrace();
+                    }
+                }
+            }
+    );
+
+    private final ActivityResultLauncher<Intent> activityResultLauncherExport = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            (result) -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    Uri uri = result.getData().getData();
+                    System.out.println(Objects.requireNonNull(uri).getPath());
+                    try(OutputStream stream = getApplicationContext().getContentResolver().openOutputStream(uri, "wt")) {
+                        assert stream != null;
+                        binding.drawCanvas.toBitmap().compress(Bitmap.CompressFormat.PNG, 100, stream);
+                    } catch (Exception e) {
+                        Toast.makeText(getApplicationContext(), "An error was encountered while loading.", Toast.LENGTH_LONG).show();
+                        e.printStackTrace();
                     }
                 }
             }
@@ -216,13 +244,26 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == R.id.action_save || id == R.id.action_load) {
-            intentAction = id == R.id.action_save ? Intent.ACTION_CREATE_DOCUMENT : Intent.ACTION_OPEN_DOCUMENT;
-            Intent intent = new Intent(intentAction);
+            Intent intent = new Intent(id == R.id.action_save ? Intent.ACTION_CREATE_DOCUMENT : Intent.ACTION_OPEN_DOCUMENT);
             intent.addCategory(Intent.CATEGORY_OPENABLE);
             intent.setType("image/svg+xml");
             intent.putExtra(Intent.EXTRA_TITLE, id == R.id.action_save ? "output.svg" : "input.svg");
             intent = Intent.createChooser(intent, "Save/load file");
-            activityResultLauncher.launch(intent);
+            if (id == R.id.action_save) {
+                activityResultLauncherSave.launch(intent);
+            } else {
+                activityResultLauncherLoad.launch(intent);
+            }
+            return true;
+        }
+
+        if (id == R.id.action_export) {
+            Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.setType("image/png");
+            intent.putExtra(Intent.EXTRA_TITLE, "exported.png");
+            intent = Intent.createChooser(intent, "Export image");
+            activityResultLauncherExport.launch(intent);
             return true;
         }
 
@@ -382,14 +423,13 @@ public class MainActivity extends AppCompatActivity {
      */
     public static class ColorPickerDialog extends DialogFragment {
 
-        int initialColor;
-
         String prefName;
 
         ColorPickerDialog(String prefName) {
             this.prefName = prefName;
         }
 
+        @NonNull
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             // Use the Builder class for convenient dialog construction.
@@ -402,25 +442,20 @@ public class MainActivity extends AppCompatActivity {
             builder
                     .setTitle(null)
                     .setView(picker)
-                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(requireContext());
-                            SharedPreferences.Editor editor = preferences.edit();
-                            editor.putInt(prefName, picker.getColor());
-                            editor.apply();
-                            // Then, update MainActivity
-                            if (getActivity() instanceof MainActivity) {
-                                ((MainActivity) getActivity()).updateBottomBarColors(
-                                        PreferenceManager.getDefaultSharedPreferences(requireContext()).getInt("fillColor", 0x10000000),
-                                        PreferenceManager.getDefaultSharedPreferences(requireContext()).getInt("strokeColor", 0x10000000)
-                                );
-                            }
+                    .setPositiveButton("Ok", (dialog, which) -> {
+                        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(requireContext());
+                        SharedPreferences.Editor editor = preferences.edit();
+                        editor.putInt(prefName, picker.getColor());
+                        editor.apply();
+                        // Then, update MainActivity
+                        if (getActivity() instanceof MainActivity) {
+                            ((MainActivity) getActivity()).updateBottomBarColors(
+                                    PreferenceManager.getDefaultSharedPreferences(requireContext()).getInt("fillColor", 0x10000000),
+                                    PreferenceManager.getDefaultSharedPreferences(requireContext()).getInt("strokeColor", 0x10000000)
+                            );
                         }
                     })
-                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                        }
+                    .setNegativeButton("Cancel", (dialog, id) -> {
                     });
             // Create the AlertDialog object and return it.
             return builder.create();

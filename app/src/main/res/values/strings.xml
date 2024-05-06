@@ -28,4 +28,5 @@
     <string name="opt_category_file">File</string>
     <string name="action_set_stroke">Set stroke color</string>
     <string name="action_set_fill">Set fill color</string>
+    <string name="action_export">Export</string>
 </resources>
