@@ -3,6 +3,7 @@ package io.github.pastthepixels.freepaint;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -46,6 +47,10 @@ public final class DrawCanvas extends View {
     public int documentColor = Color.WHITE;
     private int version_index = -1;
     private TOOLS tool = TOOLS.none;
+
+    // Drawing flags
+    // Draws only the document, without any tool paths, or any rotation/translation.
+    private boolean drawMinimal = false;
 
     /**
      * Constructor
@@ -214,6 +219,18 @@ public final class DrawCanvas extends View {
     }
 
     /**
+     * Gets a bitmap from a DrawCanvas.
+     */
+    public Bitmap toBitmap() {
+        Bitmap bitmap = Bitmap.createBitmap((int) this.documentSize.x, (int) this.documentSize.y, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        this.drawMinimal = true;
+        this.draw(canvas);
+        this.drawMinimal = false;
+        return bitmap;
+    }
+
+    /**
      * Gets the chosen tool
      *
      * @return A Tool instance, depending on DrawCanvas.tool
@@ -293,26 +310,32 @@ public final class DrawCanvas extends View {
         // Draws things on the screen
         canvas.save();
         // SCALES, THEN TRANSLATES (translations are independent of scales)
-        canvas.scale(panTool.scaleFactor, panTool.scaleFactor);
-        canvas.translate(panTool.offset.x + panTool.panOffset.x, panTool.offset.y + panTool.panOffset.y);
+        if (!drawMinimal) {
+            canvas.scale(panTool.scaleFactor, panTool.scaleFactor);
+            canvas.translate(panTool.offset.x + panTool.panOffset.x, panTool.offset.y + panTool.panOffset.y);
+        }
         // Draws what the page will look like
         paint.setColor(documentColor);
         paint.setStyle(Paint.Style.FILL);
-        paint.setShadowLayer(12, 0, 0, Color.argb(200, 0, 0, 0));
+        if (!drawMinimal) {
+            paint.setShadowLayer(12, 0, 0, Color.argb(200, 0, 0, 0));
+        }
         canvas.drawRect(0, 0, documentSize.x, documentSize.y, paint);
         paint.reset();
         // Draws a stroke for the page
-        paint.setColor(Color.GRAY);
-        paint.setStrokeWidth(5 / panTool.scaleFactor); // Always five pixels no matter scale
-        paint.setStyle(Paint.Style.STROKE);
-        canvas.drawRect(0, 0, documentSize.x, documentSize.y, paint);
-        paint.reset();
+        if (!drawMinimal) {
+            paint.setColor(Color.GRAY);
+            paint.setStrokeWidth(5 / panTool.scaleFactor); // Always five pixels no matter scale
+            paint.setStyle(Paint.Style.STROKE);
+            canvas.drawRect(0, 0, documentSize.x, documentSize.y, paint);
+            paint.reset();
+        }
         // Draws every path, then tool path
         for (DrawPath path : paths) {
             paint.reset();
             path.draw(canvas, paint, screenDensity, getScaleFactor());
         }
-        if (getTool() != null && getTool().getToolPaths() != null) {
+        if (!drawMinimal && getTool() != null && getTool().getToolPaths() != null) {
             if (getTool() instanceof EraserTool) {
                 paint.setARGB(150, 0, 0, 0);
                 paint.setStyle(Paint.Style.FILL);
