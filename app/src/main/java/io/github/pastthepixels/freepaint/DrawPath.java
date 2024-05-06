@@ -7,6 +7,7 @@ import android.graphics.Path;
 
 import androidx.annotation.NonNull;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 import dev.romainguy.graphics.path.PathIterator;
@@ -63,11 +64,20 @@ public class DrawPath {
      */
     public Path generatePath() {
         Path path = new Path();
-        for (Point point : points) {
-            if (point == points.get(0) || point.command == Point.COMMANDS.move) {
+        for(int i = 0; i < points.size(); i ++) {
+            Point point = points.get(i);
+            if (i == 0 || point.command == Point.COMMANDS.move) {
                 path.moveTo(point.x, point.y);
             } else {
-                path.lineTo(point.x, point.y);
+                Point prev = points.get(i - 1);
+                path.cubicTo(
+                        prev.getRightHandle().x,
+                        prev.getRightHandle().y,
+                        point.getLeftHandle().x,
+                        point.getLeftHandle().y,
+                        point.x,
+                        point.y
+                );
             }
         }
         if (isClosed) {
@@ -85,32 +95,44 @@ public class DrawPath {
     }
 
     /**
-     * Generates a "final" path by interpolating lines.
-     * Right now, we are just using generatePath(). In the future, look at
-     * something like <a href="https://www.stkent.com/2015/07/03/building-smooth-paths-using-bezier-curves.html">this</a>
-     * We need to interpolate between points, but unlike the default way of doing so, *also* contact each point.
+     * Applies operations to the <code>points</code> array to simplify and
+     * smoothen lines after they are drawn.
      */
     public void finalise() {
+        // Simplifies the path. TODO
         /*
-        Path path = new Path();
-        for(int i = 0; i < points.size(); i ++){
-            Point point = points.get(i);
-            if(i == 0 || point.command == Point.COMMANDS.move){
-                path.moveTo(point.x, point.y);
-            } else if(i < points.size() - 1 && points.get(i + 1).command != Point.COMMANDS.move) {
-                Point next = points.get(i + 1);
-                path.quadTo(point.x, point.y, next.x, next.y);
-                i ++;
-            } else {
-                path.lineTo(point.x, point.y);
+        for(int i = 0; i < points.size(); i ++) {
+            for(int j = i; j < points.size(); j ++) {
+                // TODO: 3 is hard-coded
+                if(j != i && Math.sqrt(Math.pow(points.get(i).x - points.get(j).x, 2) + Math.pow(points.get(i).y - points.get(j).y, 2)) < 20) {
+                    points.remove(j);
+                }
             }
         }
-        if (isClosed) {
-            path.close();
-        }
-        this.path = path;
         */
-        this.path = generatePath();
+        // Generates handles for each point.
+        for(int i = 0; i < points.size(); i++) {
+            Point point = points.get(i);
+            if (i == 0) {
+                Point next = points.get(i + 1);
+                point.setRightHandle(new Point(
+                        ((next.x - point.x) / 3),
+                        ((next.y - point.y) / 3)
+                ));
+            } else if (i != points.size() - 1) {
+                Point prev = points.get(i - 1);
+                Point next = points.get(i + 1);
+                point.setRightHandle(new Point(
+                        ((next.x - prev.x) / 6),
+                        ((next.y - prev.y) / 6)
+                ));
+                // Left handle is mirrored.
+                point.setLeftHandle(new Point(
+                        -((next.x - prev.x) / 6),
+                        -((next.y - prev.y) / 6)
+                ));
+            }
+        }
     }
 
     /**
@@ -123,6 +145,13 @@ public class DrawPath {
     }
 
     /**
+     * Caches generatePath() into a thing we can reuse (dp)
+     */
+    public void cachePath() {
+        this.path = generatePath();
+    }
+
+    /**
      * Draws the path.
      *
      * @param canvas      The canvas to draw to.
@@ -130,7 +159,7 @@ public class DrawPath {
      * @param scaleFactor Necessary so we can draw the dots for points to always be the same size
      */
     public void draw(Canvas canvas, Paint paint, float screenDensity, float scaleFactor) {
-        Path toDraw = path == null ? generatePath() : path;
+        Path toDraw = generatePath();
         // Sets a configuration for the Paint with DrawPath.appearance
         appearance.initialisePaint(paint, screenDensity / scaleFactor);
         // Fills, then...
@@ -160,6 +189,15 @@ public class DrawPath {
                 paint.setColor(Color.BLACK);
                 paint.setStyle(Paint.Style.STROKE);
                 canvas.drawPath(shape, paint);
+                // HANDLES
+                paint.setColor(pt.color);
+                paint.setStyle(Paint.Style.FILL);
+                canvas.drawPath(pt.getLeftHandle().getShape(4 * screenDensity / scaleFactor), paint);
+                canvas.drawPath(pt.getRightHandle().getShape(4 * screenDensity / scaleFactor), paint);
+                // HANDLE LINES
+                paint.setStyle(Paint.Style.STROKE);
+                canvas.drawLine(pt.getLeftHandle().x, pt.getLeftHandle().y, pt.x, pt.y, paint);
+                canvas.drawLine(pt.getRightHandle().x, pt.getRightHandle().y, pt.x, pt.y, paint);
                 // Done
             }
         }
@@ -176,14 +214,14 @@ public class DrawPath {
             return;
         }
         if (path.getPath() == null) {
-            path.finalise();
+            path.cachePath();
         }
         if (isClosed) {
             getPath().op(path.getPath(), Path.Op.DIFFERENCE);
             regeneratePoints();
         } else {
             eraseFromStroke(path);
-            finalise();
+            path.cachePath();
         }
     }
 
@@ -279,7 +317,7 @@ public class DrawPath {
         for (Point point : points) {
             cloned.points.add(point.clone());
         }
-        cloned.finalise();
+        cloned.cachePath();
         return cloned;
     }
 
