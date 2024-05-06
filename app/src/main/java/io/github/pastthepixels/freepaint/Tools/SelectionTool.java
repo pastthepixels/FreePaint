@@ -111,7 +111,7 @@ public class SelectionTool implements Tool {
                     currentPath.translate(touchPoint.clone().subtract(previousPoint));
                     for (DrawPath path : selectedPaths) {
                         path.translate(touchPoint.clone().subtract(previousPoint));
-                        path.finalise();
+                        path.cachePath();
                     }
                 }
                 // Important for second if statement

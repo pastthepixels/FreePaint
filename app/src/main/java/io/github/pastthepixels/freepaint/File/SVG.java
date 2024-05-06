@@ -182,7 +182,7 @@ public class SVG {
                         path.appearance.strokeSize = Integer.parseInt(element.getAttribute("stroke-width"));
                     }
                     // Done!!
-                    path.finalise();
+                    path.cachePath();
                     canvas.paths.add(path);
                 }
             }

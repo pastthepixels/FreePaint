@@ -71,6 +71,7 @@ public class PaintTool implements Tool {
 
             case MotionEvent.ACTION_UP:
                 currentPath.finalise();
+                currentPath.cachePath();
                 break;
 
             default:
