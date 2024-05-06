@@ -71,11 +71,16 @@ public class Point extends PointF {
      * @return a new Point
      */
     public Point getRightHandle() {
-        Point point = this.clone();
-        if (rightHandle != null) {
-            point.add(rightHandle);
+        if (this.command == COMMANDS.handle) {
+            return null;
+        } else {
+            Point point = new Point(this.x, this.y);
+            point.command = COMMANDS.handle;
+            if (rightHandle != null) {
+                point.add(rightHandle);
+            }
+            return point;
         }
-        return point;
     }
 
     /**
@@ -83,11 +88,16 @@ public class Point extends PointF {
      * @return a new Point
      */
     public Point getLeftHandle() {
-        Point point = this.clone();
-        if (leftHandle != null) {
-            point.add(leftHandle);
+        if (this.command == COMMANDS.handle) {
+            return null;
+        } else {
+            Point point = new Point(this.x, this.y);
+            point.command = COMMANDS.handle;
+            if (leftHandle != null) {
+                point.add(leftHandle);
+            }
+            return point;
         }
-        return point;
     }
 
     /**
@@ -141,9 +151,12 @@ public class Point extends PointF {
     @NonNull
     @Override
     public Point clone() {
-        return new Point(x, y, command, color);
+        Point point = new Point(x, y, command, color);
+        if (this.getLeftHandle() != null) point.setLeftHandle(this.getLeftHandle().subtract(this));
+        if (this.getRightHandle() != null) point.setRightHandle(this.getRightHandle().subtract(this));
+        return point;
     }
 
     // SVG point commands. Only `none`, `move` and `line` are supported.
-    public enum COMMANDS {none, move, line, horizontal, vertical}
+    public enum COMMANDS {none, move, line, horizontal, vertical, handle}
 }

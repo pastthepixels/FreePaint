@@ -88,6 +88,7 @@ public class EraserTool implements Tool {
     public void eraseCurrentPath() {
         for (DrawPath path : canvas.paths) {
             path.erase(currentPath);
+            path.cachePath();
         }
         currentPath.clear();
         init();

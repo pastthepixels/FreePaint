@@ -57,6 +57,15 @@ public class DrawPath {
         points.add(point);
     }
 
+
+    /**
+     * Clears all points in a DrawPath, then resets <code>DrawPath.path</code>
+     */
+    public void clear() {
+        points.clear();
+        this.path = null;
+    }
+
     /**
      * Generates a basic path by connecting lines, ideal for previewing
      *
@@ -86,12 +95,32 @@ public class DrawPath {
         return path;
     }
 
+
     /**
-     * Clears all points in a DrawPath, then resets <code>DrawPath.path</code>
+     * Accessor for <code>path</code>
+     *
+     * @return The <code>android.graphics.Path</code> instance used for drawing.
      */
-    public void clear() {
-        points.clear();
-        this.path = null;
+    public Path getPath() {
+        return path;
+    }
+
+    /**
+     * Returns a cached path, or generates a new one.
+     */
+    private Path getPathOrGenerate() {
+        if (getPath() != null) {
+            return getPath();
+        } else {
+            return generatePath();
+        }
+    }
+
+    /**
+     * Caches generatePath() into a thing we can reuse (dp)
+     */
+    public void cachePath() {
+        this.path = generatePath();
     }
 
     /**
@@ -136,22 +165,6 @@ public class DrawPath {
     }
 
     /**
-     * Accessor for <code>path</code>
-     *
-     * @return The <code>android.graphics.Path</code> instance used for drawing.
-     */
-    public Path getPath() {
-        return path;
-    }
-
-    /**
-     * Caches generatePath() into a thing we can reuse (dp)
-     */
-    public void cachePath() {
-        this.path = generatePath();
-    }
-
-    /**
      * Draws the path.
      *
      * @param canvas      The canvas to draw to.
@@ -159,7 +172,10 @@ public class DrawPath {
      * @param scaleFactor Necessary so we can draw the dots for points to always be the same size
      */
     public void draw(Canvas canvas, Paint paint, float screenDensity, float scaleFactor) {
-        Path toDraw = generatePath();
+        Path toDraw = getPath();
+        if (toDraw == null) {
+            toDraw = generatePath();
+        }
         // Sets a configuration for the Paint with DrawPath.appearance
         appearance.initialisePaint(paint, screenDensity / scaleFactor);
         // Fills, then...
@@ -213,15 +229,11 @@ public class DrawPath {
         if (getPath() == null) {
             return;
         }
-        if (path.getPath() == null) {
-            path.cachePath();
-        }
         if (isClosed) {
-            getPath().op(path.getPath(), Path.Op.DIFFERENCE);
+            getPath().op(path.generatePath(), Path.Op.DIFFERENCE);
             regeneratePoints();
         } else {
             eraseFromStroke(path);
-            path.cachePath();
         }
     }
 
@@ -261,14 +273,11 @@ public class DrawPath {
                 state = false;
                 index++;
             }
-            // If there's a STATE CHANGE (uncomment lines to debug path starting/ending points)
+            // If there's a STATE CHANGE
             if (oldState != state) {
                 if (!state) {
                     point.command = Point.COMMANDS.move;
-                    //point.color = Color.GREEN;
-                }/* else if (index > 0) {
-                    points.get(index - 1).color = Color.RED;
-                }*/
+                }
             }
         }
     }
@@ -296,7 +305,7 @@ public class DrawPath {
     public boolean contains(Point point) {
         Path pointPath = new Path();
         pointPath.addCircle(point.x, point.y, 1, Path.Direction.CW);
-        pointPath.op(getPath() == null ? generatePath() : getPath(), Path.Op.DIFFERENCE);
+        pointPath.op(getPathOrGenerate(), Path.Op.DIFFERENCE);
         return pointPath.isEmpty();
     }
 
