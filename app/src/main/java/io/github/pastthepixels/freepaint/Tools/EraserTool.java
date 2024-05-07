@@ -71,7 +71,7 @@ public class EraserTool implements Tool {
                 break;
 
             case MotionEvent.ACTION_UP:
-                currentPath.cachePath();
+                currentPath.finalise();
                 eraseCurrentPath();
                 break;
 
