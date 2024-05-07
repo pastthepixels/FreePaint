@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import dev.romainguy.graphics.path.Svg;
 import io.github.pastthepixels.freepaint.DrawAppearance;
 import io.github.pastthepixels.freepaint.DrawCanvas;
 import io.github.pastthepixels.freepaint.DrawPath;
@@ -105,14 +106,7 @@ public class SVG {
     public void addPath(DrawPath path) {
         StringBuilder data = new StringBuilder("\n<path d=\"");
         // Step 1. Add points.
-        for (Point point : path.points) {
-            String command = point.command == Point.COMMANDS.move ? "M" : "L";
-            if (point == path.points.get(0)) command = "M";
-            data.append(String.format("%s%.2f %.2f ", command, point.x, point.y));
-        }
-        if (path.isClosed) {
-            data.append("Z");
-        }
+        data.append(Svg.toSvg(path.generatePath(), false));
         data.append("\" ");
         // Step 2. Set the appearance of the path.
         // Inkscape only accepts hex colors, I don't know why
