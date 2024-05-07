@@ -230,17 +230,19 @@ public class DrawPath {
             return;
         }
         if (isClosed) {
-            getPath().op(path.generatePath(), Path.Op.DIFFERENCE);
-            regeneratePoints();
+            Path erased = getPathOrGenerate();
+            erased.op(path.generatePath(), Path.Op.DIFFERENCE);
+            regeneratePoints(erased);
         } else {
             eraseFromStroke(path);
         }
     }
 
     /**
-     * Regenerates points[] from DrawPath.path (android.graphics.Path)
+     * Regenerates points[] from DrawPath.path (android.graphics.Path) using Pathway
+     * TODO curves?
      */
-    public void regeneratePoints() {
+    public void regeneratePoints(Path path) {
         PathIterator iterator = Paths.iterator(path);
         points.clear();
         float[] pointArray = new float[8];
