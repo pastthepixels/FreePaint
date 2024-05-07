@@ -19,6 +19,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -201,13 +202,13 @@ public class SVG {
      * @param d The "d" attribute of an SVG path element.
      * @return A linked list of points, with proper commands, that you can use in a DrawPath.
      */
-    public LinkedList<Point> parsePath(@NonNull String d) {
+    public ArrayList<Point> parsePath(@NonNull String d) {
         // We start with a "pen" that we set the position of (capital letters) or move around by an amount (lowercase letters)
         Point penCoords = new Point(0, 0);
-        LinkedList<Point> points = new LinkedList<>();
+        ArrayList<Point> points = new ArrayList<>();
 
         // 1. Separate the string into 1 string per command (ex. "M 12 240 10 4" (multiple points with same command), "L 4")
-        LinkedList<String> commands = new LinkedList<>();
+        ArrayList<String> commands = new ArrayList<>();
         for (int i = 0; i < d.length(); i++) {
             if (Character.isLetter(d.charAt(i))) {
                 commands.add(String.valueOf(d.charAt(i)));

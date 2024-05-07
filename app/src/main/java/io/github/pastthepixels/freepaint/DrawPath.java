@@ -7,6 +7,7 @@ import android.graphics.Path;
 
 import androidx.annotation.NonNull;
 
+import java.sql.Array;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -26,7 +27,7 @@ public class DrawPath {
     /**
      * List of points
      */
-    public LinkedList<Point> points = new LinkedList<>();
+    public ArrayList<Point> points = new ArrayList<>();
 
     /**
      * Whether or not the path is closed (a line is drawn from the end point to the start point)
@@ -128,17 +129,8 @@ public class DrawPath {
      * smoothen lines after they are drawn.
      */
     public void finalise() {
-        // Simplifies the path. TODO
-        /*
-        for(int i = 0; i < points.size(); i ++) {
-            for(int j = i; j < points.size(); j ++) {
-                // TODO: 3 is hard-coded
-                if(j != i && Math.sqrt(Math.pow(points.get(i).x - points.get(j).x, 2) + Math.pow(points.get(i).y - points.get(j).y, 2)) < 20) {
-                    points.remove(j);
-                }
-            }
-        }
-        */
+        // Simplifies the path. TODO epsilon is hard-coded
+        points = simplify(points, 1);
         // Generates handles for each point.
         for(int i = 0; i < points.size(); i++) {
             Point point = points.get(i);
@@ -162,6 +154,39 @@ public class DrawPath {
                 ));
             }
         }
+    }
+
+    /**
+     * Simplifies points using the Ramer-Douglas-Peucker algorithm.
+     * Adapted from the pseudocde from https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm
+     */
+    private ArrayList<Point> simplify(ArrayList<Point> points, double epsilon) {
+        double max_distance = 0;
+        int index = 0;
+        for(int i = 2; i < points.size() - 1; i++) {
+            double distance = Utils.distanceFromPointToLine(points.get(0), points.get(points.size() - 1), points.get(i));
+            if (distance > max_distance) {
+                index = i;
+                max_distance = distance;
+            }
+        }
+
+        ArrayList<Point> simplified = new ArrayList<>();
+
+        if (max_distance > epsilon) {
+            // Like merge sort
+            ArrayList<Point> leftHalf = simplify(new ArrayList<Point>(points.subList(0, index)), epsilon);
+            ArrayList<Point> rightHalf = simplify(new ArrayList<Point>(points.subList(index, points.size())), epsilon);
+            Point point = rightHalf.get(0).clone().subtract(leftHalf.get(leftHalf.size() - 1));
+            leftHalf.remove(leftHalf.size() - 1);
+            simplified.addAll(leftHalf);
+            simplified.addAll(rightHalf);
+        } else {
+            simplified.add(points.get(0));
+            simplified.add(points.get(points.size() - 1));
+        }
+
+        return simplified;
     }
 
     /**
