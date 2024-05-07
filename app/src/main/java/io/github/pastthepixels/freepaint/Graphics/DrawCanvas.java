@@ -1,4 +1,4 @@
-package io.github.pastthepixels.freepaint;
+package io.github.pastthepixels.freepaint.Graphics;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import java.util.Objects;
 
 import io.github.pastthepixels.freepaint.File.SVG;
+import io.github.pastthepixels.freepaint.MainActivity;
 import io.github.pastthepixels.freepaint.Tools.EraserTool;
 import io.github.pastthepixels.freepaint.Tools.PaintTool;
 import io.github.pastthepixels.freepaint.Tools.PanTool;

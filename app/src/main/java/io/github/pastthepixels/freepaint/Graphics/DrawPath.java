@@ -1,4 +1,4 @@
-package io.github.pastthepixels.freepaint;
+package io.github.pastthepixels.freepaint.Graphics;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -7,13 +7,12 @@ import android.graphics.Path;
 
 import androidx.annotation.NonNull;
 
-import java.sql.Array;
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 import dev.romainguy.graphics.path.PathIterator;
 import dev.romainguy.graphics.path.PathSegment;
 import dev.romainguy.graphics.path.Paths;
+import io.github.pastthepixels.freepaint.Utils;
 
 
 public class DrawPath {
@@ -57,7 +56,7 @@ public class DrawPath {
     }
 
     /**
-     * Adds an instance of <code>io.github.pastthepixels.freepaint.Point</code> to the list of points
+     * Adds an instance of <code>io.github.pastthepixels.freepaint.Graphics.Point</code> to the list of points
      */
     public void addPoint(Point point) {
         points.add(point);

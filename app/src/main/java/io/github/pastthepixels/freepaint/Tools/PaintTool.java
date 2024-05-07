@@ -7,9 +7,9 @@ import androidx.preference.PreferenceManager;
 
 import java.util.LinkedList;
 
-import io.github.pastthepixels.freepaint.DrawAppearance;
-import io.github.pastthepixels.freepaint.DrawCanvas;
-import io.github.pastthepixels.freepaint.DrawPath;
+import io.github.pastthepixels.freepaint.Graphics.DrawAppearance;
+import io.github.pastthepixels.freepaint.Graphics.DrawCanvas;
+import io.github.pastthepixels.freepaint.Graphics.DrawPath;
 
 public class PaintTool implements Tool {
     /**

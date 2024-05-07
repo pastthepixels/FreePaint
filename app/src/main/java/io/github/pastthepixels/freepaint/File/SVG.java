@@ -2,7 +2,6 @@ package io.github.pastthepixels.freepaint.File;
 
 import android.annotation.SuppressLint;
 import android.graphics.Color;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -18,18 +17,16 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import dev.romainguy.graphics.path.Svg;
-import io.github.pastthepixels.freepaint.DrawAppearance;
-import io.github.pastthepixels.freepaint.DrawCanvas;
-import io.github.pastthepixels.freepaint.DrawPath;
-import io.github.pastthepixels.freepaint.Point;
+import io.github.pastthepixels.freepaint.Graphics.DrawAppearance;
+import io.github.pastthepixels.freepaint.Graphics.DrawCanvas;
+import io.github.pastthepixels.freepaint.Graphics.DrawPath;
+import io.github.pastthepixels.freepaint.Graphics.Point;
 
 public class SVG {
     private final DrawCanvas canvas;

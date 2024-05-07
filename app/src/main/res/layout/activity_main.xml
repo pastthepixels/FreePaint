@@ -8,7 +8,7 @@
     tools:context=".MainActivity">
 
 
-    <io.github.pastthepixels.freepaint.DrawCanvas
+    <io.github.pastthepixels.freepaint.Graphics.DrawCanvas
         android:id="@+id/drawCanvas"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

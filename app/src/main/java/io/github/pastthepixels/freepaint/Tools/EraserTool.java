@@ -5,9 +5,9 @@ import android.view.MotionEvent;
 
 import java.util.LinkedList;
 
-import io.github.pastthepixels.freepaint.DrawAppearance;
-import io.github.pastthepixels.freepaint.DrawCanvas;
-import io.github.pastthepixels.freepaint.DrawPath;
+import io.github.pastthepixels.freepaint.Graphics.DrawAppearance;
+import io.github.pastthepixels.freepaint.Graphics.DrawCanvas;
+import io.github.pastthepixels.freepaint.Graphics.DrawPath;
 
 /**
  * Erases a filled path region from paths, turning them into filled paths if necessary.

@@ -8,9 +8,9 @@ import androidx.annotation.NonNull;
 
 import java.util.LinkedList;
 
-import io.github.pastthepixels.freepaint.DrawCanvas;
-import io.github.pastthepixels.freepaint.DrawPath;
-import io.github.pastthepixels.freepaint.Point;
+import io.github.pastthepixels.freepaint.Graphics.DrawCanvas;
+import io.github.pastthepixels.freepaint.Graphics.DrawPath;
+import io.github.pastthepixels.freepaint.Graphics.Point;
 
 public class PanTool implements Tool {
     /**

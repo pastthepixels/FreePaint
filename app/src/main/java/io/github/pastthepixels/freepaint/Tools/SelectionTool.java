@@ -7,10 +7,10 @@ import android.view.MotionEvent;
 
 import java.util.LinkedList;
 
-import io.github.pastthepixels.freepaint.DrawAppearance;
-import io.github.pastthepixels.freepaint.DrawCanvas;
-import io.github.pastthepixels.freepaint.DrawPath;
-import io.github.pastthepixels.freepaint.Point;
+import io.github.pastthepixels.freepaint.Graphics.DrawAppearance;
+import io.github.pastthepixels.freepaint.Graphics.DrawCanvas;
+import io.github.pastthepixels.freepaint.Graphics.DrawPath;
+import io.github.pastthepixels.freepaint.Graphics.Point;
 
 public class SelectionTool implements Tool {
     private final DrawAppearance APPEARANCE = new DrawAppearance(Color.GRAY, Color.argb(32, 64, 64, 64));
