@@ -40,6 +40,11 @@ public class DrawPath {
     public boolean drawPoints = false;
 
     /**
+     * Epsilon value for the simplification algorithm (RDP)
+     */
+    public double simplificationAmount = 0;
+
+    /**
      * android.graphics.Path instance. FreePaint handles math but this is how we get that math to be shown on the screen.
      */
     private Path path;
@@ -129,8 +134,8 @@ public class DrawPath {
      * smoothen lines after they are drawn.
      */
     public void finalise() {
-        // Simplifies the path. TODO epsilon is hard-coded
-        points = simplify(points, 1);
+        // Simplifies the path.
+        points = simplify(points, simplificationAmount);
         // Generates handles for each point.
         for(int i = 0; i < points.size(); i++) {
             Point point = points.get(i);
