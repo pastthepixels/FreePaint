@@ -264,6 +264,33 @@ public class SVG {
                             points.add(new Point(penCoords.x, penCoords.y, Point.COMMANDS.line));
                         }
                     }
+
+                    // Cubic bezier curve command ("C")
+                case cubicBezier:
+                    Point originalPenCoords = penCoords.clone();
+                    for (int j = 0; j < numbers.length - 6; j+=6) {
+                        // Sets the right handle of the last point.
+                        penCoords.x = parseFloat(numbers[j]) + (isCommandRelative ? originalPenCoords.x : 0);
+                        penCoords.y = parseFloat(numbers[j+1]) + (isCommandRelative ? originalPenCoords.y : 0);
+                        points.get(points.size() - 1).setRightHandle(new Point(
+                                penCoords.x - points.get(points.size() - 1).x,
+                                penCoords.y - points.get(points.size() - 1).y
+                        ));
+                        // Defines the handle for a new point.
+                        penCoords.x = parseFloat(numbers[j+2]) + (isCommandRelative ? originalPenCoords.x : 0);
+                        penCoords.y = parseFloat(numbers[j+3]) + (isCommandRelative ? originalPenCoords.y : 0);
+                        Point leftHandle = new Point(
+                                penCoords.x,
+                                penCoords.y
+                        );
+                        // Makes a new point.
+                        penCoords.x = parseFloat(numbers[j+4]) + (isCommandRelative ? originalPenCoords.x : 0);
+                        penCoords.y = parseFloat(numbers[j+5]) + (isCommandRelative ? originalPenCoords.y : 0);
+                        Point newPoint = new Point(penCoords.x, penCoords.y, Point.COMMANDS.line);
+                        leftHandle.subtract(newPoint);
+                        newPoint.setLeftHandle(leftHandle);
+                        points.add(newPoint);
+                    }
             }
         }
 
@@ -288,6 +315,8 @@ public class SVG {
                 return Point.COMMANDS.horizontal;
             case 'v':
                 return Point.COMMANDS.vertical;
+            case 'c':
+                return Point.COMMANDS.cubicBezier;
             default:
                 return Point.COMMANDS.none;
         }
