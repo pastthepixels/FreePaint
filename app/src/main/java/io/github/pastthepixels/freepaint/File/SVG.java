@@ -227,17 +227,27 @@ public class SVG {
             Point.COMMANDS command = svgToPointCommand(commands.get(i).charAt(0));
             boolean isCommandRelative = Character.isLowerCase(commands.get(i).charAt(0));
             // Note: commas are ignored (as per W3 spec) and replaced with spaces
-            String[] numbers = commands.get(i).replace(",", " ").substring(1).strip().split(" ");
+            String[] numbers = commands.get(i).replace(",", " ").replace("-", " -").replace("  ", " ").substring(1).strip().split(" ");
+            //TODO remove
+            for(String num : numbers) {
+                System.out.print(num + " ");
+            }
+            System.out.println();
+
+            Point originalPenCoords; // Used for bezier curves
+
             switch (command) {
                 // Horizontal lines ("H" command)
                 case horizontal:
                     penCoords.x = isCommandRelative ? penCoords.x + parseFloat(numbers[0]) : parseFloat(numbers[0]);
                     points.add(new Point(penCoords.x, penCoords.y, Point.COMMANDS.line));
+                    break;
 
                     // Vertical lines ("V" command)
                 case vertical:
                     penCoords.y = isCommandRelative ? penCoords.y + parseFloat(numbers[0]) : parseFloat(numbers[0]);
                     points.add(new Point(penCoords.x, penCoords.y, Point.COMMANDS.line));
+                    break;
 
                     // Moveto command ("M")
                 case move:
@@ -250,6 +260,7 @@ public class SVG {
                         }
                     }
                     points.add(new Point(penCoords.x, penCoords.y, Point.COMMANDS.move));
+                    break;
 
                     // Lineto command ("L")
                 case line:
@@ -264,11 +275,12 @@ public class SVG {
                             points.add(new Point(penCoords.x, penCoords.y, Point.COMMANDS.line));
                         }
                     }
+                    break;
 
                     // Cubic bezier curve command ("C")
                 case cubicBezier:
-                    Point originalPenCoords = penCoords.clone();
-                    for (int j = 0; j < numbers.length - 6; j+=6) {
+                    originalPenCoords = points.get(points.size() - 1).clone();
+                    for (int j = 0; j < numbers.length - 5; j+=6) {
                         // Sets the right handle of the last point.
                         penCoords.x = parseFloat(numbers[j]) + (isCommandRelative ? originalPenCoords.x : 0);
                         penCoords.y = parseFloat(numbers[j+1]) + (isCommandRelative ? originalPenCoords.y : 0);
@@ -290,7 +302,39 @@ public class SVG {
                         leftHandle.subtract(newPoint);
                         newPoint.setLeftHandle(leftHandle);
                         points.add(newPoint);
+                        // update originalPenCoords
+                        originalPenCoords = newPoint.clone();
                     }
+                    break;
+
+                case smoothCubicBezier:
+                    originalPenCoords = points.get(points.size() - 1).clone();
+                    for (int j = 0; j < numbers.length - 3; j+= 4) {
+                        // Reflect the left handle of the last control point.
+                        Point leftHandle = points.get(points.size() - 1).getLeftHandle();
+                        leftHandle.subtract(points.get(points.size() - 1));
+                        points.get(points.size() - 1).setRightHandle(new Point(
+                                -leftHandle.x,
+                                -leftHandle.y
+                        ));
+                        // Defines the handle for a new point.
+                        penCoords.x = parseFloat(numbers[j]) + (isCommandRelative ? originalPenCoords.x : 0);
+                        penCoords.y = parseFloat(numbers[j+1]) + (isCommandRelative ? originalPenCoords.y : 0);
+                        leftHandle = new Point(
+                                penCoords.x,
+                                penCoords.y
+                        );
+                        // Makes a new point.
+                        penCoords.x = parseFloat(numbers[j+2]) + (isCommandRelative ? originalPenCoords.x : 0);
+                        penCoords.y = parseFloat(numbers[j+3]) + (isCommandRelative ? originalPenCoords.y : 0);
+                        Point newPoint = new Point(penCoords.x, penCoords.y, Point.COMMANDS.line);
+                        leftHandle.subtract(newPoint);
+                        newPoint.setLeftHandle(leftHandle);
+                        points.add(newPoint);
+                        // update originalPenCoords
+                        originalPenCoords = newPoint.clone();
+                    }
+                    break;
             }
         }
 
@@ -317,6 +361,8 @@ public class SVG {
                 return Point.COMMANDS.vertical;
             case 'c':
                 return Point.COMMANDS.cubicBezier;
+            case 's':
+                return Point.COMMANDS.smoothCubicBezier;
             default:
                 return Point.COMMANDS.none;
         }

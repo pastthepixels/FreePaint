@@ -158,5 +158,5 @@ public class Point extends PointF {
     }
 
     // SVG point commands, with an extra command that defines handles. Only `none`, `move` and `line` are supported.
-    public enum COMMANDS {none, move, line, horizontal, vertical, cubicBezier, handle}
+    public enum COMMANDS {none, move, line, horizontal, vertical, cubicBezier, smoothCubicBezier, handle}
 }
