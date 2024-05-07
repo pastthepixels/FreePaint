@@ -20,7 +20,6 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -143,8 +142,8 @@ public class SVG {
             Document document = factory.newDocumentBuilder().parse(new ByteArrayInputStream(data.getBytes()));
             // Set size/color
             canvas.documentSize.set(
-                    parseFloat(document.getDocumentElement().getAttribute("width")),
-                    parseFloat(document.getDocumentElement().getAttribute("height"))
+                    Float.parseFloat(document.getDocumentElement().getAttribute("width").replace("px", "")),
+                    Float.parseFloat(document.getDocumentElement().getAttribute("height").replace("px", ""))
             );
             if (document.getDocumentElement().hasAttribute("viewport-fill")) {
                 canvas.documentColor = Color.parseColor(document.getDocumentElement().getAttribute("viewport-fill"));
@@ -229,7 +228,7 @@ public class SVG {
             // Note: commas are ignored (as per W3 spec) and replaced with spaces
             String[] numbers = commands.get(i).replace(",", " ").replace("-", " -").replace("  ", " ").substring(1).strip().split(" ");
             //TODO remove
-            for(String num : numbers) {
+            for (String num : numbers) {
                 System.out.print(num + " ");
             }
             System.out.println();
@@ -239,65 +238,65 @@ public class SVG {
             switch (command) {
                 // Horizontal lines ("H" command)
                 case horizontal:
-                    penCoords.x = isCommandRelative ? penCoords.x + parseFloat(numbers[0]) : parseFloat(numbers[0]);
+                    penCoords.x = Float.parseFloat(numbers[0]) + (isCommandRelative? penCoords.x : 0);
                     points.add(new Point(penCoords.x, penCoords.y, Point.COMMANDS.line));
                     break;
 
-                    // Vertical lines ("V" command)
+                // Vertical lines ("V" command)
                 case vertical:
-                    penCoords.y = isCommandRelative ? penCoords.y + parseFloat(numbers[0]) : parseFloat(numbers[0]);
+                    penCoords.y = Float.parseFloat(numbers[0]) + (isCommandRelative? penCoords.y : 0);
                     points.add(new Point(penCoords.x, penCoords.y, Point.COMMANDS.line));
                     break;
 
-                    // Moveto command ("M")
+                // Moveto command ("M")
                 case move:
                     for (int j = 0; j < numbers.length; j++) {
                         // Even index: likely x coordinate
                         if (j % 2 == 0) {
-                            penCoords.x = isCommandRelative ? penCoords.x + parseFloat(numbers[j]) : parseFloat(numbers[j]);
+                            penCoords.x = Float.parseFloat(numbers[j]) + (isCommandRelative? penCoords.x : 0);
                         } else {
-                            penCoords.y = isCommandRelative ? penCoords.y + parseFloat(numbers[j]) : parseFloat(numbers[j]);
+                            penCoords.y = Float.parseFloat(numbers[j]) + (isCommandRelative? penCoords.y : 0);
                         }
                     }
                     points.add(new Point(penCoords.x, penCoords.y, Point.COMMANDS.move));
                     break;
 
-                    // Lineto command ("L")
+                // Lineto command ("L")
                 case line:
                     for (int j = 0; j < numbers.length; j++) {
                         // Even index: likely x coordinate
                         if (j % 2 == 0) {
-                            penCoords.x = isCommandRelative ? penCoords.x + parseFloat(numbers[j]) : parseFloat(numbers[j]);
+                            penCoords.x = Float.parseFloat(numbers[j]) + (isCommandRelative? penCoords.x : 0);
                         } else {
                             // Odd index: y component of a coordinate, completes
                             // a coordinate which we add as a Point.
-                            penCoords.y = isCommandRelative ? penCoords.y + parseFloat(numbers[j]) : parseFloat(numbers[j]);
+                            penCoords.y = Float.parseFloat(numbers[j]) + (isCommandRelative? penCoords.y : 0);
                             points.add(new Point(penCoords.x, penCoords.y, Point.COMMANDS.line));
                         }
                     }
                     break;
 
-                    // Cubic bezier curve command ("C")
+                // Cubic bezier curve command ("C")
                 case cubicBezier:
                     originalPenCoords = points.get(points.size() - 1).clone();
-                    for (int j = 0; j < numbers.length - 5; j+=6) {
+                    for (int j = 0; j < numbers.length - 5; j += 6) {
                         // Sets the right handle of the last point.
-                        penCoords.x = parseFloat(numbers[j]) + (isCommandRelative ? originalPenCoords.x : 0);
-                        penCoords.y = parseFloat(numbers[j+1]) + (isCommandRelative ? originalPenCoords.y : 0);
+                        penCoords.x = Float.parseFloat(numbers[j]) + (isCommandRelative ? originalPenCoords.x : 0);
+                        penCoords.y = Float.parseFloat(numbers[j + 1]) + (isCommandRelative ? originalPenCoords.y : 0);
                         points.get(points.size() - 1).setRightHandle(new Point(
                                 penCoords.x - points.get(points.size() - 1).x,
                                 penCoords.y - points.get(points.size() - 1).y
                         ));
                         // Defines the handle for a new point.
-                        penCoords.x = parseFloat(numbers[j+2]) + (isCommandRelative ? originalPenCoords.x : 0);
-                        penCoords.y = parseFloat(numbers[j+3]) + (isCommandRelative ? originalPenCoords.y : 0);
+                        penCoords.x = Float.parseFloat(numbers[j + 2]) + (isCommandRelative ? originalPenCoords.x : 0);
+                        penCoords.y = Float.parseFloat(numbers[j + 3]) + (isCommandRelative ? originalPenCoords.y : 0);
                         Point leftHandle = new Point(
                                 penCoords.x,
                                 penCoords.y
                         );
                         // Makes a new point.
-                        penCoords.x = parseFloat(numbers[j+4]) + (isCommandRelative ? originalPenCoords.x : 0);
-                        penCoords.y = parseFloat(numbers[j+5]) + (isCommandRelative ? originalPenCoords.y : 0);
+                        penCoords.x = Float.parseFloat(numbers[j + 4]) + (isCommandRelative ? originalPenCoords.x : 0);
+                        penCoords.y = Float.parseFloat(numbers[j + 5]) + (isCommandRelative ? originalPenCoords.y : 0);
                         Point newPoint = new Point(penCoords.x, penCoords.y, Point.COMMANDS.line);
                         leftHandle.subtract(newPoint);
                         newPoint.setLeftHandle(leftHandle);
@@ -309,7 +308,7 @@ public class SVG {
 
                 case smoothCubicBezier:
                     originalPenCoords = points.get(points.size() - 1).clone();
-                    for (int j = 0; j < numbers.length - 3; j+= 4) {
+                    for (int j = 0; j < numbers.length - 3; j += 4) {
                         // Reflect the left handle of the last control point.
                         Point leftHandle = points.get(points.size() - 1).getLeftHandle();
                         leftHandle.subtract(points.get(points.size() - 1));
@@ -318,15 +317,15 @@ public class SVG {
                                 -leftHandle.y
                         ));
                         // Defines the handle for a new point.
-                        penCoords.x = parseFloat(numbers[j]) + (isCommandRelative ? originalPenCoords.x : 0);
-                        penCoords.y = parseFloat(numbers[j+1]) + (isCommandRelative ? originalPenCoords.y : 0);
+                        penCoords.x = Float.parseFloat(numbers[j]) + (isCommandRelative ? originalPenCoords.x : 0);
+                        penCoords.y = Float.parseFloat(numbers[j + 1]) + (isCommandRelative ? originalPenCoords.y : 0);
                         leftHandle = new Point(
                                 penCoords.x,
                                 penCoords.y
                         );
                         // Makes a new point.
-                        penCoords.x = parseFloat(numbers[j+2]) + (isCommandRelative ? originalPenCoords.x : 0);
-                        penCoords.y = parseFloat(numbers[j+3]) + (isCommandRelative ? originalPenCoords.y : 0);
+                        penCoords.x = Float.parseFloat(numbers[j + 2]) + (isCommandRelative ? originalPenCoords.x : 0);
+                        penCoords.y = Float.parseFloat(numbers[j + 3]) + (isCommandRelative ? originalPenCoords.y : 0);
                         Point newPoint = new Point(penCoords.x, penCoords.y, Point.COMMANDS.line);
                         leftHandle.subtract(newPoint);
                         newPoint.setLeftHandle(leftHandle);
@@ -366,34 +365,6 @@ public class SVG {
             default:
                 return Point.COMMANDS.none;
         }
-    }
-
-    /**
-     * Parses a floating point string, with decimals and negative values, to a <code>float</code>.
-     * Uses DecimalFormat.
-     *
-     * @param input The String to parse (ex. <code>"-100.54313"</code>
-     * @return The String, converted to a number (<code>Float</code>)
-     */
-    private float parseFloat(String input) {
-        DecimalFormat df = new DecimalFormat();
-        try {
-            return Objects.requireNonNull(df.parse(input.trim())).floatValue();
-        } catch (Exception e) {
-            Log.e("Warning:", "There was an issue parsing a float. It's been replaced with 0, but here's the error:");
-            e.printStackTrace();
-            return 0;
-        }
-    }
-
-    /**
-     * Checks if a number (as a String) is able to be parsed from <code>parseFloat</code>, or in other words, if it is a float
-     *
-     * @param input The number, as a String, to check.
-     * @return Whether or not parseFloat can parse the number
-     */
-    private boolean isFloat(String input) {
-        return !input.matches("[^\\d.]") && !input.equals("");
     }
 
 }
