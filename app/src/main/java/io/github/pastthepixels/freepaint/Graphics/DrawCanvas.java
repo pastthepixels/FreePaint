@@ -211,7 +211,7 @@ public final class DrawCanvas extends View {
         if (version_index < versions.size() - 1) {
             version_index += 1;
             paths = cloneDrawPathList(versions.get(version_index));
-        } else if (version_index <= 0) {
+        } else if (version_index <= 0 && !versions.isEmpty()) {
             version_index = 0;
             paths = cloneDrawPathList(versions.get(0));
         }
