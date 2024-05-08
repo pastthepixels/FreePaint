@@ -16,7 +16,6 @@ A vector graphics drawing app for Android.
 <img width="200px" src="https://github.com/pastthepixels/FreePaint/assets/52388215/5cd2b656-bcc9-4091-85e0-d821fbe38c66" />
 <img width="200px" src="https://github.com/pastthepixels/FreePaint/assets/52388215/2619125c-024f-4a9b-bc1b-214baa09c638" />
 <img width="200px" src="https://github.com/pastthepixels/FreePaint/assets/52388215/93487b6f-5506-4cec-a07a-f4c71b6e20ad" />
-<img height="200px" src="https://github.com/pastthepixels/FreePaint/assets/52388215/9a1f60b2-c87d-4941-94ef-22277d577b5a" />
 
 # FEATURING
 - Material Design 3 with dynamic colors
