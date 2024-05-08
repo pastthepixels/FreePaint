@@ -1,4 +1,4 @@
-package io.github.pastthepixels.freepaint;
+package io.github.pastthepixels.freepaint.Graphics;
 
 import android.graphics.Color;
 import android.graphics.Path;
@@ -20,6 +20,16 @@ public class Point extends PointF {
     public COMMANDS command = COMMANDS.none;
 
     /**
+     * Left or previous handle to the point, if it's in a curve.
+     */
+    private Point leftHandle = null;
+
+    /**
+     * Right or next handle to the point, if it's in a curve.
+     */
+    private Point rightHandle = null;
+
+    /**
      * Constructor for Point.
      *
      * @param x X-coordinate as a float
@@ -38,6 +48,60 @@ public class Point extends PointF {
         super(x, y);
         this.command = command;
         this.color = color;
+    }
+
+    /**
+     * Gets a right handle with coordinates in global space.
+     *
+     * @return a new Point
+     */
+    public Point getRightHandle() {
+        if (this.command == COMMANDS.handle) {
+            return null;
+        } else {
+            Point point = new Point(this.x, this.y);
+            point.command = COMMANDS.handle;
+            if (rightHandle != null) {
+                point.add(rightHandle);
+            }
+            return point;
+        }
+    }
+
+    /**
+     * Sets the right handle of the point - this defines the curvature in a spline.
+     *
+     * @param rightHandle A handle with coordinates relative to the point.
+     */
+    public void setRightHandle(Point rightHandle) {
+        this.rightHandle = rightHandle;
+    }
+
+    /**
+     * Gets a left handle with coordinates in global space.
+     *
+     * @return a new Point
+     */
+    public Point getLeftHandle() {
+        if (this.command == COMMANDS.handle) {
+            return null;
+        } else {
+            Point point = new Point(this.x, this.y);
+            point.command = COMMANDS.handle;
+            if (leftHandle != null) {
+                point.add(leftHandle);
+            }
+            return point;
+        }
+    }
+
+    /**
+     * Sets the left handle of the point - this defines the curvature in a spline.
+     *
+     * @param leftHandle A handle with coordinates relative to the point.
+     */
+    public void setLeftHandle(Point leftHandle) {
+        this.leftHandle = leftHandle;
     }
 
     /**
@@ -91,9 +155,13 @@ public class Point extends PointF {
     @NonNull
     @Override
     public Point clone() {
-        return new Point(x, y, command, color);
+        Point point = new Point(x, y, command, color);
+        if (this.getLeftHandle() != null) point.setLeftHandle(this.getLeftHandle().subtract(this));
+        if (this.getRightHandle() != null)
+            point.setRightHandle(this.getRightHandle().subtract(this));
+        return point;
     }
 
-    // SVG point commands. Only `none`, `move` and `line` are supported.
-    public enum COMMANDS {none, move, line, horizontal, vertical}
+    // SVG point commands, with an extra command that defines handles. Only `none`, `move` and `line` are supported.
+    public enum COMMANDS {none, move, line, horizontal, vertical, cubicBezier, smoothCubicBezier, handle}
 }

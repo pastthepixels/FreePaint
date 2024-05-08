@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -20,8 +19,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -47,6 +44,7 @@ import com.takisoft.preferencex.PreferenceFragmentCompat;
 import java.io.OutputStream;
 import java.util.Objects;
 
+import io.github.pastthepixels.freepaint.Graphics.DrawCanvas;
 import io.github.pastthepixels.freepaint.databinding.ActivityMainBinding;
 
 
@@ -97,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
                 if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                     Uri uri = result.getData().getData();
                     System.out.println(Objects.requireNonNull(uri).getPath());
-                    try(OutputStream stream = getApplicationContext().getContentResolver().openOutputStream(uri, "wt")) {
+                    try (OutputStream stream = getApplicationContext().getContentResolver().openOutputStream(uri, "wt")) {
                         assert stream != null;
                         binding.drawCanvas.toBitmap().compress(Bitmap.CompressFormat.PNG, 100, stream);
                     } catch (Exception e) {

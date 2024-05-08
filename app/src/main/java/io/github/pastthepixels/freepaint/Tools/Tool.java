@@ -4,7 +4,7 @@ import android.view.MotionEvent;
 
 import java.util.LinkedList;
 
-import io.github.pastthepixels.freepaint.DrawPath;
+import io.github.pastthepixels.freepaint.Graphics.DrawPath;
 
 public interface Tool {
     /**
