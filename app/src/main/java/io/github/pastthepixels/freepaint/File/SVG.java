@@ -9,6 +9,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import dev.romainguy.graphics.path.Svg;
 import io.github.pastthepixels.freepaint.Graphics.DrawAppearance;
@@ -135,53 +137,57 @@ public class SVG {
     public void parseFile(String data) {
         System.out.println("**READING**");
         System.out.println(data);
+
+        // Loads the document.
+        Document document;
         try {
-            Document document = factory.newDocumentBuilder().parse(new ByteArrayInputStream(data.getBytes()));
-            // Set size/color
-            canvas.documentSize.set(
-                    Float.parseFloat(document.getDocumentElement().getAttribute("width").replace("px", "")),
-                    Float.parseFloat(document.getDocumentElement().getAttribute("height").replace("px", ""))
-            );
-            if (document.getDocumentElement().hasAttribute("viewport-fill")) {
-                canvas.documentColor = Color.parseColor(document.getDocumentElement().getAttribute("viewport-fill"));
-            }
-            // Add paths
-            canvas.paths.clear();
-            NodeList nodes = document.getElementsByTagName("path");
-            for (int i = 0; i < nodes.getLength(); i++) {
-                Node node = nodes.item(i);
-                if (node.getNodeType() == Node.ELEMENT_NODE && ((Element) node).getTagName().equals("path")) {
-                    Element element = (Element) node;
-                    DrawPath path = new DrawPath(null);
-                    path.appearance.stroke = path.appearance.fill = -1;
-                    path.isClosed = element.getAttribute("d").toUpperCase().contains("Z");
-                    // Points
-                    path.points = parsePath(element.getAttribute("d"));
-                    // Fill/stroke
-                    float fillOpacity = element.hasAttribute("fill-opacity") ? Float.parseFloat(element.getAttribute("fill-opacity")) : 1;
-                    float strokeOpacity = element.hasAttribute("stroke-opacity") ? Float.parseFloat(element.getAttribute("stroke-opacity")) : 1;
-                    if (element.hasAttribute("fill") && !element.getAttribute("fill").equals("none")) {
-                        int fill = Color.parseColor(element.getAttribute("fill"));
-                        path.appearance.fill = Color.argb((int) (fillOpacity * 255), Color.red(fill), Color.green(fill), Color.blue(fill));
-                    }
-                    if (element.hasAttribute("stroke") && !element.getAttribute("stroke").equals("none")) {
-                        int stroke = Color.parseColor(element.getAttribute("stroke"));
-                        path.appearance.stroke = Color.argb((int) (strokeOpacity * 255), Color.red(stroke), Color.green(stroke), Color.blue(stroke));
-                    }
-                    // Stroke width
-                    if (element.hasAttribute("stroke-width")) {
-                        path.appearance.strokeSize = Integer.parseInt(element.getAttribute("stroke-width"));
-                    }
-                    // Done!!
-                    path.cachePath();
-                    canvas.paths.add(path);
-                }
-            }
-            // Invalidate!
-            canvas.invalidate();
-        } catch (Exception e) {
-            e.printStackTrace();
+            document = factory.newDocumentBuilder().parse(new ByteArrayInputStream(data.getBytes()));
+        } catch (IOException | ParserConfigurationException | SAXException e) {
+            throw new RuntimeException(e);
         }
+
+        // Set size/color
+        canvas.documentSize.set(
+                Float.parseFloat(document.getDocumentElement().getAttribute("width").replace("px", "")),
+                Float.parseFloat(document.getDocumentElement().getAttribute("height").replace("px", ""))
+        );
+        if (document.getDocumentElement().hasAttribute("viewport-fill")) {
+            canvas.documentColor = Color.parseColor(document.getDocumentElement().getAttribute("viewport-fill"));
+        }
+        // Add paths
+        canvas.paths.clear();
+        NodeList nodes = document.getElementsByTagName("path");
+        for (int i = 0; i < nodes.getLength(); i++) {
+            Node node = nodes.item(i);
+            if (node.getNodeType() == Node.ELEMENT_NODE && ((Element) node).getTagName().equals("path")) {
+                Element element = (Element) node;
+                DrawPath path = new DrawPath(null);
+                path.appearance.stroke = path.appearance.fill = -1;
+                path.isClosed = element.getAttribute("d").toUpperCase().contains("Z");
+                // Points
+                path.points = parsePath(element.getAttribute("d"));
+                // Fill/stroke
+                float fillOpacity = element.hasAttribute("fill-opacity") ? Float.parseFloat(element.getAttribute("fill-opacity")) : 1;
+                float strokeOpacity = element.hasAttribute("stroke-opacity") ? Float.parseFloat(element.getAttribute("stroke-opacity")) : 1;
+                if (element.hasAttribute("fill") && !element.getAttribute("fill").equals("none")) {
+                    int fill = Color.parseColor(element.getAttribute("fill"));
+                    path.appearance.fill = Color.argb((int) (fillOpacity * 255), Color.red(fill), Color.green(fill), Color.blue(fill));
+                }
+                if (element.hasAttribute("stroke") && !element.getAttribute("stroke").equals("none")) {
+                    int stroke = Color.parseColor(element.getAttribute("stroke"));
+                    path.appearance.stroke = Color.argb((int) (strokeOpacity * 255), Color.red(stroke), Color.green(stroke), Color.blue(stroke));
+                }
+                // Stroke width
+                if (element.hasAttribute("stroke-width")) {
+                    path.appearance.strokeSize = Integer.parseInt(element.getAttribute("stroke-width"));
+                }
+                // Done!!
+                path.cachePath();
+                canvas.paths.add(path);
+            }
+        }
+        // Invalidate!
+        canvas.invalidate();
     }
 
     /**
