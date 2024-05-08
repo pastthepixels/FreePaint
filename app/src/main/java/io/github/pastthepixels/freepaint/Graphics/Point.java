@@ -51,23 +51,8 @@ public class Point extends PointF {
     }
 
     /**
-     * Sets the left handle of the point - this defines the curvature in a spline.
-     * @param leftHandle A handle with coordinates relative to the point.
-     */
-    public void setLeftHandle(Point leftHandle) {
-        this.leftHandle = leftHandle;
-    }
-
-    /**
-     * Sets the right handle of the point - this defines the curvature in a spline.
-     * @param rightHandle A handle with coordinates relative to the point.
-     */
-    public void setRightHandle(Point rightHandle) {
-        this.rightHandle = rightHandle;
-    }
-
-    /**
      * Gets a right handle with coordinates in global space.
+     *
      * @return a new Point
      */
     public Point getRightHandle() {
@@ -84,7 +69,17 @@ public class Point extends PointF {
     }
 
     /**
+     * Sets the right handle of the point - this defines the curvature in a spline.
+     *
+     * @param rightHandle A handle with coordinates relative to the point.
+     */
+    public void setRightHandle(Point rightHandle) {
+        this.rightHandle = rightHandle;
+    }
+
+    /**
      * Gets a left handle with coordinates in global space.
+     *
      * @return a new Point
      */
     public Point getLeftHandle() {
@@ -98,6 +93,15 @@ public class Point extends PointF {
             }
             return point;
         }
+    }
+
+    /**
+     * Sets the left handle of the point - this defines the curvature in a spline.
+     *
+     * @param leftHandle A handle with coordinates relative to the point.
+     */
+    public void setLeftHandle(Point leftHandle) {
+        this.leftHandle = leftHandle;
     }
 
     /**
@@ -153,7 +157,8 @@ public class Point extends PointF {
     public Point clone() {
         Point point = new Point(x, y, command, color);
         if (this.getLeftHandle() != null) point.setLeftHandle(this.getLeftHandle().subtract(this));
-        if (this.getRightHandle() != null) point.setRightHandle(this.getRightHandle().subtract(this));
+        if (this.getRightHandle() != null)
+            point.setRightHandle(this.getRightHandle().subtract(this));
         return point;
     }
 

@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
                 if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                     Uri uri = result.getData().getData();
                     System.out.println(Objects.requireNonNull(uri).getPath());
-                    try(OutputStream stream = getApplicationContext().getContentResolver().openOutputStream(uri, "wt")) {
+                    try (OutputStream stream = getApplicationContext().getContentResolver().openOutputStream(uri, "wt")) {
                         assert stream != null;
                         binding.drawCanvas.toBitmap().compress(Bitmap.CompressFormat.PNG, 100, stream);
                     } catch (Exception e) {

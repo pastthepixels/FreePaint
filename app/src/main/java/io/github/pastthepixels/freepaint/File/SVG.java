@@ -235,13 +235,13 @@ public class SVG {
             switch (command) {
                 // Horizontal lines ("H" command)
                 case horizontal:
-                    penCoords.x = Float.parseFloat(numbers[0]) + (isCommandRelative? penCoords.x : 0);
+                    penCoords.x = Float.parseFloat(numbers[0]) + (isCommandRelative ? penCoords.x : 0);
                     points.add(new Point(penCoords.x, penCoords.y, Point.COMMANDS.line));
                     break;
 
                 // Vertical lines ("V" command)
                 case vertical:
-                    penCoords.y = Float.parseFloat(numbers[0]) + (isCommandRelative? penCoords.y : 0);
+                    penCoords.y = Float.parseFloat(numbers[0]) + (isCommandRelative ? penCoords.y : 0);
                     points.add(new Point(penCoords.x, penCoords.y, Point.COMMANDS.line));
                     break;
 
@@ -250,9 +250,9 @@ public class SVG {
                     for (int j = 0; j < numbers.length; j++) {
                         // Even index: likely x coordinate
                         if (j % 2 == 0) {
-                            penCoords.x = Float.parseFloat(numbers[j]) + (isCommandRelative? penCoords.x : 0);
+                            penCoords.x = Float.parseFloat(numbers[j]) + (isCommandRelative ? penCoords.x : 0);
                         } else {
-                            penCoords.y = Float.parseFloat(numbers[j]) + (isCommandRelative? penCoords.y : 0);
+                            penCoords.y = Float.parseFloat(numbers[j]) + (isCommandRelative ? penCoords.y : 0);
                         }
                     }
                     points.add(new Point(penCoords.x, penCoords.y, Point.COMMANDS.move));
@@ -263,11 +263,11 @@ public class SVG {
                     for (int j = 0; j < numbers.length; j++) {
                         // Even index: likely x coordinate
                         if (j % 2 == 0) {
-                            penCoords.x = Float.parseFloat(numbers[j]) + (isCommandRelative? penCoords.x : 0);
+                            penCoords.x = Float.parseFloat(numbers[j]) + (isCommandRelative ? penCoords.x : 0);
                         } else {
                             // Odd index: y component of a coordinate, completes
                             // a coordinate which we add as a Point.
-                            penCoords.y = Float.parseFloat(numbers[j]) + (isCommandRelative? penCoords.y : 0);
+                            penCoords.y = Float.parseFloat(numbers[j]) + (isCommandRelative ? penCoords.y : 0);
                             points.add(new Point(penCoords.x, penCoords.y, Point.COMMANDS.line));
                         }
                     }

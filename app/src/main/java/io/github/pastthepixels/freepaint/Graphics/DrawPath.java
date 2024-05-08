@@ -78,7 +78,7 @@ public class DrawPath {
      */
     public Path generatePath() {
         Path path = new Path();
-        for(int i = 0; i < points.size(); i ++) {
+        for (int i = 0; i < points.size(); i++) {
             Point point = points.get(i);
             if (i == 0 || point.command == Point.COMMANDS.move) {
                 path.moveTo(point.x, point.y);
@@ -136,7 +136,7 @@ public class DrawPath {
         // Simplifies the path.
         points = simplify(points, simplificationAmount);
         // Generates handles for each point.
-        for(int i = 0; i < points.size(); i++) {
+        for (int i = 0; i < points.size(); i++) {
             Point point = points.get(i);
             if (i == 0) {
                 Point next = points.get(i + 1);
@@ -167,7 +167,7 @@ public class DrawPath {
     private ArrayList<Point> simplify(ArrayList<Point> points, double epsilon) {
         double max_distance = 0;
         int index = 0;
-        for(int i = 2; i < points.size() - 1; i++) {
+        for (int i = 2; i < points.size() - 1; i++) {
             double distance = Utils.distanceFromPointToLine(points.get(0), points.get(points.size() - 1), points.get(i));
             if (distance > max_distance) {
                 index = i;
