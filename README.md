@@ -43,6 +43,5 @@ You can drag on that rectangle to move those paths, or draw on an empty space to
   with preferences
 
 # Potential future updates?
-- Automatically smoothing lines with Bezier curves
-- Layers!
-- Pen tool (like Illustrator/Inkscape!)
+- Layers
+- Pen tool (like Illustrator/Inkscape)
