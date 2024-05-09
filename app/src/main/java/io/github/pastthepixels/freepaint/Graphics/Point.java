@@ -140,14 +140,25 @@ public class Point extends PointF {
 
 
     /**
-     * Divides the coordinates of another point to the current point.
+     * Divides the coordinates of another point to the current point, and applies changes to the current point.
      * Returns the current point for single-line operations.
      *
      * @param number The number which you want to divide both the x and y coordinates by
      */
-    public void divide(float number) {
-        this.x /= number;
-        this.y /= number;
+    public void applyMultiply(float number) {
+        this.x *= number;
+        this.y *= number;
+    }
+
+
+    /**
+     * Divides the coordinates of another point to the current point, and applies changes to the current point.
+     *
+     * @param scale The number which you want to divide both the x and y coordinates by
+     * @return A new point that is scaled.
+     */
+    public Point multiply(float scale) {
+        return new Point(this.x * scale, this.y * scale);
     }
 
     /**

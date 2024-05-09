@@ -86,7 +86,7 @@ public class PanTool implements Tool {
                 -(float) canvas.getWidth() * scaleFactor / 2 + ((float) canvas.getWidth() / 2),
                 -(float) canvas.getHeight() * scaleFactor / 2 + ((float) canvas.getHeight() / 2)
         );
-        panOffset.divide(scaleFactor);
+        panOffset.applyMultiply((float) 1./scaleFactor);
     }
 
     /**
