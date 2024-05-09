@@ -147,15 +147,19 @@ public class DrawPath {
             } else if (i != points.size() - 1) {
                 Point prev = points.get(i - 1);
                 Point next = points.get(i + 1);
-                point.setRightHandle(new Point(
+                // Set handles (left handle is mirrored; hermite splines!
+                Point rightHandle = new Point(
                         ((next.x - prev.x) / 6),
                         ((next.y - prev.y) / 6)
-                ));
-                // Left handle is mirrored.
-                point.setLeftHandle(new Point(
-                        -((next.x - prev.x) / 6),
-                        -((next.y - prev.y) / 6)
-                ));
+                );
+                point.setRightHandle(rightHandle);
+                point.setLeftHandle(rightHandle.multiply(-1));
+                // If the angles between the current point and the next point/current and previous are acute, make the corner sharp.
+                double angle = Utils.angleBetweenVectors(prev.subtract(point), point.subtract(next));
+                if (Math.abs(angle) > Math.PI/2) { // idk how this works but it does. it shouldn't be this way.
+                    point.setLeftHandle(new Point(0, 0 ));
+                    point.setRightHandle(new Point(0, 0 ));
+                }
             }
         }
     }
