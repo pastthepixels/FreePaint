@@ -8,4 +8,16 @@ public class Utils {
         double denominator = Math.sqrt(Math.pow(lineEnd.x - lineStart.x, 2) + Math.pow(lineEnd.y - lineStart.y, 2));
         return numerator / denominator;
     }
+
+    public static Point collisionBetweenLines(Point aStart, Point aEnd, Point bStart, Point bEnd) {
+        double detA = aStart.x * aEnd.y - aStart.y * aEnd.x;
+        double detB = bStart.x * bEnd.y - bStart.y * bEnd.x;
+        Point diffA = aStart.subtract(aEnd);
+        Point diffB = bStart.subtract(bEnd);
+        double denom = diffA.x * diffB.y - diffA.y * diffB.x;
+        return new Point(
+                (float) ((detA * diffB.x - diffA.x * detB) / denom),
+                (float) ((detA * diffB.y - diffA.y * detB) / denom)
+        );
+    }
 }
