@@ -142,6 +142,9 @@ public final class DrawCanvas extends View {
         editor.putString("documentWidth", String.format("%d", (int) documentSize.x));
         editor.putString("documentHeight", String.format("%d", (int) documentSize.y));
         editor.apply();
+        // Save everything in the version history
+        versions.add(cloneDrawPathList(paths));
+        version_index += 1;
     }
 
     /**
