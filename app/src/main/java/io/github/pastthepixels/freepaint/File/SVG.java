@@ -301,7 +301,7 @@ public class SVG {
                         penCoords.x = Float.parseFloat(numbers[j + 4]) + (isCommandRelative ? originalPenCoords.x : 0);
                         penCoords.y = Float.parseFloat(numbers[j + 5]) + (isCommandRelative ? originalPenCoords.y : 0);
                         Point newPoint = new Point(penCoords.x, penCoords.y, Point.COMMANDS.line);
-                        leftHandle.subtract(newPoint);
+                        leftHandle.applySubtract(newPoint);
                         newPoint.setLeftHandle(leftHandle);
                         points.add(newPoint);
                         // update originalPenCoords
@@ -314,7 +314,7 @@ public class SVG {
                     for (int j = 0; j < numbers.length - 3; j += 4) {
                         // Reflect the left handle of the last control point.
                         Point leftHandle = points.get(points.size() - 1).getLeftHandle();
-                        leftHandle.subtract(points.get(points.size() - 1));
+                        leftHandle.applySubtract(points.get(points.size() - 1));
                         points.get(points.size() - 1).setRightHandle(new Point(
                                 -leftHandle.x,
                                 -leftHandle.y
@@ -330,7 +330,7 @@ public class SVG {
                         penCoords.x = Float.parseFloat(numbers[j + 2]) + (isCommandRelative ? originalPenCoords.x : 0);
                         penCoords.y = Float.parseFloat(numbers[j + 3]) + (isCommandRelative ? originalPenCoords.y : 0);
                         Point newPoint = new Point(penCoords.x, penCoords.y, Point.COMMANDS.line);
-                        leftHandle.subtract(newPoint);
+                        leftHandle.applySubtract(newPoint);
                         newPoint.setLeftHandle(leftHandle);
                         points.add(newPoint);
                         // update originalPenCoords

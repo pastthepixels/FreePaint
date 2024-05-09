@@ -108,9 +108,9 @@ public class SelectionTool implements Tool {
                 if (mode == TOUCH_MODES.move && previousPoint != null) {
                     // If we're trying to move all the paths we selected... well, move them!
                     changedDrawPaths = true;
-                    currentPath.translate(touchPoint.clone().subtract(previousPoint));
+                    currentPath.translate(touchPoint.clone().applySubtract(previousPoint));
                     for (DrawPath path : selectedPaths) {
-                        path.translate(touchPoint.clone().subtract(previousPoint));
+                        path.translate(touchPoint.clone().applySubtract(previousPoint));
                         path.cachePath();
                     }
                 }

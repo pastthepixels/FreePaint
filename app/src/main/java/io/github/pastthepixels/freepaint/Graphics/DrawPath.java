@@ -181,7 +181,7 @@ public class DrawPath {
             // Like merge sort
             ArrayList<Point> leftHalf = simplify(new ArrayList<Point>(points.subList(0, index)), epsilon);
             ArrayList<Point> rightHalf = simplify(new ArrayList<Point>(points.subList(index, points.size())), epsilon);
-            Point point = rightHalf.get(0).clone().subtract(leftHalf.get(leftHalf.size() - 1));
+            Point point = rightHalf.get(0).clone().applySubtract(leftHalf.get(leftHalf.size() - 1));
             leftHalf.remove(leftHalf.size() - 1);
             simplified.addAll(leftHalf);
             simplified.addAll(rightHalf);

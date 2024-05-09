@@ -116,16 +116,26 @@ public class Point extends PointF {
     }
 
     /**
-     * Subtracts the coordinates of another point to the current point.
+     * Subtracts the coordinates of another point to the current point, and applies changes to the current point.
      * Returns the current point for single-line operations.
      *
      * @param point The point which has the coordinates you want to subtract.
      * @return The point you are preforming the operation on (<code>this</code>)
      */
-    public Point subtract(Point point) {
+    public Point applySubtract(Point point) {
         this.x -= point.x;
         this.y -= point.y;
         return this;
+    }
+
+    /**
+     * Subtracts the coordinates of another point to the current point.
+     *
+     * @param point The point which has the coordinates you want to subtract.
+     * @return A new point that is the difference between the two points of concern.
+     */
+    public Point subtract(Point point) {
+        return new Point(this.x - point.x, this.y - point.y);
     }
 
 
@@ -156,9 +166,9 @@ public class Point extends PointF {
     @Override
     public Point clone() {
         Point point = new Point(x, y, command, color);
-        if (this.getLeftHandle() != null) point.setLeftHandle(this.getLeftHandle().subtract(this));
+        if (this.getLeftHandle() != null) point.setLeftHandle(this.getLeftHandle().applySubtract(this));
         if (this.getRightHandle() != null)
-            point.setRightHandle(this.getRightHandle().subtract(this));
+            point.setRightHandle(this.getRightHandle().applySubtract(this));
         return point;
     }
 
