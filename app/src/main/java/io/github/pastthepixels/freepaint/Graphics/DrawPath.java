@@ -154,9 +154,9 @@ public class DrawPath {
                 );
                 point.setRightHandle(rightHandle);
                 point.setLeftHandle(rightHandle.multiply(-1));
-                // If the angles between the current point and the next point/current and previous are acute, make the corner sharp.
+                // If the angles between the current point and the next point/current and previous are acute/right, make the corner sharp.
                 double angle = Utils.angleBetweenVectors(prev.subtract(point), point.subtract(next));
-                if (Math.abs(angle) > Math.PI/2) { // idk how this works but it does. it shouldn't be this way.
+                if (Math.abs(angle) >= Math.PI/2) { // idk how this works but it does. it shouldn't be this way.
                     point.setLeftHandle(new Point(0, 0 ));
                     point.setRightHandle(new Point(0, 0 ));
                 }
