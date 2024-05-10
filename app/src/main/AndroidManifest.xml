@@ -12,22 +12,17 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FreePaint"
         android:name=".FreePaintApplication"
-        tools:targetApi="31">
+        tools:targetApi="34">
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize|uiMode"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.FreePaint">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
     </application>
-
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
 </manifest>

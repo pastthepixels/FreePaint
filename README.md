@@ -13,9 +13,9 @@ A vector graphics drawing app for Android.
 <a href="https://f-droid.org/en/packages/io.github.pastthepixels.freepaint/">Get it on F-Droid!</a>
 
 # Screenshots
-<img width="200px" src="https://github.com/pastthepixels/FreePaint/assets/52388215/665d393b-f937-4263-bac5-8cf5b0239257" />
-<img width="200px" src="https://github.com/pastthepixels/FreePaint/assets/52388215/58481eb2-5b47-4b1c-ab8c-16e4331d4df5" />
-
+<img width="200px" src="https://github.com/pastthepixels/FreePaint/assets/52388215/5cd2b656-bcc9-4091-85e0-d821fbe38c66" />
+<img width="200px" src="https://github.com/pastthepixels/FreePaint/assets/52388215/2619125c-024f-4a9b-bc1b-214baa09c638" />
+<img width="200px" src="https://github.com/pastthepixels/FreePaint/assets/52388215/93487b6f-5506-4cec-a07a-f4c71b6e20ad" />
 
 # FEATURING
 - Material Design 3 with dynamic colors
@@ -42,6 +42,5 @@ You can drag on that rectangle to move those paths, or draw on an empty space to
   with preferences
 
 # Potential future updates?
-- Automatically smoothing lines with Bezier curves
-- Layers!
-- Pen tool (like Illustrator/Inkscape!)
+- Layers
+- Pen tool (like Illustrator/Inkscape)

@@ -2,7 +2,6 @@ package io.github.pastthepixels.freepaint.File;
 
 import android.annotation.SuppressLint;
 import android.graphics.Color;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -10,6 +9,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -18,17 +18,17 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.text.DecimalFormat;
-import java.util.LinkedList;
-import java.util.Objects;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
-import io.github.pastthepixels.freepaint.DrawAppearance;
-import io.github.pastthepixels.freepaint.DrawCanvas;
-import io.github.pastthepixels.freepaint.DrawPath;
-import io.github.pastthepixels.freepaint.Point;
+import dev.romainguy.graphics.path.Svg;
+import io.github.pastthepixels.freepaint.Graphics.DrawAppearance;
+import io.github.pastthepixels.freepaint.Graphics.DrawCanvas;
+import io.github.pastthepixels.freepaint.Graphics.DrawPath;
+import io.github.pastthepixels.freepaint.Graphics.Point;
 
 public class SVG {
     private final DrawCanvas canvas;
@@ -105,14 +105,7 @@ public class SVG {
     public void addPath(DrawPath path) {
         StringBuilder data = new StringBuilder("\n<path d=\"");
         // Step 1. Add points.
-        for (Point point : path.points) {
-            String command = point.command == Point.COMMANDS.move ? "M" : "L";
-            if (point == path.points.get(0)) command = "M";
-            data.append(String.format("%s%.2f %.2f ", command, point.x, point.y));
-        }
-        if (path.isClosed) {
-            data.append("Z");
-        }
+        data.append(Svg.toSvg(path.generatePath(), false));
         data.append("\" ");
         // Step 2. Set the appearance of the path.
         // Inkscape only accepts hex colors, I don't know why
@@ -144,53 +137,57 @@ public class SVG {
     public void parseFile(String data) {
         System.out.println("**READING**");
         System.out.println(data);
+
+        // Loads the document.
+        Document document;
         try {
-            Document document = factory.newDocumentBuilder().parse(new ByteArrayInputStream(data.getBytes()));
-            // Set size/color
-            canvas.documentSize.set(
-                    parseFloat(document.getDocumentElement().getAttribute("width")),
-                    parseFloat(document.getDocumentElement().getAttribute("height"))
-            );
-            if (document.getDocumentElement().hasAttribute("viewport-fill")) {
-                canvas.documentColor = Color.parseColor(document.getDocumentElement().getAttribute("viewport-fill"));
-            }
-            // Add paths
-            canvas.paths.clear();
-            NodeList nodes = document.getElementsByTagName("path");
-            for (int i = 0; i < nodes.getLength(); i++) {
-                Node node = nodes.item(i);
-                if (node.getNodeType() == Node.ELEMENT_NODE && ((Element) node).getTagName().equals("path")) {
-                    Element element = (Element) node;
-                    DrawPath path = new DrawPath(null);
-                    path.appearance.stroke = path.appearance.fill = -1;
-                    path.isClosed = element.getAttribute("d").toUpperCase().contains("Z");
-                    // Points
-                    path.points = parsePath(element.getAttribute("d"));
-                    // Fill/stroke
-                    float fillOpacity = element.hasAttribute("fill-opacity") ? Float.parseFloat(element.getAttribute("fill-opacity")) : 1;
-                    float strokeOpacity = element.hasAttribute("stroke-opacity") ? Float.parseFloat(element.getAttribute("stroke-opacity")) : 1;
-                    if (element.hasAttribute("fill") && !element.getAttribute("fill").equals("none")) {
-                        int fill = Color.parseColor(element.getAttribute("fill"));
-                        path.appearance.fill = Color.argb((int) (fillOpacity * 255), Color.red(fill), Color.green(fill), Color.blue(fill));
-                    }
-                    if (element.hasAttribute("stroke") && !element.getAttribute("stroke").equals("none")) {
-                        int stroke = Color.parseColor(element.getAttribute("stroke"));
-                        path.appearance.stroke = Color.argb((int) (strokeOpacity * 255), Color.red(stroke), Color.green(stroke), Color.blue(stroke));
-                    }
-                    // Stroke width
-                    if (element.hasAttribute("stroke-width")) {
-                        path.appearance.strokeSize = Integer.parseInt(element.getAttribute("stroke-width"));
-                    }
-                    // Done!!
-                    path.finalise();
-                    canvas.paths.add(path);
-                }
-            }
-            // Invalidate!
-            canvas.invalidate();
-        } catch (Exception e) {
-            e.printStackTrace();
+            document = factory.newDocumentBuilder().parse(new ByteArrayInputStream(data.getBytes()));
+        } catch (IOException | ParserConfigurationException | SAXException e) {
+            throw new RuntimeException(e);
         }
+
+        // Set size/color
+        canvas.documentSize.set(
+                Float.parseFloat(document.getDocumentElement().getAttribute("width").replace("px", "")),
+                Float.parseFloat(document.getDocumentElement().getAttribute("height").replace("px", ""))
+        );
+        if (document.getDocumentElement().hasAttribute("viewport-fill")) {
+            canvas.documentColor = Color.parseColor(document.getDocumentElement().getAttribute("viewport-fill"));
+        }
+        // Add paths
+        canvas.paths.clear();
+        NodeList nodes = document.getElementsByTagName("path");
+        for (int i = 0; i < nodes.getLength(); i++) {
+            Node node = nodes.item(i);
+            if (node.getNodeType() == Node.ELEMENT_NODE && ((Element) node).getTagName().equals("path")) {
+                Element element = (Element) node;
+                DrawPath path = new DrawPath(null);
+                path.appearance.stroke = path.appearance.fill = -1;
+                path.isClosed = element.getAttribute("d").toUpperCase().contains("Z");
+                // Points
+                path.points = parsePath(element.getAttribute("d"));
+                // Fill/stroke
+                float fillOpacity = element.hasAttribute("fill-opacity") ? Float.parseFloat(element.getAttribute("fill-opacity")) : 1;
+                float strokeOpacity = element.hasAttribute("stroke-opacity") ? Float.parseFloat(element.getAttribute("stroke-opacity")) : 1;
+                if (element.hasAttribute("fill") && !element.getAttribute("fill").equals("none")) {
+                    int fill = Color.parseColor(element.getAttribute("fill"));
+                    path.appearance.fill = Color.argb((int) (fillOpacity * 255), Color.red(fill), Color.green(fill), Color.blue(fill));
+                }
+                if (element.hasAttribute("stroke") && !element.getAttribute("stroke").equals("none")) {
+                    int stroke = Color.parseColor(element.getAttribute("stroke"));
+                    path.appearance.stroke = Color.argb((int) (strokeOpacity * 255), Color.red(stroke), Color.green(stroke), Color.blue(stroke));
+                }
+                // Stroke width
+                if (element.hasAttribute("stroke-width")) {
+                    path.appearance.strokeSize = Integer.parseInt(element.getAttribute("stroke-width"));
+                }
+                // Done!!
+                path.cachePath();
+                canvas.paths.add(path);
+            }
+        }
+        // Invalidate!
+        canvas.invalidate();
     }
 
     /**
@@ -207,14 +204,14 @@ public class SVG {
      * @param d The "d" attribute of an SVG path element.
      * @return A linked list of points, with proper commands, that you can use in a DrawPath.
      */
-    public LinkedList<Point> parsePath(@NonNull String d) {
+    public ArrayList<Point> parsePath(@NonNull String d) {
         // We start with a "pen" that we set the position of (capital letters) or move around by an amount (lowercase letters)
         Point penCoords = new Point(0, 0);
-        LinkedList<Point> points = new LinkedList<>();
+        ArrayList<Point> points = new ArrayList<>();
 
         // 1. Separate the string into 1 string per command (ex. "M 12 240 10 4" (multiple points with same command), "L 4")
-        LinkedList<String> commands = new LinkedList<>();
-        for(int i = 0; i < d.length(); i ++) {
+        ArrayList<String> commands = new ArrayList<>();
+        for (int i = 0; i < d.length(); i++) {
             if (Character.isLetter(d.charAt(i))) {
                 commands.add(String.valueOf(d.charAt(i)));
             } else {
@@ -226,49 +223,120 @@ public class SVG {
         }
 
         // 2. Separate each string into points with the command of the letter at the start of the string.
-        for(int i = 0; i < commands.size(); i++) {
+        for (int i = 0; i < commands.size(); i++) {
             System.out.println(commands.get(i));
             // Take the first letter out; that's a command, not a number.
             Point.COMMANDS command = svgToPointCommand(commands.get(i).charAt(0));
             boolean isCommandRelative = Character.isLowerCase(commands.get(i).charAt(0));
             // Note: commas are ignored (as per W3 spec) and replaced with spaces
-            String[] numbers = commands.get(i).replace(",", " ").substring(1).strip().split(" ");
-            switch(command) {
+            String[] numbers = commands.get(i).replace(",", " ").replace("-", " -").replace("  ", " ").substring(1).strip().split(" ");
+            //TODO remove
+            for (String num : numbers) {
+                System.out.print(num + " ");
+            }
+            System.out.println();
+
+            Point originalPenCoords; // Used for bezier curves
+
+            switch (command) {
                 // Horizontal lines ("H" command)
                 case horizontal:
-                    penCoords.x = isCommandRelative? penCoords.x + parseFloat(numbers[0]) : parseFloat(numbers[0]);
+                    penCoords.x = Float.parseFloat(numbers[0]) + (isCommandRelative ? penCoords.x : 0);
                     points.add(new Point(penCoords.x, penCoords.y, Point.COMMANDS.line));
+                    break;
 
                 // Vertical lines ("V" command)
                 case vertical:
-                    penCoords.y = isCommandRelative? penCoords.y + parseFloat(numbers[0]) : parseFloat(numbers[0]);
+                    penCoords.y = Float.parseFloat(numbers[0]) + (isCommandRelative ? penCoords.y : 0);
                     points.add(new Point(penCoords.x, penCoords.y, Point.COMMANDS.line));
+                    break;
 
                 // Moveto command ("M")
                 case move:
-                    for(int j = 0; j < numbers.length; j ++) {
+                    for (int j = 0; j < numbers.length; j++) {
                         // Even index: likely x coordinate
-                        if(j % 2 == 0) {
-                            penCoords.x = isCommandRelative? penCoords.x + parseFloat(numbers[j]) : parseFloat(numbers[j]);
+                        if (j % 2 == 0) {
+                            penCoords.x = Float.parseFloat(numbers[j]) + (isCommandRelative ? penCoords.x : 0);
                         } else {
-                            penCoords.y = isCommandRelative? penCoords.y + parseFloat(numbers[j]) : parseFloat(numbers[j]);
+                            penCoords.y = Float.parseFloat(numbers[j]) + (isCommandRelative ? penCoords.y : 0);
                         }
                     }
                     points.add(new Point(penCoords.x, penCoords.y, Point.COMMANDS.move));
+                    break;
 
                 // Lineto command ("L")
                 case line:
-                    for(int j = 0; j < numbers.length; j ++) {
+                    for (int j = 0; j < numbers.length; j++) {
                         // Even index: likely x coordinate
-                        if(j % 2 == 0) {
-                            penCoords.x = isCommandRelative? penCoords.x + parseFloat(numbers[j]) : parseFloat(numbers[j]);
+                        if (j % 2 == 0) {
+                            penCoords.x = Float.parseFloat(numbers[j]) + (isCommandRelative ? penCoords.x : 0);
                         } else {
                             // Odd index: y component of a coordinate, completes
                             // a coordinate which we add as a Point.
-                            penCoords.y = isCommandRelative? penCoords.y + parseFloat(numbers[j]) : parseFloat(numbers[j]);
+                            penCoords.y = Float.parseFloat(numbers[j]) + (isCommandRelative ? penCoords.y : 0);
                             points.add(new Point(penCoords.x, penCoords.y, Point.COMMANDS.line));
                         }
                     }
+                    break;
+
+                // Cubic bezier curve command ("C")
+                case cubicBezier:
+                    originalPenCoords = points.get(points.size() - 1).clone();
+                    for (int j = 0; j < numbers.length - 5; j += 6) {
+                        // Sets the right handle of the last point.
+                        penCoords.x = Float.parseFloat(numbers[j]) + (isCommandRelative ? originalPenCoords.x : 0);
+                        penCoords.y = Float.parseFloat(numbers[j + 1]) + (isCommandRelative ? originalPenCoords.y : 0);
+                        points.get(points.size() - 1).setRightHandle(new Point(
+                                penCoords.x - points.get(points.size() - 1).x,
+                                penCoords.y - points.get(points.size() - 1).y
+                        ));
+                        // Defines the handle for a new point.
+                        penCoords.x = Float.parseFloat(numbers[j + 2]) + (isCommandRelative ? originalPenCoords.x : 0);
+                        penCoords.y = Float.parseFloat(numbers[j + 3]) + (isCommandRelative ? originalPenCoords.y : 0);
+                        Point leftHandle = new Point(
+                                penCoords.x,
+                                penCoords.y
+                        );
+                        // Makes a new point.
+                        penCoords.x = Float.parseFloat(numbers[j + 4]) + (isCommandRelative ? originalPenCoords.x : 0);
+                        penCoords.y = Float.parseFloat(numbers[j + 5]) + (isCommandRelative ? originalPenCoords.y : 0);
+                        Point newPoint = new Point(penCoords.x, penCoords.y, Point.COMMANDS.line);
+                        leftHandle.applySubtract(newPoint);
+                        newPoint.setLeftHandle(leftHandle);
+                        points.add(newPoint);
+                        // update originalPenCoords
+                        originalPenCoords = newPoint.clone();
+                    }
+                    break;
+
+                case smoothCubicBezier:
+                    originalPenCoords = points.get(points.size() - 1).clone();
+                    for (int j = 0; j < numbers.length - 3; j += 4) {
+                        // Reflect the left handle of the last control point.
+                        Point leftHandle = points.get(points.size() - 1).getLeftHandle();
+                        leftHandle.applySubtract(points.get(points.size() - 1));
+                        points.get(points.size() - 1).setRightHandle(new Point(
+                                -leftHandle.x,
+                                -leftHandle.y
+                        ));
+                        // Defines the handle for a new point.
+                        penCoords.x = Float.parseFloat(numbers[j]) + (isCommandRelative ? originalPenCoords.x : 0);
+                        penCoords.y = Float.parseFloat(numbers[j + 1]) + (isCommandRelative ? originalPenCoords.y : 0);
+                        leftHandle = new Point(
+                                penCoords.x,
+                                penCoords.y
+                        );
+                        // Makes a new point.
+                        penCoords.x = Float.parseFloat(numbers[j + 2]) + (isCommandRelative ? originalPenCoords.x : 0);
+                        penCoords.y = Float.parseFloat(numbers[j + 3]) + (isCommandRelative ? originalPenCoords.y : 0);
+                        Point newPoint = new Point(penCoords.x, penCoords.y, Point.COMMANDS.line);
+                        leftHandle.applySubtract(newPoint);
+                        newPoint.setLeftHandle(leftHandle);
+                        points.add(newPoint);
+                        // update originalPenCoords
+                        originalPenCoords = newPoint.clone();
+                    }
+                    break;
             }
         }
 
@@ -284,7 +352,7 @@ public class SVG {
     public Point.COMMANDS svgToPointCommand(char svgCommand) {
         // Only moveto and line commands are supported--SVGs with a "c/s" command won't load
         // as FreePaint doesnt' support Bezier curves right now
-        switch(Character.toLowerCase(svgCommand)) {
+        switch (Character.toLowerCase(svgCommand)) {
             case 'm':
                 return Point.COMMANDS.move;
             case 'l':
@@ -293,37 +361,13 @@ public class SVG {
                 return Point.COMMANDS.horizontal;
             case 'v':
                 return Point.COMMANDS.vertical;
+            case 'c':
+                return Point.COMMANDS.cubicBezier;
+            case 's':
+                return Point.COMMANDS.smoothCubicBezier;
             default:
                 return Point.COMMANDS.none;
         }
-    }
-
-    /**
-     * Parses a floating point string, with decimals and negative values, to a <code>float</code>.
-     * Uses DecimalFormat.
-     *
-     * @param input The String to parse (ex. <code>"-100.54313"</code>
-     * @return The String, converted to a number (<code>Float</code>)
-     */
-    private float parseFloat(String input) {
-        DecimalFormat df = new DecimalFormat();
-        try {
-            return Objects.requireNonNull(df.parse(input.trim())).floatValue();
-        } catch (Exception e) {
-            Log.e("Warning:", "There was an issue parsing a float. It's been replaced with 0, but here's the error:");
-            e.printStackTrace();
-            return 0;
-        }
-    }
-
-    /**
-     * Checks if a number (as a String) is able to be parsed from <code>parseFloat</code>, or in other words, if it is a float
-     *
-     * @param input The number, as a String, to check.
-     * @return Whether or not parseFloat can parse the number
-     */
-    private boolean isFloat(String input) {
-        return !input.matches("[^\\d.]") && !input.equals("");
     }
 
 }

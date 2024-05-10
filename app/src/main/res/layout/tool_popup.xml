@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/settings_popup"
+    style="@style/Widget.Material3.BottomSheet.Modal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_weight="1"
+    android:orientation="vertical"
+    android:padding="20dp"
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+    <Button
+        android:id="@+id/select_tool_paintbrush"
+        style="@style/Widget.Material3.Button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/tool_paintbrush"
+        android:padding="20dp"
+        android:text="@string/tool_paintbrush"
+        android:textAlignment="textStart"
+        app:icon="@drawable/baseline_brush_24" />
+
+    <Button
+        android:id="@+id/select_tool_eraser"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/tool_eraser"
+        android:padding="20dp"
+        android:text="@string/tool_eraser"
+        android:textAlignment="textStart"
+        app:icon="@drawable/baseline_eraser_24" />
+
+    <Button
+        android:id="@+id/select_tool_select"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/tool_select"
+        android:padding="20dp"
+        android:text="@string/tool_select"
+        android:textAlignment="textStart"
+        app:icon="@drawable/baseline_select_all_24" />
+
+    <Button
+        android:id="@+id/select_tool_pan"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/tool_pan"
+        android:padding="20dp"
+        android:text="@string/tool_pan"
+        android:textAlignment="textStart"
+        app:icon="@drawable/baseline_pan_tool_24" />
+
+</LinearLayout>

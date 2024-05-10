@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="io.github.pastthepixels.freepaint.MainActivity">
+
+    <!-- Options -->
+    <item
+        android:id="@+id/action_undo"
+        android:icon="@drawable/baseline_undo_24"
+        android:title="@string/action_undo"
+        app:iconTint="?attr/colorControlNormal"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_redo"
+        android:icon="@drawable/baseline_redo_24"
+        android:title="@string/action_redo"
+        app:iconTint="?attr/colorControlNormal"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_set_stroke"
+        android:icon="@drawable/outline_circle_24"
+        android:title="@string/action_set_stroke"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_set_fill"
+        android:icon="@drawable/baseline_circle_24"
+        android:title="@string/action_set_fill"
+        app:showAsAction="always" />
+
+    <!-- Overflow options -->
+    <item
+        android:orderInCategory="100"
+        android:title="@string/opt_category_file"
+        app:showAsAction="never">
+        <menu>
+            <group
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:menuCategory="secondary">
+                <item
+                    android:id="@+id/action_save"
+                    android:title="@string/action_save" />
+                <item
+                    android:id="@+id/action_load"
+                    android:title="@string/action_load" />
+                <item
+                    android:id="@+id/action_export"
+                    android:title="@string/action_export" />
+            </group>
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/action_settings"
+        android:orderInCategory="100"
+        android:title="@string/action_settings"
+        app:showAsAction="never" />
+
+</menu>

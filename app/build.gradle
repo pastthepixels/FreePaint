@@ -10,8 +10,8 @@ android {
         applicationId "io.github.pastthepixels.freepaint"
         minSdk 24
         targetSdk 34
-        versionCode 4 // Change this when you want to make another version!!
-        versionName "1.1.0"
+        versionCode 5 // Change this when you want to make another version!!
+        versionName "1.2.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -42,7 +42,7 @@ dependencies {
     implementation 'com.github.martin-stone:hsv-alpha-color-picker-android:3.0.1'
     implementation 'androidx.preference:preference:1.2.1'
     implementation 'com.takisoft.preferencex:preferencex:1.1.0'
-    implementation 'dev.romainguy:pathway:0.10.0'
+    implementation 'dev.romainguy:pathway:0.18.0'
     /* End custom modules */
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

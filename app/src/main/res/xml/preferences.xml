@@ -31,6 +31,14 @@
         app:title="@string/pref_closed_paths"
         app:widgetLayout="@layout/switch_preference_material" />
 
+    <com.takisoft.preferencex.EditTextPreference
+        android:digits="0123456789"
+        android:inputType="numberDecimal"
+        android:defaultValue="0"
+        app:key="simplificationAmount"
+        app:title="@string/simplification_amount"
+        app:useSimpleSummaryProvider="true" />
+
     <!-- Is set whenever you open a file, and by default is letter (according to Inkscape) -->
     <com.takisoft.preferencex.EditTextPreference
         android:digits="0123456789"
@@ -49,12 +57,6 @@
         app:useSimpleSummaryProvider="true" />
 
     <!-- Non-tool preferences -->
-    <SwitchPreference
-        android:defaultValue="false"
-        app:key="toggleToolbarToggle"
-        app:title="@string/toggleToolbarToggle"
-        app:widgetLayout="@layout/switch_preference_material" />
-
     <SwitchPreference
         android:defaultValue="true"
         app:key="savePrefsOnExit"

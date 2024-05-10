@@ -1,8 +1,9 @@
-package io.github.pastthepixels.freepaint;
+package io.github.pastthepixels.freepaint.Graphics;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -22,6 +23,7 @@ import java.util.LinkedList;
 import java.util.Objects;
 
 import io.github.pastthepixels.freepaint.File.SVG;
+import io.github.pastthepixels.freepaint.MainActivity;
 import io.github.pastthepixels.freepaint.Tools.EraserTool;
 import io.github.pastthepixels.freepaint.Tools.PaintTool;
 import io.github.pastthepixels.freepaint.Tools.PanTool;
@@ -30,33 +32,26 @@ import io.github.pastthepixels.freepaint.Tools.Tool;
 
 public final class DrawCanvas extends View {
 
-    private final PaintTool paintTool = new PaintTool(this);
-
-    private final EraserTool eraserTool = new EraserTool(this);
-
-    private final PanTool panTool = new PanTool(this);
-
-    private final SelectionTool selectionTool = new SelectionTool(this);
-
-    private final SVG svgHelper = new SVG(this);
-
     public final Paint paint = new Paint();
-
-    public LinkedList<DrawPath> paths = new LinkedList<>();
-
     // Stores previous "versions" of DrawCanvas.paths you can restore
     // You can move back and forth between this, but every time you create a new change
     // it removes everything after the current index (solving the grandfather paradox, btw)
     public final ArrayList<LinkedList<DrawPath>> versions = new ArrayList<>();
     public final int MAX_VERSIONS = 256;
-    private int version_index = -1;
-
-
     public final Point documentSize = new Point(0, 0);
-
+    private final PaintTool paintTool = new PaintTool(this);
+    private final EraserTool eraserTool = new EraserTool(this);
+    private final PanTool panTool = new PanTool(this);
+    private final SelectionTool selectionTool = new SelectionTool(this);
+    private final SVG svgHelper = new SVG(this);
+    public LinkedList<DrawPath> paths = new LinkedList<>();
     public int documentColor = Color.WHITE;
-
+    private int version_index = -1;
     private TOOLS tool = TOOLS.none;
+
+    // Drawing flags
+    // Draws only the document, without any tool paths, or any rotation/translation.
+    private boolean drawMinimal = false;
 
     /**
      * Constructor
@@ -147,6 +142,9 @@ public final class DrawCanvas extends View {
         editor.putString("documentWidth", String.format("%d", (int) documentSize.x));
         editor.putString("documentHeight", String.format("%d", (int) documentSize.y));
         editor.apply();
+        // Save everything in the version history
+        versions.add(cloneDrawPathList(paths));
+        version_index += 1;
     }
 
     /**
@@ -161,7 +159,7 @@ public final class DrawCanvas extends View {
         if (tool == TOOLS.none || !Objects.requireNonNull(getTool()).onTouchEvent(event)) {
             return false;
         } else {
-            if(getTool().allowVersionBackup() && event.getAction() == MotionEvent.ACTION_UP) {
+            if (getTool().allowVersionBackup() && event.getAction() == MotionEvent.ACTION_UP) {
                 // Remove any edits after the current.
                 while (versions.size() > version_index + 1) {
                     versions.remove(versions.size() - 1);
@@ -181,12 +179,13 @@ public final class DrawCanvas extends View {
      * (deep) Clones a list of DrawPaths.
      * TODO: Instead of making a new list, with pointers to the same DrawPaths, clone those DrawPaths (deep clone the list).
      *       This is so that if you erase a part of a path, and modify it, you can undo that.
+     *
      * @param listToClone The list you want to clone.
      * @return A deep cloned version of the list.
      */
     public LinkedList<DrawPath> cloneDrawPathList(LinkedList<DrawPath> listToClone) {
         LinkedList<DrawPath> list = new LinkedList<>();
-        for(DrawPath pathToClone : listToClone) {
+        for (DrawPath pathToClone : listToClone) {
             list.add(pathToClone.clone());
         }
         return list;
@@ -206,6 +205,8 @@ public final class DrawCanvas extends View {
         }
         // Force redraw
         postInvalidate();
+        // Re-initialise tools
+        if (tool == TOOLS.eraser) getTool().init();
     }
 
     /**
@@ -215,12 +216,26 @@ public final class DrawCanvas extends View {
         if (version_index < versions.size() - 1) {
             version_index += 1;
             paths = cloneDrawPathList(versions.get(version_index));
-        } else if (version_index <= 0) {
+        } else if (version_index <= 0 && !versions.isEmpty()) {
             version_index = 0;
             paths = cloneDrawPathList(versions.get(0));
         }
         // Force redraw
         postInvalidate();
+        // Re-initialise tools
+        if (tool == TOOLS.eraser) getTool().init();
+    }
+
+    /**
+     * Gets a bitmap from a DrawCanvas.
+     */
+    public Bitmap toBitmap() {
+        Bitmap bitmap = Bitmap.createBitmap((int) this.documentSize.x, (int) this.documentSize.y, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        this.drawMinimal = true;
+        this.draw(canvas);
+        this.drawMinimal = false;
+        return bitmap;
     }
 
     /**
@@ -303,27 +318,33 @@ public final class DrawCanvas extends View {
         // Draws things on the screen
         canvas.save();
         // SCALES, THEN TRANSLATES (translations are independent of scales)
-        canvas.scale(panTool.scaleFactor, panTool.scaleFactor);
-        canvas.translate(panTool.offset.x + panTool.panOffset.x, panTool.offset.y + panTool.panOffset.y);
+        if (!drawMinimal) {
+            canvas.scale(panTool.scaleFactor, panTool.scaleFactor);
+            canvas.translate(panTool.offset.x + panTool.panOffset.x, panTool.offset.y + panTool.panOffset.y);
+        }
         // Draws what the page will look like
         paint.setColor(documentColor);
         paint.setStyle(Paint.Style.FILL);
-        paint.setShadowLayer(12, 0, 0, Color.argb(200, 0, 0, 0));
+        if (!drawMinimal) {
+            paint.setShadowLayer(12, 0, 0, Color.argb(200, 0, 0, 0));
+        }
         canvas.drawRect(0, 0, documentSize.x, documentSize.y, paint);
         paint.reset();
         // Draws a stroke for the page
-        paint.setColor(Color.GRAY);
-        paint.setStrokeWidth(5 / panTool.scaleFactor); // Always five pixels no matter scale
-        paint.setStyle(Paint.Style.STROKE);
-        canvas.drawRect(0, 0, documentSize.x, documentSize.y, paint);
-        paint.reset();
+        if (!drawMinimal) {
+            paint.setColor(Color.GRAY);
+            paint.setStrokeWidth(5 / panTool.scaleFactor); // Always five pixels no matter scale
+            paint.setStyle(Paint.Style.STROKE);
+            canvas.drawRect(0, 0, documentSize.x, documentSize.y, paint);
+            paint.reset();
+        }
         // Draws every path, then tool path
         for (DrawPath path : paths) {
             paint.reset();
             path.draw(canvas, paint, screenDensity, getScaleFactor());
         }
-        if (getTool() != null && getTool().getToolPaths() != null) {
-            if(getTool() instanceof EraserTool) {
+        if (!drawMinimal && getTool() != null && getTool().getToolPaths() != null) {
+            if (getTool() instanceof EraserTool) {
                 paint.setARGB(150, 0, 0, 0);
                 paint.setStyle(Paint.Style.FILL);
                 canvas.drawPaint(paint);
