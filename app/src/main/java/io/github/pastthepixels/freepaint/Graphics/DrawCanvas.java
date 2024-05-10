@@ -205,6 +205,8 @@ public final class DrawCanvas extends View {
         }
         // Force redraw
         postInvalidate();
+        // Re-initialise tools
+        if (tool == TOOLS.eraser) getTool().init();
     }
 
     /**
@@ -220,6 +222,8 @@ public final class DrawCanvas extends View {
         }
         // Force redraw
         postInvalidate();
+        // Re-initialise tools
+        if (tool == TOOLS.eraser) getTool().init();
     }
 
     /**
