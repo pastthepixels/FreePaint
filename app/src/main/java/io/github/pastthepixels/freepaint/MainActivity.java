@@ -232,6 +232,10 @@ public class MainActivity extends AppCompatActivity {
             binding.FAB.setImageResource(R.drawable.baseline_select_all_24);
             tool = DrawCanvas.TOOLS.select;
         }
+        if (id == R.id.select_tool_spraypaint) {
+            binding.FAB.setImageResource(R.drawable.baseline_spraypaint_24);
+            tool = DrawCanvas.TOOLS.spraypaint;
+        }
         binding.drawCanvas.setTool(tool);
     }
 
@@ -394,6 +398,7 @@ public class MainActivity extends AppCompatActivity {
                     view.findViewById(R.id.select_tool_eraser),
                     view.findViewById(R.id.select_tool_pan),
                     view.findViewById(R.id.select_tool_select),
+                    view.findViewById(R.id.select_tool_spraypaint),
             };
             for (Button button : buttons) {
                 button.setOnClickListener(event -> {

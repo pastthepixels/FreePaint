@@ -28,6 +28,7 @@ import io.github.pastthepixels.freepaint.Tools.EraserTool;
 import io.github.pastthepixels.freepaint.Tools.PaintTool;
 import io.github.pastthepixels.freepaint.Tools.PanTool;
 import io.github.pastthepixels.freepaint.Tools.SelectionTool;
+import io.github.pastthepixels.freepaint.Tools.SprayPaintTool;
 import io.github.pastthepixels.freepaint.Tools.Tool;
 
 public final class DrawCanvas extends View {
@@ -40,6 +41,7 @@ public final class DrawCanvas extends View {
     public final int MAX_VERSIONS = 256;
     public final Point documentSize = new Point(0, 0);
     private final PaintTool paintTool = new PaintTool(this);
+    private final SprayPaintTool sprayPaintTool = new SprayPaintTool(this);
     private final EraserTool eraserTool = new EraserTool(this);
     private final PanTool panTool = new PanTool(this);
     private final SelectionTool selectionTool = new SelectionTool(this);
@@ -255,6 +257,8 @@ public final class DrawCanvas extends View {
                 return panTool;
             case select:
                 return selectionTool;
+            case spraypaint:
+                return sprayPaintTool;
         }
         return null;
     }
@@ -358,5 +362,5 @@ public final class DrawCanvas extends View {
         canvas.restore();
     }
 
-    public enum TOOLS {none, paint, eraser, pan, select}
+    public enum TOOLS {none, paint, eraser, pan, select, spraypaint}
 }

@@ -23,6 +23,16 @@
         app:icon="@drawable/baseline_brush_24" />
 
     <Button
+        android:id="@+id/select_tool_spraypaint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/tool_spraypaint"
+        android:padding="20dp"
+        android:text="@string/tool_spraypaint"
+        android:textAlignment="textStart"
+        app:icon="@drawable/baseline_spraypaint_24" />
+
+    <Button
         android:id="@+id/select_tool_eraser"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
