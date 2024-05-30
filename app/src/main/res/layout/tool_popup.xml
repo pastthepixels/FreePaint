@@ -22,7 +22,8 @@
         android:padding="20dp"
         android:text="@string/tool_paintbrush"
         android:textAlignment="textStart"
-        android:textAllCaps="false"/>
+        android:textAllCaps="false"
+        android:drawableStart="@drawable/baseline_brush_24"  />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/select_tool_spraypaint"
@@ -35,7 +36,8 @@
         android:padding="20dp"
         android:text="@string/tool_spraypaint"
         android:textAlignment="textStart"
-        android:textAllCaps="false" />
+        android:textAllCaps="false"
+        android:drawableStart="@drawable/baseline_spraypaint_24" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/select_tool_eraser"
@@ -48,7 +50,8 @@
         android:padding="20dp"
         android:text="@string/tool_eraser"
         android:textAlignment="textStart"
-        android:textAllCaps="false" />
+        android:textAllCaps="false"
+        android:drawableStart="@drawable/baseline_eraser_24" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/select_tool_select"
@@ -61,7 +64,8 @@
         android:padding="20dp"
         android:text="@string/tool_select"
         android:textAlignment="textStart"
-        android:textAllCaps="false" />
+        android:textAllCaps="false"
+        android:drawableStart="@drawable/baseline_select_all_24" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/select_tool_pan"
@@ -74,6 +78,7 @@
         android:padding="20dp"
         android:text="@string/tool_pan"
         android:textAlignment="textStart"
-        android:textAllCaps="false" />
+        android:textAllCaps="false"
+        android:drawableStart="@drawable/baseline_pan_tool_24"  />
 
 </LinearLayout>

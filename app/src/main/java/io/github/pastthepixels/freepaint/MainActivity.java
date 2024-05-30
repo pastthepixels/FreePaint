@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -25,6 +26,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.core.view.ViewCompat;
@@ -416,9 +418,11 @@ public class MainActivity extends AppCompatActivity {
                 if (button.getId() == ((MainActivity) requireActivity()).currentToolId) {
                     button.setBackgroundResource(R.drawable.selected_button);
                     button.setTextColor(getResources().getColor(R.color.white));
+                    button.setCompoundDrawableTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.white)));
                 } else {
                     button.setBackgroundResource(R.drawable.not_selected_button);
                     button.setTextColor(getResources().getColor(R.color.md_theme_light_primary));
+                    button.setCompoundDrawableTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.md_theme_light_primary)));
                 }
             }
             // Done
