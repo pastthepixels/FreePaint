@@ -23,7 +23,7 @@ A vector graphics drawing app for Android.
 - Eraser tool erases shapes from closed paths, or points from open paths
 - Saving/loading SVG files
 
-# Using FreePaint
+# Usage
 ## Paint tool
 Using this tool, you can either draw open or closed paths. Simply go to the overflow menu > Settings to access this and more options.
 ## Eraser tool
@@ -35,6 +35,15 @@ With one finger, you can pan across the document. If you pinch the screen with t
 ## Selection tool
 You can draw a rectangle for an area you wish to select (marquee select). If any paths overlap that area, they will become "selected" and the rectangle will resize to include the selected paths.
 You can drag on that rectangle to move those paths, or draw on an empty space to create a new selection.
+
+# Building
+FreePaint is built on the Android Studio Flatpak on Fedora Linux, on an amd64 device, using OpenJDK 21. This repository comes with a wrapper for Gradle; to build FreePaint, run
+```bash
+./gradlew build
+```
+The resulting unsigned APK should be in `app/build/outputs/apk`.
+
+FreePaint is built for arm64 devices and tested on a Pixel 6.
 
 # Notes
 
