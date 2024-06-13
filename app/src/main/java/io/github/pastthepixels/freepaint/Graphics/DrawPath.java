@@ -62,6 +62,10 @@ public class DrawPath {
         points.add(point);
     }
 
+    public void addPointSprayPaint(Point point, float radius) {
+        points.add(point);
+    }
+
 
     /**
      * Clears all points in a DrawPath, then resets <code>DrawPath.path</code>

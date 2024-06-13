@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -25,6 +26,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.core.view.ViewCompat;
@@ -53,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
     private final SettingsBottomSheet settingsBottomSheet = new SettingsBottomSheet();
     private final ToolsBottomSheet toolsBottomSheet = new ToolsBottomSheet();
     private ActivityMainBinding binding;
+    private int currentToolId = R.id.select_tool_paintbrush;
 
     /**
      * Handles file picker actions -- onActivityResult is called after a file path is chosen (see MainActivity.onOptionsItemSelected)
@@ -215,6 +218,7 @@ public class MainActivity extends AppCompatActivity {
      * @param id the ID of the tool button
      */
     public void setTool(int id) {
+        currentToolId = id;
         DrawCanvas.TOOLS tool = DrawCanvas.TOOLS.none;
         if (id == R.id.select_tool_paintbrush) {
             binding.FAB.setImageResource(R.drawable.baseline_brush_24);
@@ -231,6 +235,10 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.select_tool_select) {
             binding.FAB.setImageResource(R.drawable.baseline_select_all_24);
             tool = DrawCanvas.TOOLS.select;
+        }
+        if (id == R.id.select_tool_spraypaint) {
+            binding.FAB.setImageResource(R.drawable.baseline_spraypaint_24);
+            tool = DrawCanvas.TOOLS.spraypaint;
         }
         binding.drawCanvas.setTool(tool);
     }
@@ -394,6 +402,7 @@ public class MainActivity extends AppCompatActivity {
                     view.findViewById(R.id.select_tool_eraser),
                     view.findViewById(R.id.select_tool_pan),
                     view.findViewById(R.id.select_tool_select),
+                    view.findViewById(R.id.select_tool_spraypaint),
             };
             for (Button button : buttons) {
                 button.setOnClickListener(event -> {
@@ -402,6 +411,19 @@ public class MainActivity extends AppCompatActivity {
                     // Dismiss the bottom sheet.
                     dismiss();
                 });
+            }
+
+            // Set background resource for all buttons
+            for (Button button : buttons) {
+                if (button.getId() == ((MainActivity) requireActivity()).currentToolId) {
+                    button.setBackgroundResource(R.drawable.selected_button);
+                    button.setTextColor(getResources().getColor(R.color.white));
+                    button.setCompoundDrawableTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.white)));
+                } else {
+                    button.setBackgroundResource(R.drawable.not_selected_button);
+                    button.setTextColor(getResources().getColor(R.color.md_theme_light_primary));
+                    button.setCompoundDrawableTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.md_theme_light_primary)));
+                }
             }
             // Done
             return view;

@@ -6,6 +6,7 @@
     <string name="action_load">Load file</string>
     <!-- Tools -->
     <string name="tool_paintbrush">Paintbrush</string>
+    <string name="tool_spraypaint">Spraypaint</string>
     <string name="tool_pan">Pan</string>
     <string name="tool_eraser">Eraser</string>
     <string name="tool_select">Select and move</string>
