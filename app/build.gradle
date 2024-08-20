@@ -14,6 +14,13 @@ android {
         versionName "1.3.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            moduleName "resolver"
+            stl "gnustl_shared"
+            cFlags "-std=c++11"
+            abiFilters = ['armeabi', 'arm-v7', 'x86_64']
+        }
     }
 
     buildTypes {
@@ -27,6 +34,7 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
     buildFeatures {
         viewBinding true
     }
