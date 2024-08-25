@@ -1,0 +1,35 @@
+<!-- File "app/src/main/res/values/strings.xml" -->
+<resources>
+    <string name="app_name">FreePaint</string>
+    <string name="action_settings">设置</string>
+    <!-- Actions -->
+    <string name="action_save">保存于...</string>
+    <string name="action_load">加载文件</string>
+    <!-- Tools -->
+    <string name="tool_paintbrush">笔刷</string>
+    <string name="tool_pan">拖动</string>
+    <string name="tool_eraser">橡皮</string>
+    <string name="tool_select">移动对象</string>
+    <!-- MainActivity elements -->
+    <string name="toggleToolbar">切换工具栏可见性</string>
+    <!-- Settings -->
+    <string name="document_width_setting">画布宽度(像素)</string>
+    <string name="document_height_setting">画布高度(像素)</string>
+    <string name="stroke_size">笔画粗细(像素)</string>
+    <string name="pref_closed_paths">绘制闭合路径</string>
+    <string name="pref_fill_color">填充</string>
+    <string name="pref_stroke_color">笔刷颜色</string>
+    <string name="settings_header">设置</string>
+    <!-- other -->
+    <string name="draw_canvas_description">包含矩形的画布，表示用户可以在其上绘制的文档。</string>
+    <string name="toggleToolbarToggle">显示切换工具栏的按钮</string>
+    <string name="save_preferences_on_exit">记住偏好颜色</string>
+    <string name="action_undo">撤销</string>
+    <string name="action_redo">重做</string>
+    <string name="opt_category_file">文件</string>
+    <string name="action_set_stroke">设置笔刷颜色</string>
+    <string name="action_set_fill">设置填充颜色</string>
+    <string name="action_export">导出</string>
+    <string name="simplification_amount">笔画简化值</string>
+</resources>
+
