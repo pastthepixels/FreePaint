@@ -169,6 +169,9 @@ public class DrawPath {
      * Adapted from the pseudocde from https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm
      */
     private ArrayList<Point> simplify(ArrayList<Point> points, double epsilon) {
+        if (points.isEmpty()) {
+            return points;
+        }
         double max_distance = 0;
         int index = 0;
         for (int i = 2; i < points.size() - 1; i++) {
