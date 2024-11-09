@@ -344,11 +344,6 @@ public final class DrawCanvas extends View {
             path.draw(canvas, paint, screenDensity, getScaleFactor());
         }
         if (!drawMinimal && getTool() != null && getTool().getToolPaths() != null) {
-            if (getTool() instanceof EraserTool) {
-                paint.setARGB(150, 0, 0, 0);
-                paint.setStyle(Paint.Style.FILL);
-                canvas.drawPaint(paint);
-            }
             for (DrawPath path : getTool().getToolPaths()) {
                 paint.reset();
                 path.draw(canvas, paint, screenDensity, getScaleFactor());
