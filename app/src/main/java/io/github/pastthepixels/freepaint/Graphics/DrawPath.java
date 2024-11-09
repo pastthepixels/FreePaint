@@ -263,8 +263,32 @@ public class DrawPath {
             return;
         }
         Path erased = getPathOrGenerate();
-        erased.op(path.getPathOrGenerate(), Path.Op.DIFFERENCE);
-        this.path = erased;
+        // Expand strokes
+        if (!this.isClosed) {
+            Paint paint = new Paint();
+            appearance.initialisePaint(paint, 1);
+            if (appearance.fill != -1) {
+                paint.setColor(appearance.fill);
+                paint.setStyle(Paint.Style.FILL);
+            }
+            // Strokes
+            if (appearance.stroke != -1) {
+                paint.setColor(appearance.stroke);
+                paint.setStyle(Paint.Style.STROKE);
+            }
+            paint.getFillPath(erased, erased);
+        }
+        // Erase
+        boolean op = erased.op(path.getPathOrGenerate(), Path.Op.DIFFERENCE);
+        if (op) {
+            if (!this.isClosed) {
+                appearance.strokeSize = 0;
+                appearance.fill = appearance.stroke;
+                appearance.stroke = -1;
+            }
+            this.path = erased;
+            this.isClosed = true;
+        }
     }
 
     /**
