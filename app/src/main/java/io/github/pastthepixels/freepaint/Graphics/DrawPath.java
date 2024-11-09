@@ -351,7 +351,7 @@ public class DrawPath {
     @NonNull
     @Override
     public DrawPath clone() {
-        DrawPath cloned = new DrawPath(new Path());
+        DrawPath cloned = new DrawPath(new Path(this.getPathOrGenerate()));
         // 1. Copy variables.
         cloned.drawPoints = drawPoints;
         cloned.isClosed = isClosed;
@@ -360,7 +360,6 @@ public class DrawPath {
         for (Point point : points) {
             cloned.points.add(point.clone());
         }
-        cloned.cachePath();
         return cloned;
     }
 
