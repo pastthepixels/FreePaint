@@ -24,10 +24,10 @@ import java.util.stream.Collectors;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import dev.romainguy.graphics.path.Svg;
 import io.github.pastthepixels.freepaint.Graphics.DrawAppearance;
 import io.github.pastthepixels.freepaint.Graphics.DrawCanvas;
-import io.github.pastthepixels.freepaint.Graphics.DrawPath;
+import io.github.pastthepixels.freepaint.Graphics.ExtendedPath;
+import io.github.pastthepixels.freepaint.Graphics.PathGenerator;
 import io.github.pastthepixels.freepaint.Graphics.Point;
 
 public class SVG {
@@ -63,8 +63,8 @@ public class SVG {
                 (int) canvas.documentSize.y,
                 DrawAppearance.colorToHex(canvas.documentColor)
         );
-        for (DrawPath path : canvas.paths) {
-            if (path.points.size() > 1) addPath(path);
+        for (ExtendedPath path : canvas.paths) {
+            addPath(path);
         }
         // Closes the tag. We are done.
         this.data += "\n</svg>";
@@ -102,10 +102,11 @@ public class SVG {
      * @param path The DrawPath to convert to SVG data.
      */
     @SuppressLint("DefaultLocale")
-    public void addPath(DrawPath path) {
+    public void addPath(ExtendedPath path) {
         StringBuilder data = new StringBuilder("\n<path d=\"");
         // Step 1. Add points.
-        data.append(Svg.toSvg(path.generatePath(), false));
+        // TODO: pathway is broken, use a androidx.graphics.path.PathIterator and do it yourself :(
+        //data.append(Svg.toSvg(path, false));
         data.append("\" ");
         // Step 2. Set the appearance of the path.
         // Inkscape only accepts hex colors, I don't know why
@@ -161,7 +162,7 @@ public class SVG {
             Node node = nodes.item(i);
             if (node.getNodeType() == Node.ELEMENT_NODE && ((Element) node).getTagName().equals("path")) {
                 Element element = (Element) node;
-                DrawPath path = new DrawPath(null);
+                PathGenerator path = new PathGenerator();
                 path.appearance.stroke = path.appearance.fill = -1;
                 path.isClosed = element.getAttribute("d").toUpperCase().contains("Z");
                 // Points
@@ -182,8 +183,7 @@ public class SVG {
                     path.appearance.strokeSize = Integer.parseInt(element.getAttribute("stroke-width"));
                 }
                 // Done!!
-                path.cachePath();
-                canvas.paths.add(path);
+                canvas.paths.add(path.getPath());
             }
         }
         // Invalidate!
