@@ -265,13 +265,9 @@ public class DrawPath {
         if (getPath() == null) {
             return;
         }
-        if (isClosed) {
-            Path erased = getPathOrGenerate();
-            erased.op(path.generatePath(), Path.Op.DIFFERENCE);
-            regeneratePoints(erased);
-        } else {
-            eraseFromStroke(path);
-        }
+        Path erased = getPathOrGenerate();
+        erased.op(path.getPathOrGenerate(), Path.Op.DIFFERENCE);
+        this.path = erased;
     }
 
     /**
