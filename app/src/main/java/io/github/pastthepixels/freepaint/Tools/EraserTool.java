@@ -1,6 +1,7 @@
 package io.github.pastthepixels.freepaint.Tools;
 
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Path;
 import android.view.MotionEvent;
 
@@ -70,7 +71,7 @@ public class EraserTool implements Tool {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 // Starts a new line in the path
-                this.currentPath.appearance.strokeSize = 2 * this.radius;
+                this.currentPath.appearance.strokeSize = (int) (2 * this.radius * (1/canvas.getScaleFactor()));
                 currentPath.clear();
                 break;
 
@@ -91,39 +92,14 @@ public class EraserTool implements Tool {
     }
 
     /**
-     * Turns the current path to a closed path by doing an expensive(!) operation where circles are added in place of each point.
-     * Effectively "expands" the eraser path.
+     * Turns the current path to a closed path by "expanding" it.
      */
     public Path expandEraser() {
-        // 1. Create an "expanded" path and a circle that we'll "stamp" at each touch point.
         Path path = new Path();
-        Point oldPoint = null;
-        // 2. Loop through all points.
-        for(Point point : currentPath.points) {
-            // 1. Add circle for current point.
-            Path circle = new Path();
-            circle.addCircle(point.x, point.y, this.radius, Path.Direction.CCW);
-            path.op(circle, Path.Op.UNION);
-            // 2. Linear interpolate between current point and old point.
-            if (oldPoint != null) {
-                // Direction
-                Point dir = point.subtract(oldPoint);
-                float length = (float) Math.sqrt(dir.x * dir.x + dir.y * dir.y);
-                dir = dir.multiply(1.f/length * this.radius);
-                // Normal
-                Point nor = new Point(dir.y, -dir.x);
-                // Draw box between two circles
-                Path inter = new Path();
-                inter.moveTo(point.x + nor.x, point.y + nor.y);
-                inter.lineTo(point.x - nor.x, point.y - nor.y);
-                inter.lineTo(oldPoint.x - nor.x, oldPoint.y - nor.y);
-                inter.lineTo(oldPoint.x + nor.x, oldPoint.y + nor.y);
-                // Union
-                path.op(inter, Path.Op.UNION);
-            }
-            // 3. Set oldPoint
-            oldPoint = point;
-        }
+        Paint paint = new Paint();
+        currentPath.appearance.initialisePaint(paint, 1);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.getFillPath(currentPath.getPathOrGenerate(), path);
         return path;
     }
 

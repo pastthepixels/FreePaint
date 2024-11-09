@@ -9,9 +9,6 @@ import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
 
-import dev.romainguy.graphics.path.PathIterator;
-import dev.romainguy.graphics.path.PathSegment;
-import dev.romainguy.graphics.path.Paths;
 import io.github.pastthepixels.freepaint.Utils;
 
 
@@ -113,7 +110,7 @@ public class DrawPath {
     /**
      * Returns a cached path, or generates a new one.
      */
-    private Path getPathOrGenerate() {
+    public Path getPathOrGenerate() {
         if (getPath() != null) {
             return getPath();
         } else {
@@ -268,24 +265,6 @@ public class DrawPath {
         Path erased = getPathOrGenerate();
         erased.op(path.getPathOrGenerate(), Path.Op.DIFFERENCE);
         this.path = erased;
-    }
-
-    /**
-     * Regenerates points[] from DrawPath.path (android.graphics.Path) using Pathway
-     * TODO curves?
-     */
-    public void regeneratePoints(Path path) {
-        PathIterator iterator = Paths.iterator(path);
-        points.clear();
-        float[] pointArray = new float[8];
-        while (iterator.hasNext()) {
-            PathSegment.Type type = iterator.next(pointArray, 0); // The type of segment
-            if (type != PathSegment.Type.Close) {
-                Point point = new Point(pointArray[0], pointArray[1]);
-                point.command = type == PathSegment.Type.Move ? Point.COMMANDS.move : Point.COMMANDS.line;
-                points.add(point);
-            }
-        }
     }
 
     /**
