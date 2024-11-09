@@ -9,7 +9,8 @@ import java.util.LinkedList;
 
 import io.github.pastthepixels.freepaint.Graphics.DrawAppearance;
 import io.github.pastthepixels.freepaint.Graphics.DrawCanvas;
-import io.github.pastthepixels.freepaint.Graphics.DrawPath;
+import io.github.pastthepixels.freepaint.Graphics.ExtendedPath;
+import io.github.pastthepixels.freepaint.Graphics.PathGenerator;
 
 public class PaintTool implements Tool {
     /**
@@ -17,7 +18,7 @@ public class PaintTool implements Tool {
      */
     private final DrawAppearance appearance = new DrawAppearance(Color.BLACK, -1);
     private final DrawCanvas canvas;
-    private DrawPath currentPath;
+    private PathGenerator currentPath = new PathGenerator();
 
     /**
      * Constructor for PaintTool, which binds itself to a DrawCanvas
@@ -32,8 +33,10 @@ public class PaintTool implements Tool {
      * Returns nothing as we don't draw custom tool paths
      */
     @Override
-    public LinkedList<DrawPath> getToolPaths() {
-        return null;
+    public LinkedList<ExtendedPath> getToolPaths() {
+        LinkedList<ExtendedPath> paths = new LinkedList<>();
+        paths.add(currentPath.getPath());
+        return paths;
     }
 
     /**
@@ -58,11 +61,10 @@ public class PaintTool implements Tool {
             case MotionEvent.ACTION_DOWN:
                 appearance.loadFromSettings(canvas.getContext());
                 // Starts a new line in the path -- whether or not it is closed is taken from the preferences (defaults to false)
-                currentPath = new DrawPath(null);
+                currentPath.clear();
                 currentPath.simplificationAmount = Double.parseDouble(PreferenceManager.getDefaultSharedPreferences(canvas.getContext()).getString("simplificationAmount", "0"));
                 currentPath.isClosed = PreferenceManager.getDefaultSharedPreferences(canvas.getContext()).getBoolean("drawFilledShapes", false);
                 currentPath.appearance = appearance.clone();
-                canvas.paths.add(currentPath);
                 break;
 
             case MotionEvent.ACTION_MOVE:
@@ -71,8 +73,9 @@ public class PaintTool implements Tool {
                 break;
 
             case MotionEvent.ACTION_UP:
-                currentPath.finalise();
-                currentPath.cachePath();
+                currentPath.apply();
+                canvas.paths.add(currentPath.getPath());
+                currentPath.clear();
                 break;
 
             default:

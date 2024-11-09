@@ -9,8 +9,8 @@ import java.util.LinkedList;
 
 import io.github.pastthepixels.freepaint.Graphics.DrawAppearance;
 import io.github.pastthepixels.freepaint.Graphics.DrawCanvas;
-import io.github.pastthepixels.freepaint.Graphics.DrawPath;
-import io.github.pastthepixels.freepaint.Graphics.Point;
+import io.github.pastthepixels.freepaint.Graphics.ExtendedPath;
+import io.github.pastthepixels.freepaint.Graphics.PathGenerator;
 
 /**
  * Erases a filled path region from paths, turning them into filled paths if necessary.
@@ -19,14 +19,9 @@ import io.github.pastthepixels.freepaint.Graphics.Point;
  */
 public class EraserTool implements Tool {
     /**
-     * List of paths to redraw, where we highlight points.
-     */
-    private final LinkedList<DrawPath> toolPaths = new LinkedList<>();
-
-    /**
      * The eraser path
      */
-    private final DrawPath currentPath = new DrawPath(null);
+    private final PathGenerator currentPath = new PathGenerator();
 
     /**
      * The canvas
@@ -46,7 +41,6 @@ public class EraserTool implements Tool {
     public EraserTool(DrawCanvas canvas) {
         this.canvas = canvas;
         this.currentPath.appearance = new DrawAppearance(Color.RED, -1);
-        this.toolPaths.add(this.currentPath);
     }
 
     /**
@@ -55,8 +49,10 @@ public class EraserTool implements Tool {
      *
      * @return A list of paths for the DrawCanvas to draw
      */
-    public LinkedList<DrawPath> getToolPaths() {
-        return toolPaths;
+    public LinkedList<ExtendedPath> getToolPaths() {
+        LinkedList<ExtendedPath> paths = new LinkedList<>();
+        paths.add(currentPath.getPath());
+        return paths;
     }
 
     /**
@@ -94,12 +90,12 @@ public class EraserTool implements Tool {
     /**
      * Turns the current path to a closed path by "expanding" it.
      */
-    public Path expandEraser() {
-        Path path = new Path();
+    public ExtendedPath expandEraser() {
+        ExtendedPath path = new ExtendedPath();
         Paint paint = new Paint();
         currentPath.appearance.initialisePaint(paint, 1);
         paint.setStyle(Paint.Style.STROKE);
-        paint.getFillPath(currentPath.getPathOrGenerate(), path);
+        paint.getFillPath(currentPath.getPath(), path);
         return path;
     }
 
@@ -108,10 +104,9 @@ public class EraserTool implements Tool {
      * See <code>DrawPath.erase</code> for how this handles erasing from strokes/filled shapes.
      */
     public void eraseCurrentPath() {
-        DrawPath currentPath = new DrawPath(expandEraser());
-        for (DrawPath path : canvas.paths) {
-            path.erase(currentPath);
-            //path.cachePath();
+        ExtendedPath toErase = expandEraser();
+        for (ExtendedPath path : canvas.paths) {
+            path.erase(toErase);
         }
         currentPath.clear();
         init();

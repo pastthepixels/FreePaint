@@ -5,11 +5,13 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.view.MotionEvent;
 
+import java.util.Collection;
 import java.util.LinkedList;
 
 import io.github.pastthepixels.freepaint.Graphics.DrawAppearance;
 import io.github.pastthepixels.freepaint.Graphics.DrawCanvas;
-import io.github.pastthepixels.freepaint.Graphics.DrawPath;
+import io.github.pastthepixels.freepaint.Graphics.ExtendedPath;
+import io.github.pastthepixels.freepaint.Graphics.PathGenerator;
 import io.github.pastthepixels.freepaint.Graphics.Point;
 
 public class SelectionTool implements Tool {
@@ -17,10 +19,10 @@ public class SelectionTool implements Tool {
 
     private final DrawAppearance APPEARANCE_SELECTED = new DrawAppearance(Color.BLUE, -1);
 
-    private final LinkedList<DrawPath> toolPaths = new LinkedList<>();
-    private final LinkedList<DrawPath> selectedPaths = new LinkedList<>();
+    private final LinkedList<ExtendedPath> toolPaths = new LinkedList<>();
+    private final LinkedList<ExtendedPath> selectedPaths = new LinkedList<>();
 
-    private final DrawPath currentPath = new DrawPath(null);
+    private final PathGenerator currentPath = new PathGenerator();
     private final DrawCanvas canvas;
     public Point originalPoint = new Point(0, 0);
     public Point previousPoint = null;
@@ -48,8 +50,11 @@ public class SelectionTool implements Tool {
      * @return A list of paths for the DrawCanvas to draw
      */
     @Override
-    public LinkedList<DrawPath> getToolPaths() {
-        return toolPaths;
+    public LinkedList<ExtendedPath> getToolPaths() {
+        LinkedList<ExtendedPath> paths = new LinkedList<>();
+        paths.add(currentPath.getPath());
+        paths.addAll(toolPaths);
+        return paths;
     }
 
     /**
@@ -61,7 +66,6 @@ public class SelectionTool implements Tool {
         selectedPaths.clear();
         currentPath.clear();
         toolPaths.clear();
-        toolPaths.add(currentPath);
     }
 
     /**
@@ -109,9 +113,8 @@ public class SelectionTool implements Tool {
                     // If we're trying to move all the paths we selected... well, move them!
                     changedDrawPaths = true;
                     currentPath.translate(touchPoint.clone().applySubtract(previousPoint));
-                    for (DrawPath path : selectedPaths) {
+                    for (ExtendedPath path : selectedPaths) {
                         path.translate(touchPoint.clone().applySubtract(previousPoint));
-                        path.cachePath();
                     }
                 }
                 // Important for second if statement
@@ -152,12 +155,12 @@ public class SelectionTool implements Tool {
 
         // Creates a Region from the current path to do bounding box math
         Region currentPathRegion = new Region();
-        currentPathRegion.setPath(currentPath.generatePath(), clip);
+        currentPathRegion.setPath(currentPath.getPath(), clip);
 
         // Bounding box math! (If a path collides with the current path, add it to the selection.)
-        for (DrawPath path : canvas.paths) {
+        for (ExtendedPath path : canvas.paths) {
             Region region = new Region();
-            region.setPath(path.getPath(), clip);
+            region.setPath(path, clip);
             Rect bounds = region.getBounds();
             if (!region.quickReject(currentPathRegion) && region.op(currentPathRegion, Region.Op.INTERSECT)) {
                 selectedPaths.add(path);
