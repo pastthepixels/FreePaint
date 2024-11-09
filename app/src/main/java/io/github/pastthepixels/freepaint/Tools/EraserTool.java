@@ -1,6 +1,7 @@
 package io.github.pastthepixels.freepaint.Tools;
 
 import android.graphics.Color;
+import android.graphics.Path;
 import android.view.MotionEvent;
 
 import java.util.LinkedList;
@@ -8,6 +9,7 @@ import java.util.LinkedList;
 import io.github.pastthepixels.freepaint.Graphics.DrawAppearance;
 import io.github.pastthepixels.freepaint.Graphics.DrawCanvas;
 import io.github.pastthepixels.freepaint.Graphics.DrawPath;
+import io.github.pastthepixels.freepaint.Graphics.Point;
 
 /**
  * Erases a filled path region from paths, turning them into filled paths if necessary.
@@ -31,13 +33,19 @@ public class EraserTool implements Tool {
     private final DrawCanvas canvas;
 
     /**
+     * Radius of eraser path
+     */
+    private int radius = 25;
+
+    /**
      * Init function, binds the tool to a canvas and sets a default appearance for the eraser path
      *
      * @param canvas The canvas to bind the tool to (paths will be sampled from/drawn on here)
      */
     public EraserTool(DrawCanvas canvas) {
         this.canvas = canvas;
-        this.currentPath.appearance = new DrawAppearance(-1, Color.RED);
+        this.currentPath.appearance = new DrawAppearance(Color.RED, -1);
+        this.toolPaths.add(this.currentPath);
     }
 
     /**
@@ -62,6 +70,7 @@ public class EraserTool implements Tool {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 // Starts a new line in the path
+                this.currentPath.appearance.strokeSize = 2 * this.radius;
                 currentPath.clear();
                 break;
 
@@ -71,8 +80,8 @@ public class EraserTool implements Tool {
                 break;
 
             case MotionEvent.ACTION_UP:
-                currentPath.finalise();
                 eraseCurrentPath();
+                currentPath.clear();
                 break;
 
             default:
@@ -82,40 +91,60 @@ public class EraserTool implements Tool {
     }
 
     /**
+     * Turns the current path to a closed path by doing an expensive(!) operation where circles are added in place of each point.
+     * Effectively "expands" the eraser path.
+     */
+    public Path expandEraser() {
+        // 1. Create an "expanded" path and a circle that we'll "stamp" at each touch point.
+        Path path = new Path();
+        Point oldPoint = null;
+        // 2. Loop through all points.
+        for(Point point : currentPath.points) {
+            // 1. Add circle for current point.
+            Path circle = new Path();
+            circle.addCircle(point.x, point.y, this.radius, Path.Direction.CCW);
+            path.op(circle, Path.Op.UNION);
+            // 2. Linear interpolate between current point and old point.
+            if (oldPoint != null) {
+                // Direction
+                Point dir = point.subtract(oldPoint);
+                float length = (float) Math.sqrt(dir.x * dir.x + dir.y * dir.y);
+                dir = dir.multiply(1.f/length * this.radius);
+                // Normal
+                Point nor = new Point(dir.y, -dir.x);
+                // Draw box between two circles
+                Path inter = new Path();
+                inter.moveTo(point.x + nor.x, point.y + nor.y);
+                inter.lineTo(point.x - nor.x, point.y - nor.y);
+                inter.lineTo(oldPoint.x - nor.x, oldPoint.y - nor.y);
+                inter.lineTo(oldPoint.x + nor.x, oldPoint.y + nor.y);
+                // Union
+                path.op(inter, Path.Op.UNION);
+            }
+            // 3. Set oldPoint
+            oldPoint = point;
+        }
+        return path;
+    }
+
+    /**
      * Loops through all paths, calling <code>path.erase</code>.
      * See <code>DrawPath.erase</code> for how this handles erasing from strokes/filled shapes.
      */
     public void eraseCurrentPath() {
+        DrawPath currentPath = new DrawPath(expandEraser());
         for (DrawPath path : canvas.paths) {
             path.erase(currentPath);
-            path.cachePath();
+            //path.cachePath();
         }
         currentPath.clear();
         init();
     }
 
     /**
-     * Initialises by building a list of DrawPaths which have their points highlighted
-     * and saves this to toolPaths.
+     * Init left empty
      */
-    public void init() {
-        toolPaths.clear();
-        for (DrawPath path : canvas.paths) {
-            DrawPath cloned = new DrawPath(path.getPath());
-            cloned.points = path.points;
-            cloned.isClosed = path.isClosed;
-            if (cloned.isClosed) {
-                cloned.appearance = new DrawAppearance(-1, Color.GREEN);
-            } else {
-                cloned.appearance = new DrawAppearance(Color.GREEN, -1);
-                cloned.appearance.strokeSize = 1;
-                cloned.appearance.useDP = true;
-                cloned.drawPoints = true;
-            }
-            toolPaths.add(cloned);
-        }
-        toolPaths.add(currentPath);
-    }
+    public void init() {};
 
     public boolean allowVersionBackup() {
         return true;
