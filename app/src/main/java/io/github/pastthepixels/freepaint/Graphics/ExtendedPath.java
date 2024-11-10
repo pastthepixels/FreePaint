@@ -27,9 +27,14 @@ public class ExtendedPath extends Path {
 
     /** Constructor using an ExtendedPath */
     public ExtendedPath(ExtendedPath path) {
-        super((Path) path);
+        super(path);
         this.isClosed = path.isClosed;
-        this.appearance = path.appearance;
+        this.appearance = path.appearance.clone();
+    }
+
+    /** Constructor from a Path */
+    public ExtendedPath(Path path) {
+        super(path);
     }
 
     /**

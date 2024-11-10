@@ -2,8 +2,9 @@ package io.github.pastthepixels.freepaint.File;
 
 import android.annotation.SuppressLint;
 import android.graphics.Color;
+import android.graphics.Path;
 
-import androidx.annotation.NonNull;
+import androidx.core.graphics.PathParser;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -18,7 +19,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -27,8 +27,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import io.github.pastthepixels.freepaint.Graphics.DrawAppearance;
 import io.github.pastthepixels.freepaint.Graphics.DrawCanvas;
 import io.github.pastthepixels.freepaint.Graphics.ExtendedPath;
-import io.github.pastthepixels.freepaint.Graphics.PathGenerator;
-import io.github.pastthepixels.freepaint.Graphics.Point;
+
+import androidx.graphics.path.PathIterator;
+import androidx.graphics.path.PathSegment;
 
 public class SVG {
     private final DrawCanvas canvas;
@@ -96,6 +97,79 @@ public class SVG {
     }
 
     /**
+     * Implementation of https://github.com/romainguy/pathway/blob/main/pathway/src/main/java/dev/romainguy/graphics/path/Svg.kt
+     * with androidx.graphics.path and Java 8
+     */
+    public String toSvg(Path path) {
+        PathIterator iterator = new PathIterator(path, PathIterator.ConicEvaluation.AsQuadratics, 1.0f);
+        StringBuilder builder = new StringBuilder();
+        PathSegment.Type lastType = PathSegment.Type.Done;
+        float[] points = new float[8];
+
+        while(iterator.hasNext()) {
+            PathSegment.Type type = iterator.next(points);
+            switch(type) {
+                case Move:
+                    builder.append(toSvgCommand(PathSegment.Type.Move, lastType)).append(points[0]).append(" ").append(points[1]);
+                    break;
+
+                case Line:
+                    builder.append(toSvgCommand(PathSegment.Type.Line, lastType)).append(points[2]).append(" ").append(points[3]);
+                    break;
+
+                case Quadratic:
+                    builder.append(toSvgCommand(PathSegment.Type.Quadratic, lastType)).append(points[2]).append(" ").append(points[3]).append(" ").append(points[4]).append(" ").append(points[5]);
+                    break;
+
+                case Cubic:
+                    builder.append(toSvgCommand(PathSegment.Type.Cubic, lastType));
+                    builder.append(points[2]).append(" ").append(points[3]).append(" ");
+                    builder.append(points[4]).append(" ").append(points[5]).append(" ");
+                    builder.append(points[6]).append(" ").append(points[7]);
+                    break;
+
+                case Close:
+                    builder.append(toSvgCommand(PathSegment.Type.Close, lastType));
+                    break;
+
+                case Conic:
+                case Done:
+                    continue;
+            }
+            lastType = type;
+            builder.append(" ");
+        }
+
+        return builder.toString();
+    }
+
+    /**
+     * Implementation of https://github.com/romainguy/pathway/blob/main/pathway/src/main/java/dev/romainguy/graphics/path/Svg.kt
+     * with androidx.graphics.path and Java 8
+     */
+    public String toSvgCommand(PathSegment.Type type, PathSegment.Type lastType) {
+        if (type != lastType) {
+            switch(type) {
+                case Move:
+                    return "M";
+
+                case Line:
+                    return "L";
+
+                case Quadratic:
+                    return "Q";
+
+                case Cubic:
+                    return "C";
+
+                case Close:
+                    return "Z";
+            }
+        }
+        return "";
+    }
+
+    /**
      * Converts a DrawPath to SVG data as a string (using the <code>path</code> element)
      * and concatenates it to <code>SVG.data</code>.
      *
@@ -106,7 +180,7 @@ public class SVG {
         StringBuilder data = new StringBuilder("\n<path d=\"");
         // Step 1. Add points.
         // TODO: pathway is broken, use a androidx.graphics.path.PathIterator and do it yourself :(
-        //data.append(Svg.toSvg(path, false));
+        data.append(toSvg(path));
         data.append("\" ");
         // Step 2. Set the appearance of the path.
         // Inkscape only accepts hex colors, I don't know why
@@ -159,15 +233,13 @@ public class SVG {
         canvas.paths.clear();
         NodeList nodes = document.getElementsByTagName("path");
         for (int i = 0; i < nodes.getLength(); i++) {
+            // TODO: use androidx.graphics.path.PathParser instead of doing it myself
             Node node = nodes.item(i);
             if (node.getNodeType() == Node.ELEMENT_NODE && ((Element) node).getTagName().equals("path")) {
                 Element element = (Element) node;
-                PathGenerator path = new PathGenerator();
-                path.appearance.stroke = path.appearance.fill = -1;
-                path.isClosed = element.getAttribute("d").toUpperCase().contains("Z");
-                // Points
-                path.points = parsePath(element.getAttribute("d"));
+                ExtendedPath path = new ExtendedPath(PathParser.createPathFromPathData(element.getAttribute("d")));
                 // Fill/stroke
+                path.appearance.stroke = path.appearance.fill = -1;
                 float fillOpacity = element.hasAttribute("fill-opacity") ? Float.parseFloat(element.getAttribute("fill-opacity")) : 1;
                 float strokeOpacity = element.hasAttribute("stroke-opacity") ? Float.parseFloat(element.getAttribute("stroke-opacity")) : 1;
                 if (element.hasAttribute("fill") && !element.getAttribute("fill").equals("none")) {
@@ -183,191 +255,11 @@ public class SVG {
                     path.appearance.strokeSize = Integer.parseInt(element.getAttribute("stroke-width"));
                 }
                 // Done!!
-                canvas.paths.add(path.getPath());
+                canvas.paths.add(path);
             }
         }
         // Invalidate!
         canvas.invalidate();
-    }
-
-    /**
-     * Parses a path's <code>d</code> parameter (as a String) into a linked list of points.
-     * <b>If you want to add support for an SVG command</b>, add a value for Point.COMMANDS,
-     * then update SVG.svgToPointCommand to convert an SVG command to a Point command (case
-     * insensitive). Then, make your implementation by adding a case in the switch statement
-     * in this function.
-     * <p>
-     * Note the boolean isCommandRelative and how other statements set the x and y of penCoords.
-     * SVG spec means that each point with an absolute command sets the position of the "pen"
-     * and each point with a relative command moves the pen by some amount.
-     *
-     * @param d The "d" attribute of an SVG path element.
-     * @return A linked list of points, with proper commands, that you can use in a DrawPath.
-     */
-    public ArrayList<Point> parsePath(@NonNull String d) {
-        // We start with a "pen" that we set the position of (capital letters) or move around by an amount (lowercase letters)
-        Point penCoords = new Point(0, 0);
-        ArrayList<Point> points = new ArrayList<>();
-
-        // 1. Separate the string into 1 string per command (ex. "M 12 240 10 4" (multiple points with same command), "L 4")
-        ArrayList<String> commands = new ArrayList<>();
-        for (int i = 0; i < d.length(); i++) {
-            if (Character.isLetter(d.charAt(i))) {
-                commands.add(String.valueOf(d.charAt(i)));
-            } else {
-                commands.set(
-                        commands.size() - 1,
-                        commands.get(commands.size() - 1).concat(String.valueOf(d.charAt(i)))
-                );
-            }
-        }
-
-        // 2. Separate each string into points with the command of the letter at the start of the string.
-        for (int i = 0; i < commands.size(); i++) {
-            System.out.println(commands.get(i));
-            // Take the first letter out; that's a command, not a number.
-            Point.COMMANDS command = svgToPointCommand(commands.get(i).charAt(0));
-            boolean isCommandRelative = Character.isLowerCase(commands.get(i).charAt(0));
-            // Note: commas are ignored (as per W3 spec) and replaced with spaces
-            String[] numbers = commands.get(i).replace(",", " ").replace("-", " -").replace("  ", " ").substring(1).strip().split(" ");
-            //TODO remove
-            for (String num : numbers) {
-                System.out.print(num + " ");
-            }
-            System.out.println();
-
-            Point originalPenCoords; // Used for bezier curves
-
-            switch (command) {
-                // Horizontal lines ("H" command)
-                case horizontal:
-                    penCoords.x = Float.parseFloat(numbers[0]) + (isCommandRelative ? penCoords.x : 0);
-                    points.add(new Point(penCoords.x, penCoords.y, Point.COMMANDS.line));
-                    break;
-
-                // Vertical lines ("V" command)
-                case vertical:
-                    penCoords.y = Float.parseFloat(numbers[0]) + (isCommandRelative ? penCoords.y : 0);
-                    points.add(new Point(penCoords.x, penCoords.y, Point.COMMANDS.line));
-                    break;
-
-                // Moveto command ("M")
-                case move:
-                    for (int j = 0; j < numbers.length; j++) {
-                        // Even index: likely x coordinate
-                        if (j % 2 == 0) {
-                            penCoords.x = Float.parseFloat(numbers[j]) + (isCommandRelative ? penCoords.x : 0);
-                        } else {
-                            penCoords.y = Float.parseFloat(numbers[j]) + (isCommandRelative ? penCoords.y : 0);
-                        }
-                    }
-                    points.add(new Point(penCoords.x, penCoords.y, Point.COMMANDS.move));
-                    break;
-
-                // Lineto command ("L")
-                case line:
-                    for (int j = 0; j < numbers.length; j++) {
-                        // Even index: likely x coordinate
-                        if (j % 2 == 0) {
-                            penCoords.x = Float.parseFloat(numbers[j]) + (isCommandRelative ? penCoords.x : 0);
-                        } else {
-                            // Odd index: y component of a coordinate, completes
-                            // a coordinate which we add as a Point.
-                            penCoords.y = Float.parseFloat(numbers[j]) + (isCommandRelative ? penCoords.y : 0);
-                            points.add(new Point(penCoords.x, penCoords.y, Point.COMMANDS.line));
-                        }
-                    }
-                    break;
-
-                // Cubic bezier curve command ("C")
-                case cubicBezier:
-                    originalPenCoords = points.get(points.size() - 1).clone();
-                    for (int j = 0; j < numbers.length - 5; j += 6) {
-                        // Sets the right handle of the last point.
-                        penCoords.x = Float.parseFloat(numbers[j]) + (isCommandRelative ? originalPenCoords.x : 0);
-                        penCoords.y = Float.parseFloat(numbers[j + 1]) + (isCommandRelative ? originalPenCoords.y : 0);
-                        points.get(points.size() - 1).setRightHandle(new Point(
-                                penCoords.x - points.get(points.size() - 1).x,
-                                penCoords.y - points.get(points.size() - 1).y
-                        ));
-                        // Defines the handle for a new point.
-                        penCoords.x = Float.parseFloat(numbers[j + 2]) + (isCommandRelative ? originalPenCoords.x : 0);
-                        penCoords.y = Float.parseFloat(numbers[j + 3]) + (isCommandRelative ? originalPenCoords.y : 0);
-                        Point leftHandle = new Point(
-                                penCoords.x,
-                                penCoords.y
-                        );
-                        // Makes a new point.
-                        penCoords.x = Float.parseFloat(numbers[j + 4]) + (isCommandRelative ? originalPenCoords.x : 0);
-                        penCoords.y = Float.parseFloat(numbers[j + 5]) + (isCommandRelative ? originalPenCoords.y : 0);
-                        Point newPoint = new Point(penCoords.x, penCoords.y, Point.COMMANDS.line);
-                        leftHandle.applySubtract(newPoint);
-                        newPoint.setLeftHandle(leftHandle);
-                        points.add(newPoint);
-                        // update originalPenCoords
-                        originalPenCoords = newPoint.clone();
-                    }
-                    break;
-
-                case smoothCubicBezier:
-                    originalPenCoords = points.get(points.size() - 1).clone();
-                    for (int j = 0; j < numbers.length - 3; j += 4) {
-                        // Reflect the left handle of the last control point.
-                        Point leftHandle = points.get(points.size() - 1).getLeftHandle();
-                        leftHandle.applySubtract(points.get(points.size() - 1));
-                        points.get(points.size() - 1).setRightHandle(new Point(
-                                -leftHandle.x,
-                                -leftHandle.y
-                        ));
-                        // Defines the handle for a new point.
-                        penCoords.x = Float.parseFloat(numbers[j]) + (isCommandRelative ? originalPenCoords.x : 0);
-                        penCoords.y = Float.parseFloat(numbers[j + 1]) + (isCommandRelative ? originalPenCoords.y : 0);
-                        leftHandle = new Point(
-                                penCoords.x,
-                                penCoords.y
-                        );
-                        // Makes a new point.
-                        penCoords.x = Float.parseFloat(numbers[j + 2]) + (isCommandRelative ? originalPenCoords.x : 0);
-                        penCoords.y = Float.parseFloat(numbers[j + 3]) + (isCommandRelative ? originalPenCoords.y : 0);
-                        Point newPoint = new Point(penCoords.x, penCoords.y, Point.COMMANDS.line);
-                        leftHandle.applySubtract(newPoint);
-                        newPoint.setLeftHandle(leftHandle);
-                        points.add(newPoint);
-                        // update originalPenCoords
-                        originalPenCoords = newPoint.clone();
-                    }
-                    break;
-            }
-        }
-
-        return points;
-    }
-
-    /**
-     * Converts an SVG command, case insensitive (ex. moveto "M", lineto "L") to a corresponding Point.COMMANDS command.
-     *
-     * @param svgCommand Char containing SVG path letter command
-     * @return an equivalent Path.COMMANDS commnd
-     */
-    public Point.COMMANDS svgToPointCommand(char svgCommand) {
-        // Only moveto and line commands are supported--SVGs with a "c/s" command won't load
-        // as FreePaint doesnt' support Bezier curves right now
-        switch (Character.toLowerCase(svgCommand)) {
-            case 'm':
-                return Point.COMMANDS.move;
-            case 'l':
-                return Point.COMMANDS.line;
-            case 'h':
-                return Point.COMMANDS.horizontal;
-            case 'v':
-                return Point.COMMANDS.vertical;
-            case 'c':
-                return Point.COMMANDS.cubicBezier;
-            case 's':
-                return Point.COMMANDS.smoothCubicBezier;
-            default:
-                return Point.COMMANDS.none;
-        }
     }
 
 }
