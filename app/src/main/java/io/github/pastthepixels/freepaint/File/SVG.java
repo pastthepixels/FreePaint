@@ -254,7 +254,7 @@ public class SVG {
                 }
                 // Stroke width
                 if (element.hasAttribute("stroke-width")) {
-                    path.appearance.strokeSize = Integer.parseInt(element.getAttribute("stroke-width"));
+                    path.appearance.strokeSize = (int) Float.parseFloat(element.getAttribute("stroke-width"));
                 }
                 // Done!!
                 canvas.paths.add(path);
