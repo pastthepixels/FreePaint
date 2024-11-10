@@ -237,7 +237,9 @@ public class SVG {
             Node node = nodes.item(i);
             if (node.getNodeType() == Node.ELEMENT_NODE && ((Element) node).getTagName().equals("path")) {
                 Element element = (Element) node;
-                ExtendedPath path = new ExtendedPath(PathParser.createPathFromPathData(element.getAttribute("d")));
+                String pathData = element.getAttribute("d");
+                ExtendedPath path = new ExtendedPath(PathParser.createPathFromPathData(pathData));
+                if (pathData.contains("z") || pathData.contains("Z")) path.setIsClosed(true);
                 // Fill/stroke
                 path.appearance.stroke = path.appearance.fill = -1;
                 float fillOpacity = element.hasAttribute("fill-opacity") ? Float.parseFloat(element.getAttribute("fill-opacity")) : 1;

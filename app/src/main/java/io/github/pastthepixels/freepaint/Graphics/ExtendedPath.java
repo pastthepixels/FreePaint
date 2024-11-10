@@ -14,12 +14,6 @@ public class ExtendedPath extends Path {
     /** Whether the path is an open stroke or a closed path. Defaults to true. */
     private boolean isClosed = false;
 
-    /** Wrapper for close */
-    public void close() {
-        super.close();
-        this.isClosed = true;
-    }
-
     /** Constructor with no arguments */
     public ExtendedPath() {
         super();
@@ -35,6 +29,18 @@ public class ExtendedPath extends Path {
     /** Constructor from a Path */
     public ExtendedPath(Path path) {
         super(path);
+    }
+
+
+    /** Wrapper for close */
+    public void close() {
+        super.close();
+        this.isClosed = true;
+    }
+
+    /** Sets isClosed */
+    public void setIsClosed(boolean closed) {
+        this.isClosed = closed;
     }
 
     /**
