@@ -4,7 +4,8 @@ import android.view.MotionEvent;
 
 import java.util.LinkedList;
 
-import io.github.pastthepixels.freepaint.Graphics.DrawPath;
+import io.github.pastthepixels.freepaint.Graphics.ExtendedPath;
+import io.github.pastthepixels.freepaint.Graphics.PathGenerator;
 
 public interface Tool {
     /**
@@ -13,7 +14,7 @@ public interface Tool {
      *
      * @return A list of paths for the DrawCanvas to draw
      */
-    LinkedList<DrawPath> getToolPaths();
+    LinkedList<ExtendedPath> getToolPaths();
 
     /**
      * When the user touches a DrawCanvas with this tool as the selected one, run this.

@@ -36,7 +36,7 @@ public final class DrawCanvas extends View {
     // Stores previous "versions" of DrawCanvas.paths you can restore
     // You can move back and forth between this, but every time you create a new change
     // it removes everything after the current index (solving the grandfather paradox, btw)
-    public final ArrayList<LinkedList<DrawPath>> versions = new ArrayList<>();
+    public final ArrayList<LinkedList<ExtendedPath>> versions = new ArrayList<>();
     public final int MAX_VERSIONS = 256;
     public final Point documentSize = new Point(0, 0);
     private final PaintTool paintTool = new PaintTool(this);
@@ -44,7 +44,7 @@ public final class DrawCanvas extends View {
     private final PanTool panTool = new PanTool(this);
     private final SelectionTool selectionTool = new SelectionTool(this);
     private final SVG svgHelper = new SVG(this);
-    public LinkedList<DrawPath> paths = new LinkedList<>();
+    public LinkedList<ExtendedPath> paths = new LinkedList<>();
     public int documentColor = Color.WHITE;
     private int version_index = -1;
     private TOOLS tool = TOOLS.none;
@@ -183,9 +183,9 @@ public final class DrawCanvas extends View {
      * @param listToClone The list you want to clone.
      * @return A deep cloned version of the list.
      */
-    public LinkedList<DrawPath> cloneDrawPathList(LinkedList<DrawPath> listToClone) {
-        LinkedList<DrawPath> list = new LinkedList<>();
-        for (DrawPath pathToClone : listToClone) {
+    public LinkedList<ExtendedPath> cloneDrawPathList(LinkedList<ExtendedPath> listToClone) {
+        LinkedList<ExtendedPath> list = new LinkedList<>();
+        for (ExtendedPath pathToClone : listToClone) {
             list.add(pathToClone.clone());
         }
         return list;
@@ -339,17 +339,12 @@ public final class DrawCanvas extends View {
             paint.reset();
         }
         // Draws every path, then tool path
-        for (DrawPath path : paths) {
+        for (ExtendedPath path : paths) {
             paint.reset();
             path.draw(canvas, paint, screenDensity, getScaleFactor());
         }
         if (!drawMinimal && getTool() != null && getTool().getToolPaths() != null) {
-            if (getTool() instanceof EraserTool) {
-                paint.setARGB(150, 0, 0, 0);
-                paint.setStyle(Paint.Style.FILL);
-                canvas.drawPaint(paint);
-            }
-            for (DrawPath path : getTool().getToolPaths()) {
+            for (ExtendedPath path : getTool().getToolPaths()) {
                 paint.reset();
                 path.draw(canvas, paint, screenDensity, getScaleFactor());
             }

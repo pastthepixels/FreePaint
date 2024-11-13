@@ -9,7 +9,8 @@ import androidx.annotation.NonNull;
 import java.util.LinkedList;
 
 import io.github.pastthepixels.freepaint.Graphics.DrawCanvas;
-import io.github.pastthepixels.freepaint.Graphics.DrawPath;
+import io.github.pastthepixels.freepaint.Graphics.ExtendedPath;
+import io.github.pastthepixels.freepaint.Graphics.PathGenerator;
 import io.github.pastthepixels.freepaint.Graphics.Point;
 
 public class PanTool implements Tool {
@@ -92,7 +93,7 @@ public class PanTool implements Tool {
     /**
      * Returns null. In the future it would be nice to draw text saying what the scale factor is.
      */
-    public LinkedList<DrawPath> getToolPaths() {
+    public LinkedList<ExtendedPath> getToolPaths() {
         return null;
     }
 
