@@ -198,6 +198,14 @@ public class SelectionTool implements Tool {
         }
     }
 
+    /**
+     * Resets the tool
+     */
+    @Override
+    public void reset() {
+        currentPath.clear();
+    }
+
     public boolean allowVersionBackup() {
         return changedDrawPaths;
     }

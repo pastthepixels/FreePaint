@@ -1,18 +1,23 @@
 package io.github.pastthepixels.freepaint.Tools;
 
 import android.graphics.PointF;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.util.LinkedList;
 
 import io.github.pastthepixels.freepaint.Graphics.DrawCanvas;
 import io.github.pastthepixels.freepaint.Graphics.ExtendedPath;
-import io.github.pastthepixels.freepaint.Graphics.PathGenerator;
 import io.github.pastthepixels.freepaint.Graphics.Point;
 
+/**
+ * TODO: zoom into corners of the screen
+ * TODO: pan with two fingers without zooming
+ */
 public class PanTool implements Tool {
     /**
      * Offset
@@ -29,19 +34,17 @@ public class PanTool implements Tool {
      */
     private final PointF touchDown = new PointF(0, 0);
     /**
-     * Old offset value, recorded before a new one is set
+     * ScaleGestureDetector
      */
-    private final Point oldOffset = new Point(0, 0);
-    private final ScaleGestureDetector detector;
+    private final ScaleGestureDetector scaleDetector;
+    /**
+     * GestureDetector
+     */
+    private final GestureDetector gestureDetector;
     /**
      * Scale
      */
     public float scaleFactor = 1f;
-    /**
-     * Used in onTouchEvent.
-     */
-    boolean isScaling = false;
-    boolean disableIsScalingOnNextUp = false;
 
     /**
      * Binds the tool to a DrawCanvas, and sets up a <code>ScaleGestureDetector</code>
@@ -51,8 +54,9 @@ public class PanTool implements Tool {
      */
     public PanTool(DrawCanvas canvas) {
         this.canvas = canvas;
-        this.detector = new ScaleGestureDetector(canvas.getContext(), new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+        this.scaleDetector = new ScaleGestureDetector(canvas.getContext(), new ScaleGestureDetector.SimpleOnScaleGestureListener() {
             private final Point lastFocus = new Point(0, 0);
+            private final Point lastFocusMapped = new Point(0, 0);
 
             @Override
             public boolean onScaleBegin(@NonNull ScaleGestureDetector detector) {
@@ -60,6 +64,7 @@ public class PanTool implements Tool {
                         detector.getFocusX(),
                         detector.getFocusY()
                 );
+                lastFocusMapped.set(canvas.mapPoint(lastFocus.x, lastFocus.y));
                 return super.onScaleBegin(detector);
             }
 
@@ -70,10 +75,22 @@ public class PanTool implements Tool {
              */
             @Override
             public boolean onScale(@NonNull ScaleGestureDetector detector) {
+                // Scale
                 scaleFactor *= detector.getScaleFactor();
-                updatePanOffset();
+                Point newFocus = canvas.mapPoint(lastFocus.x, lastFocus.y);
+                panOffset.set(
+                        panOffset.x - (lastFocusMapped.x - newFocus.x),
+                        panOffset.y - (lastFocusMapped.y - newFocus.y)
+                );
                 canvas.invalidate();
                 return true;
+            }
+        });
+        this.gestureDetector = new GestureDetector(canvas.getContext(), new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onScroll(@Nullable MotionEvent e1, @NonNull MotionEvent e2, float distanceX, float distanceY) {
+                offset.set(offset.x - distanceX / scaleFactor, offset.y - distanceY / scaleFactor);
+                return super.onScroll(e1, e2, distanceX, distanceY);
             }
         });
     }
@@ -82,7 +99,7 @@ public class PanTool implements Tool {
      * Updates <code>panOffset</code> so that the canvas is moved to create the effect of
      * center zoom.
      */
-    public void updatePanOffset() {
+    public void centerPanOffset() {
         panOffset.set(
                 -(float) canvas.getWidth() * scaleFactor / 2 + ((float) canvas.getWidth() / 2),
                 -(float) canvas.getHeight() * scaleFactor / 2 + ((float) canvas.getHeight() / 2)
@@ -98,41 +115,17 @@ public class PanTool implements Tool {
     }
 
     /**
-     * Pans the canvas if one finger is on the screen, or zooms it if there's two.
+     * Pans and zooms.
      */
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        // Scaling
-        detector.onTouchEvent(event);
-        // This bit of code basically prevents edge cases where you're scrolling and let go of one finger
-        // first instead of two at the first time -- the code would usually detect the remaining finger and
-        // treat it the same way as a touch with just one finger (you intended to pan)
-        if (detector.isInProgress()) {
-            isScaling = true;
-        } else {
-            disableIsScalingOnNextUp = true;
-        }
-        if (event.getAction() == MotionEvent.ACTION_UP && disableIsScalingOnNextUp) {
-            disableIsScalingOnNextUp = false;
-            isScaling = false;
-        }
-        // Panning
-        if (!isScaling) {
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    touchDown.set(event.getX(), event.getY());
-                    oldOffset.set(offset);
-                    break;
+        boolean scrollEvent = gestureDetector.onTouchEvent(event);
+        return scaleDetector.onTouchEvent(event) || scrollEvent;
+    }
 
-                case MotionEvent.ACTION_MOVE:
-                    offset.set(
-                            oldOffset.x - (touchDown.x - event.getX()) / scaleFactor,
-                            oldOffset.y - (touchDown.y - event.getY()) / scaleFactor
-                    );
-                    break;
-            }
-        }
-        return true;
+    @Override
+    public void reset() {
+
     }
 
     /**

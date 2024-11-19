@@ -5,7 +5,6 @@ import android.view.MotionEvent;
 import java.util.LinkedList;
 
 import io.github.pastthepixels.freepaint.Graphics.ExtendedPath;
-import io.github.pastthepixels.freepaint.Graphics.PathGenerator;
 
 public interface Tool {
     /**
@@ -33,4 +32,11 @@ public interface Tool {
      * Every time this tool is selected, run this.
      */
     void init();
+
+    /**
+     * Resets a tool -- this could be called as the tool is being used.
+     */
+    void reset();
+
+    enum Type {NONE, PAINT, ERASER, PAN, SELECT}
 }
