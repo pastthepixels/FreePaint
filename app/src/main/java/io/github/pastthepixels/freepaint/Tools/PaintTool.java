@@ -84,6 +84,14 @@ public class PaintTool implements Tool {
         return true;
     }
 
+    /**
+     * Resets the tool
+     */
+    @Override
+    public void reset() {
+        currentPath.clear();
+    }
+
     public boolean allowVersionBackup() {
         return true;
     }

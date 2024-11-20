@@ -47,7 +47,12 @@ public final class DrawCanvas extends View {
     public LinkedList<ExtendedPath> paths = new LinkedList<>();
     public int documentColor = Color.WHITE;
     private int version_index = -1;
-    private TOOLS tool = TOOLS.none;
+    
+    /** Primary tool (one finger) */
+    private Tool.Type primaryTool = Tool.Type.NONE;
+    
+    /** Secondary tool (two fingers) */
+    private Tool.Type secondaryTool = Tool.Type.PAN;
 
     // Drawing flags
     // Draws only the document, without any tool paths, or any rotation/translation.
@@ -102,7 +107,7 @@ public final class DrawCanvas extends View {
     private void centerDocument() {
         // Scales the canvas so that the document width takes up 80% of the screen width
         panTool.scaleFactor = (float) ((0.8) * (getWidth() / documentSize.x));
-        panTool.updatePanOffset();
+        panTool.centerPanOffset();
         panTool.offset.set(
                 ((float) (getWidth()) / 2 - documentSize.x / 2),
                 ((float) (getHeight()) / 2 - documentSize.y / 2)
@@ -135,7 +140,7 @@ public final class DrawCanvas extends View {
         // Load the file
         svgHelper.createSVG();
         svgHelper.loadFile(getContext().getContentResolver().openInputStream(uri));
-        if (getTool() != null) getTool().init();
+        if (getPrimaryTool() != null) getPrimaryTool().init();
         centerDocument();
         // Sets settings for document width/height to new document size
         @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getContext()).edit();
@@ -147,6 +152,9 @@ public final class DrawCanvas extends View {
         version_index += 1;
     }
 
+    /** The amount of pointers in the last MotionEvent.ACTION_DOWN */
+    public int lastPointers = 0;
+
     /**
      * Adds touch points when the user touches the screen.
      *
@@ -155,24 +163,45 @@ public final class DrawCanvas extends View {
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        // Runs chosenTool.onTouchEvent if it exists, otherwise don't update the screen.
-        if (tool == TOOLS.none || !Objects.requireNonNull(getTool()).onTouchEvent(event)) {
-            return false;
-        } else {
-            if (getTool().allowVersionBackup() && event.getAction() == MotionEvent.ACTION_UP) {
-                // Remove any edits after the current.
-                while (versions.size() > version_index + 1) {
-                    versions.remove(versions.size() - 1);
-                }
-                versions.add(cloneDrawPathList(paths)); // adds to the end ∴ newest changes are at the end of the list
-                System.out.println(versions + " " + versions.size());
-                if (versions.size() < MAX_VERSIONS - 1) version_index += 1;
-                if (versions.size() > MAX_VERSIONS)
-                    versions.remove(0); // delete the oldest change if the list has grown too much
+        boolean isTouchConsumed = false;
+        // Set lastPointers based on the action type
+        if (this.lastPointers < event.getPointerCount()) {
+            if (this.lastPointers > 0 && getPrimaryTool() != null) {
+                getPrimaryTool().reset();
             }
-            postInvalidate(); // Indicate view should be redrawn
-            return true; // Indicate we've consumed the touch
+            this.lastPointers = event.getPointerCount();
         }
+        // Switch on lastPointers
+        switch (this.lastPointers) {
+            case 1:
+                // Runs chosenTool.onTouchEvent if it exists, otherwise don't update the screen.
+                if (getPrimaryTool() != null) {
+                    isTouchConsumed = getPrimaryTool().onTouchEvent(event);
+                    if (getPrimaryTool().allowVersionBackup() && event.getAction() == MotionEvent.ACTION_UP) {
+                        // Remove any edits after the current.
+                        while (versions.size() > version_index + 1) {
+                            versions.remove(versions.size() - 1);
+                        }
+                        versions.add(cloneDrawPathList(paths)); // adds to the end ∴ newest changes are at the end of the list
+                        System.out.println(versions + " " + versions.size());
+                        if (versions.size() < MAX_VERSIONS - 1) version_index += 1;
+                        if (versions.size() > MAX_VERSIONS)
+                            versions.remove(0); // delete the oldest change if the list has grown too much
+                    }
+                    postInvalidate(); // Indicate view should be redrawn
+                }
+                break;
+
+            case 2:
+                assert getSecondaryTool() != null;
+                isTouchConsumed = getSecondaryTool().onTouchEvent(event);
+                postInvalidate(); // Indicate view should be redrawn
+        }
+        // Set lastPointers based on the action type
+        if (event.getAction() == MotionEvent.ACTION_UP) {
+            this.lastPointers = 0;
+        }
+        return isTouchConsumed;
     }
 
     /**
@@ -205,8 +234,6 @@ public final class DrawCanvas extends View {
         }
         // Force redraw
         postInvalidate();
-        // Re-initialise tools
-        if (tool == TOOLS.eraser) getTool().init();
     }
 
     /**
@@ -222,8 +249,6 @@ public final class DrawCanvas extends View {
         }
         // Force redraw
         postInvalidate();
-        // Re-initialise tools
-        if (tool == TOOLS.eraser) getTool().init();
     }
 
     /**
@@ -239,35 +264,51 @@ public final class DrawCanvas extends View {
     }
 
     /**
-     * Gets the chosen tool
-     *
-     * @return A Tool instance, depending on DrawCanvas.tool
+     * Gets a Tool instance corresponding to the type in DrawCanvas.primaryTool
      */
-    public Tool getTool() {
-        switch (tool) {
-            case none:
+    public Tool getPrimaryTool() {
+        switch (primaryTool) {
+            case NONE:
                 return null;
-            case paint:
+            case PAINT:
                 return paintTool;
-            case eraser:
+            case ERASER:
                 return eraserTool;
-            case pan:
+            case PAN:
                 return panTool;
-            case select:
+            case SELECT:
                 return selectionTool;
         }
         return null;
     }
 
     /**
-     * Setting tools
-     *
-     * @param tool Not a Tool instance, but rather from an Enum at <code>DrawCanvas.TOOLS</code>
+     * Gets a Tool instance corresponding to the type in DrawCanvas.secondaryTool
+     * TODO: get rid of enum and fix redundant getPrimaryTool/getSecondaryTool code
      */
-    public void setTool(TOOLS tool) {
-        this.tool = tool;
-        if (tool != TOOLS.none && getTool() != null) {
-            getTool().init();
+    public Tool getSecondaryTool() {
+        switch (secondaryTool) {
+            case NONE:
+                return null;
+            case PAINT:
+                return paintTool;
+            case ERASER:
+                return eraserTool;
+            case PAN:
+                return panTool;
+            case SELECT:
+                return selectionTool;
+        }
+        return null;
+    }
+
+    /**
+     * Makes primaryTool point to the instance of a tool class with the same type as primaryTool
+     */
+    public void setPrimaryTool(Tool.Type primaryTool) {
+        this.primaryTool = primaryTool;
+        if (primaryTool != Tool.Type.NONE && getPrimaryTool() != null) {
+            getPrimaryTool().init();
         }
         postInvalidate(); // Indicate view should be redrawn
     }
@@ -343,8 +384,8 @@ public final class DrawCanvas extends View {
             paint.reset();
             path.draw(canvas, paint, screenDensity, getScaleFactor());
         }
-        if (!drawMinimal && getTool() != null && getTool().getToolPaths() != null) {
-            for (ExtendedPath path : getTool().getToolPaths()) {
+        if (!drawMinimal && getPrimaryTool() != null && getPrimaryTool().getToolPaths() != null) {
+            for (ExtendedPath path : getPrimaryTool().getToolPaths()) {
                 paint.reset();
                 path.draw(canvas, paint, screenDensity, getScaleFactor());
             }
@@ -353,5 +394,4 @@ public final class DrawCanvas extends View {
         canvas.restore();
     }
 
-    public enum TOOLS {none, paint, eraser, pan, select}
 }

@@ -44,7 +44,7 @@ import com.takisoft.preferencex.PreferenceFragmentCompat;
 import java.io.OutputStream;
 import java.util.Objects;
 
-import io.github.pastthepixels.freepaint.Graphics.DrawCanvas;
+import io.github.pastthepixels.freepaint.Tools.Tool;
 import io.github.pastthepixels.freepaint.databinding.ActivityMainBinding;
 
 
@@ -215,24 +215,24 @@ public class MainActivity extends AppCompatActivity {
      * @param id the ID of the tool button
      */
     public void setTool(int id) {
-        DrawCanvas.TOOLS tool = DrawCanvas.TOOLS.none;
+        Tool.Type tool = Tool.Type.NONE;
         if (id == R.id.select_tool_paintbrush) {
             binding.FAB.setImageResource(R.drawable.baseline_brush_24);
-            tool = DrawCanvas.TOOLS.paint;
+            tool = Tool.Type.PAINT;
         }
         if (id == R.id.select_tool_eraser) {
             binding.FAB.setImageResource(R.drawable.baseline_eraser_24);
-            tool = DrawCanvas.TOOLS.eraser;
+            tool = Tool.Type.ERASER;
         }
         if (id == R.id.select_tool_pan) {
             binding.FAB.setImageResource(R.drawable.baseline_pan_tool_24);
-            tool = DrawCanvas.TOOLS.pan;
+            tool = Tool.Type.PAN;
         }
         if (id == R.id.select_tool_select) {
             binding.FAB.setImageResource(R.drawable.baseline_select_all_24);
-            tool = DrawCanvas.TOOLS.select;
+            tool = Tool.Type.SELECT;
         }
-        binding.drawCanvas.setTool(tool);
+        binding.drawCanvas.setPrimaryTool(tool);
     }
 
     /**

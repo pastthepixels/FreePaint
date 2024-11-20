@@ -113,6 +113,14 @@ public class EraserTool implements Tool {
     }
 
     /**
+     * Resets the tool
+     */
+    @Override
+    public void reset() {
+        currentPath.clear();
+    }
+
+    /**
      * Init left empty
      */
     public void init() {};
