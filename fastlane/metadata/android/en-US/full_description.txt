@@ -1,24 +1,24 @@
 FreePaint is a vector graphics drawing program for Android. Select a tool and turn your ideas into SVGs!
 
-# FEATURING
-- Material Design 3 with dynamic colors
-- Custom document sizes, fill/stroke colors, and stroke sizes
-- Eraser tool erases shapes from closed paths, or points from open paths
-- Saving/loading SVG files
+<hh2>Featuring</hh2>
+<ul> 
+<li>Material Design 3 with dynamic colors</li>
+<li>Custom document sizes, fill/stroke colors, and stroke sizes</li>
+<li>Eraser tool erases shapes from closed paths, or points from open paths</li>
+<li>Saving/loading SVG files</li>
+</ul>
 
-# Using FreePaint
+<hh3>Using FreePaint</hh3>
 
-## Paint tool
-Using this tool, you can either draw open or closed paths. Simply go to the overflow menu > Settings to access this and more options.
+<hh4>Paint Tool</hh4>
+Using this tool, you can either draw open or closed paths. Simply go to the <i>Overflow Menu</i> (3 dots at the bottom horizontal panel) > <i>Settings</i> to access this and more options.
 
-## Eraser tool
-When you select this tool, you can draw a shape to define the area you wish to erase. One of two things can happen depending on which path you want to erase from:
-For closed paths, the entire path will become green, and you can draw a shape to erase from the path.
-For open paths, individual points will become highlighted, and if those points are included in your eraser path, they will be deleted. Erasing a point inside a path will create 2 new paths.
+<hh4>Eraser Tool</hh4>
+When you select this tool, you can draw a shape to define the area you wish to erase. One of two things can happen depending on which path you want to erase from: 1. For closed paths, the entire path will become green, and you can draw a shape to erase from the path. 2. For open paths, individual points will become highlighted, and if those points are included in your eraser path, they will be deleted. Erasing a point inside a path will create 2 new paths.
 
-## Pan/zoom tool
+<hh4>Pan/Zoom Tool</hh4>
 With one finger, you can pan across the document. If you pinch the screen with two, it'll zoom in and out from the center.
 
-## Selection tool
-You can draw a rectangle for an area you wish to select (marquee select). If any paths overlap that area, they will become "selected" and the rectangle will resize to include the selected paths.
-You can drag on that rectangle to move those paths, or draw on an empty space to create a new selection.
+<hh4>Selection Tool</hh4>
+You can draw a rectangle for an area you wish to select (marquee select). If any paths overlap that area, they will become "selected" and the rectangle will resize to include the selected paths. You can drag on that rectangle to move those paths, or draw on an empty space to create a new selection.
+
