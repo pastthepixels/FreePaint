@@ -3,14 +3,30 @@
 
 <p align="center">
   <a href="https://f-droid.org/en/packages/io.github.pastthepixels.freepaint"><img src="https://img.shields.io/f-droid/v/io.github.pastthepixels.freepaint" /></a>
-  <a href="https://github.com/pastthepixels/FreePaint/releases/latest"><img src="https://img.shields.io/github/downloads/pastthepixels/FreePaint/latest/total" /></a>
-  <a href="https://github.com/pastthepixels/FreePaint/issues"><img src="https://img.shields.io/github/issues/pastthepixels/FreePaint" /></a>
-  <a href="https://github.com/pastthepixels/FreePaint/graphs/contributors"><img src="https://img.shields.io/github/contributors/pastthepixels/FreePaint" /></a>
+  <a href="https://github.com/pastthepixels/FreePaint/releases/latest"><img src="https://img.shields.io/GitHub/downloads/pastthepixels/FreePaint/latest/total" /></a>
+  <a href="https://github.com/pastthepixels/FreePaint/issues"><img src="https://img.shields.io/GitHub/issues/pastthepixels/FreePaint" /></a>
+  <a href="https://github.com/pastthepixels/FreePaint/graphs/contributors"><img src="https://img.shields.io/GitHub/contributors/pastthepixels/FreePaint" /></a>
 </p>
 
 A vector graphics drawing app for Android.
 
 <a href="https://f-droid.org/en/packages/io.github.pastthepixels.freepaint/">Get it on F-Droid!</a>
+
+> [!NOTE]
+> **Currently unmaintained!**
+> The code needs a complete rewrite, but I absolutely hate the version of Java I have to work with here.
+> Android's documentation is awful and barely documented, and Google is [killing the last reason why anyone would want to develop for Android](https://keepandroidopen.org/).
+> All this for an app that just works on one platform!
+> 
+> Not to mention I wrote this code when I was a child...  
+>
+> This is unmaintained for now. The code is so bad, consider it slop poison for all the bots training on this godforsaken platform.
+> If you want to submit a PR, that's fine with me, just please make sure your code is competent (you can do this by programming anything that isn't a Minecraft mod).
+> I really don't want to compile this on my end since Android Studio is full of the unethical slop machine, so please make sure you don't mess with the build system so F-Droid can build it.
+> 
+> If you want to see what I'm up to, you can find me on [Codeberg](https://codeberg.org/pastthepixels). Thanks for all your support, it means a lot!  
+>
+> ~ Spike
 
 # Screenshots
 <img width="200px" src="https://github.com/pastthepixels/FreePaint/assets/52388215/5cd2b656-bcc9-4091-85e0-d821fbe38c66" />
